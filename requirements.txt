@@ -1,0 +1,20 @@
+# ------------------------------------------------------------------------- #
+# VictreeBot                                                                #
+#                                                                           #
+# See LICENSE for more information. If this code is used, attribution       #
+# would be appreciated.                                                     #
+# Written by Luke Hendriks and Martijn Verlind                              #
+# ------------------------------------------------------------------------- #
+# Database and .env imports
+python-dotenv
+asyncpg
+# Hikari
+hikari
+hikari-tanjun
+# GitHub
+GitPython
+# Functionality
+pathlib
+pyfiglet
+apscheduler
+datetime
