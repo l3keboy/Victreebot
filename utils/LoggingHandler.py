@@ -1,10 +1,9 @@
 # ------------------------------------------------------------------------- #
-# Husqy Discord Bot, see https://www.husqy.xyz for more info                #
+# VictreeBot                                                                #
 #                                                                           #
-# Copyright (C) Husqy - All Rights Reserved                                 #
-# Unauthorized copying of this file, via any medium is strictly prohibited  #
-# Proprietary and confidential                                              #
-# Written by Luke Hendriks <luke@la-online.nl>, July 2021 (C)               #
+# See LICENSE for more information. If this code is used, attribution       #
+# would be appreciated.                                                     #
+# Written by Luke Hendriks and Martijn Verlind                              #
 # ------------------------------------------------------------------------- #
 # IMPORTS
 # Logging
@@ -19,6 +18,7 @@ class LoggingHandler:
         self.hikari_tanjun_clients = logging.getLogger("hikari.tanjun.clients")
         # HUSQY LOGGERS
         self.logger_victreebot = logging.getLogger("victreebot")
+        self.logger_victreebot_join_handler = logging.getLogger("victreebot.handlers.join")
         self.logger_victreebot_database = logging.getLogger("victreebot.database")
         self.logger_victreebot_update = logging.getLogger("victreebot.update")
         self.logger_victreebot_active_servers = logging.getLogger("victreebot.active_servers")

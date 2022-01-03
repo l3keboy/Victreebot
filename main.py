@@ -71,7 +71,7 @@ class Bot(hikari.GatewayBot):
         super().run(
             activity=hikari.Activity(
                 name=f"pokémon",
-                type=hikari.ActivityType.WATCHING,
+                type=hikari.ActivityType.PLAYING,
             )
         )
     
@@ -97,8 +97,7 @@ class Bot(hikari.GatewayBot):
         async with database.acquire() as conn:
             async with conn.transaction():
                 try:
-                    active_server_query = f'UPDATE "General" SET active_servers = {active_guilds}'
-                    print(active_server_query)
+                    active_server_query = f'UPDATE "Settings" SET active_servers = {active_guilds}'
                     await conn.execute(active_server_query)
                 except asyncpg.exceptions.UniqueViolationError:
                     pass
