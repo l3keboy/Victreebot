@@ -217,7 +217,7 @@ async def command_location_info(ctx: tanjun.abc.Context, location_type, name):
                 )
                     .set_thumbnail()
                     .add_field(name=lang.info_embed_location_info_field_title, value=lang.info_embed_location_info_field_value.format(latitude=latitude, longitude=longitude), inline=False)
-                    .add_field(name=lang.info_embed_location_google_maps_field_title, value=f"[{lang.info_google_maps}](https://www.google.com/maps/@{longitude},{latitude},14z)", inline=False)
+                    .add_field(name=lang.info_embed_location_google_maps_field_title, value=f"[{lang.info_google_maps}](https://www.google.com/maps/@{latitude},{longitude},14z)", inline=False)
             )
             message = await ctx.respond(embed=embed, ensure_result=True)
             await asyncio.sleep(auto_delete_this_message)
