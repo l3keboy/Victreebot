@@ -31,7 +31,7 @@ load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 BOT_NAME = os.getenv("BOT_NAME")
 
-GUILD_ID = 438415532602032138
+GUILD_ID = 926455162309070888
 clear, back_slash = "clear", "/"
 if os.name == "nt":
     clear, back_slash = "cls", "\\"
@@ -61,7 +61,7 @@ class Bot(hikari.GatewayBot):
     
     def create_client(self):
         LoggingHandler.LoggingHandler().hikari_tanjun_clients.info("Loading modules.....")
-        self.client = tanjun.Client.from_gateway_bot(self, declare_global_commands=True)
+        self.client = tanjun.Client.from_gateway_bot(self, declare_global_commands=GUILD_ID)
         self.client.load_modules(*Path("../VictreeBot/commands").glob("*.py"))
         LoggingHandler.LoggingHandler().hikari_tanjun_clients.info("Loading Complete!\n")
 
