@@ -16,9 +16,10 @@ import tanjun
 # Functionality
 import asyncio
 import math
+import datetime
 # Own Files
 from utils import DatabaseHandler, LoggingHandler 
-from utils.functions import get_settings
+from utils.functions import get_settings, validate
 
 # .ENV AND .ENV VARIABLES
 # Load .env
@@ -32,22 +33,6 @@ component = tanjun.Component()
 # ------------------------------------------------------------------------- #
 # FUNCTIONS COMMANDS #
 # ------------------------------------------------------------------------- #
-async def __latitude_longitude_check(latitude, longitude):
-    valid_latitude = False
-    valid_longitude = False
-
-    if latitude >= -90 and latitude <= 90:
-        valid_latitude = True
-    else:
-        LoggingHandler.LoggingHandler().logger_victreebot_validator.error("Invalid latitude given!")
-    if longitude >= -180 and longitude <=180:
-        valid_longitude = True
-    else:
-        LoggingHandler.LoggingHandler().logger_victreebot_validator.error("Invalid longitude given!")
-
-    return valid_latitude, valid_longitude
-
-
 async def __create(location_type, guild_id, name, latitude, longitude):
     success = False
     database = await DatabaseHandler.acquire_database()
@@ -102,12 +87,13 @@ location_component = tanjun.Component().add_slash_command(location_group)
 async def command_location_create(ctx: tanjun.abc.Context, location_type, name, latitude, longitude):
     try:
         lang, auto_delete_time = await get_settings.get_language_auto_delete_time_settings(guild_id=ctx.guild_id)
+        log_channel_id = await get_settings.get_log_channel_settings(guild_id=ctx.guild_id)
     except TypeError as e:
         LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
         return
 
-    # LATITUDE LONGITUDE HANDLER
-    valid_latitude, valid_longitude = await __latitude_longitude_check(latitude=latitude, longitude=longitude)
+    # VALIDATE LATITUDE LONGITUDE
+    valid_latitude, valid_longitude = await validate.__latitude_longitude_check(latitude=latitude, longitude=longitude)
     if not valid_latitude:
         response = lang.error_latitude_invalid.format(latitude=latitude)
         message = await ctx.respond(response, ensure_result=True)
@@ -131,11 +117,25 @@ async def command_location_create(ctx: tanjun.abc.Context, location_type, name, 
         message = await ctx.respond(response, ensure_result=True)
         await asyncio.sleep(auto_delete_time)
         await message.delete()
+
+        # SEND TO LOG CHANNEL
+        try:
+            channel = await ctx.rest.fetch_channel(channel=log_channel_id)
+            await channel.send(lang.log_channel_location_successfully_created.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, location_type=location_type, name=name_to_set))
+        except Exception as e:
+            LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
     else:
         response = lang.create_failed.format(location_type=location_type)
         message = await ctx.respond(response, ensure_result=True)
         await asyncio.sleep(auto_delete_time)
         await message.delete()
+
+        # SEND TO LOG CHANNEL
+        try:
+            channel = await ctx.rest.fetch_channel(channel=log_channel_id)
+            await channel.send(lang.log_channel_location_creation_failed.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, location_type=location_type, name=name_to_set))
+        except Exception as e:
+            LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
 
 @location_group.with_command
 @tanjun.with_author_permission_check(hikari.Permissions.MANAGE_GUILD)
@@ -145,6 +145,7 @@ async def command_location_create(ctx: tanjun.abc.Context, location_type, name, 
 async def command_location_delete(ctx: tanjun.abc.Context, location_type, name):
     try:
         lang, auto_delete_time = await get_settings.get_language_auto_delete_time_settings(guild_id=ctx.guild_id)
+        log_channel_id = await get_settings.get_log_channel_settings(guild_id=ctx.guild_id)
     except TypeError as e:
         LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
         return
@@ -159,11 +160,25 @@ async def command_location_delete(ctx: tanjun.abc.Context, location_type, name):
         message = await ctx.respond(response, ensure_result=True)
         await asyncio.sleep(auto_delete_time)
         await message.delete()
+
+        # SEND TO LOG CHANNEL
+        try:
+            channel = await ctx.rest.fetch_channel(channel=log_channel_id)
+            await channel.send(lang.log_channel_location_successfully_deleted.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, location_type=location_type, name=name_to_delete))
+        except Exception as e:
+            LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
     else:
         response = lang.delete_failed.format(location_type=location_type)
         message = await ctx.respond(response, ensure_result=True)
         await asyncio.sleep(auto_delete_time)
         await message.delete()
+
+        # SEND TO LOG CHANNEL
+        try:
+            channel = await ctx.rest.fetch_channel(channel=log_channel_id)
+            await channel.send(lang.log_channel_location_deletion_failed.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, location_type=location_type, name=name_to_delete))
+        except Exception as e:
+            LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
 
 @location_group.with_command
 @tanjun.with_author_permission_check(hikari.Permissions.MANAGE_GUILD)
@@ -173,10 +188,19 @@ async def command_location_delete(ctx: tanjun.abc.Context, location_type, name):
 async def command_location_info(ctx: tanjun.abc.Context, location_type, name):
     try:
         lang, auto_delete_time = await get_settings.get_language_auto_delete_time_settings(guild_id=ctx.guild_id)
+        log_channel_id = await get_settings.get_log_channel_settings(guild_id=ctx.guild_id)
     except TypeError as e:
         LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
         return
 
+    # SEND TO LOG CHANNEL
+    try:
+        channel = await ctx.rest.fetch_channel(channel=log_channel_id)
+        await channel.send(lang.log_channel_location_info_request.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, location_type=location_type))
+    except Exception as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
+
+    # INFO HANDLER
     if name is not None:
         if auto_delete_time < 15:
             auto_delete_this_message = 15

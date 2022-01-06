@@ -40,11 +40,56 @@ info_paginate_embed_locations_title="Locations:"
 info_paginate_embed_no_results="There are no `{location_type}'s` available in this server!"
 
 # ------------------------------------------------------------------------- #
+# 3_raids #
+# ------------------------------------------------------------------------- #
+raid_location_does_not_exist="There are no locations with the name: `{name}`!"
+raid_invalid_time_format="The given time was in an invalid format, please use `HH:MM`!"
+raid_invalid_date_format="The given date was in an invalid format, please use `DD-MM-YYYY`!"
+raid_generated_id_duplicate="The generated idea already exists, please try again!"
+
+raid_successfully_created="The `{raid_type}` is created!"
+raid_embed_description="**Raid ID:** {raid_id}\n**Time:** {time}\n**Date:** {date}\n**Location:** [{location}](https://www.google.com/maps/@{latitude},{longitude},14z)\n**Type:** {raid_type}"
+raid_embed_footer="Raid created by: {member} | Total attendees: {attendees}"
+
+raid_unable_to_delete_not_creator="You can't delete this raid because you didn't create it!"
+raid_successfully_deleted="The raid with id: `{id}` successfully deleted!"
+
+raid_unable_to_find="I didn't find the raid with ID: `{id}`!"
+raid_unable_to_edit_not_creator="You can't edit this raid because you didn't create it!"
+raid_successfully_edited="The raid with id: `{id}` successfully edited!"
+
+# ------------------------------------------------------------------------- #
 # ERRORS #
 # ------------------------------------------------------------------------- #
 # General
 error_command_in_development="The command: `{command}` is in development and will be added later. Your input: {input}!"
-error_timed_out="Timed Out!"
-# 2_location
+# Validate
 error_latitude_invalid="I am sorry, the given `latitude` is invalid! Your input: `{latitude}`!"
 error_longitude_invalid="I am sorry, the given `longitude` is invalid! Your input: `{longitude}`!"
+# Pokemon
+pokemon_not_found="I could not find `{pokemon}`!"
+
+# ------------------------------------------------------------------------- #
+# LOG CHANNEL RESPONSES #
+# ------------------------------------------------------------------------- #
+# 1_settings
+log_channel_language_changed="`[{datetime}]` - **{member}** changed the language for this server to `{language}`!"
+log_channel_timezone_changed="`[{datetime}]` - **{member}** changed the timezone for this server to `{offset}`!"
+log_channel_auto_delete_time_changed="`[{datetime}]` - **{member}** changed the auto delete time for this server to `{seconds} seconds`!"
+log_channel_raids_channel_changed="`[{datetime}]` - **{member}** changed the raids channel for this server to `{channel}`!"
+log_channel_log_channel_changed="`[{datetime}]` - **{member}** changed the log channel for this server to `{channel}`!"
+
+# 2_location
+log_channel_location_successfully_created="`[{datetime}]` - **{member}** successfully created a new `{location_type}` with the name: `{name}`!"
+log_channel_location_creation_failed="`[{datetime}]` - **{member}** tried creating a new `{location_type}` with the name: `{name}` but the execution failed!"
+log_channel_location_successfully_deleted="`[{datetime}]` - **{member}** successfully deleted a `{location_type}` with the name: `{name}`!"
+log_channel_location_deletion_failed="`[{datetime}]` - **{member}** tried deleting a `{location_type}` with the name: `{name}` but the execution failed!"
+log_channel_location_info_request="`[{datetime}]` - **{member}** requested information about one or more `{location_type}`!"
+
+# 3_raid
+log_channel_raid_successfully_created="`[{datetime}]` - **{member}** created a new `{raid_type}`!"
+log_channel_raid_creation_failed="`[{datetime}]` - **{member}** tried creating a new `{raid_type}` but the execution failed!"
+log_channel_raid_successfully_deleted="`[{datetime}]` - **{member}** deleted `{raid_type}` with id: `{id}`!"
+log_channel_raid_deletion_failed="`[{datetime}]` - **{member}** tried deleting a `{raid_type}` but the execution failed!"
+log_channel_raid_successfully_edited="`[{datetime}]` - **{member}** edited the `{raid_type}` with id: `{id}`!"
+log_channel_raid_edit_failed="`[{datetime}]` - **{member}** tried editing a `{raid_type}` but the execution failed!"
