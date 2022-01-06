@@ -16,6 +16,7 @@ import tanjun
 # Functionality
 import asyncio
 from pathlib import Path
+import datetime
 # Own Files
 from utils import DatabaseHandler, LoggingHandler
 from utils.functions import get_settings
@@ -45,10 +46,12 @@ settings_component = tanjun.Component().add_slash_command(settings_group)
 async def command_settings_language(ctx: tanjun.abc.Context, language):
     try:
         lang, auto_delete_time = await get_settings.get_language_auto_delete_time_settings(guild_id=ctx.guild_id)
+        log_channel_id = await get_settings.get_log_channel_settings(guild_id=ctx.guild_id)
     except TypeError as e:
         LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
         return
 
+    # UPDATE DATABASE
     database = await DatabaseHandler.acquire_database()
     async with database.acquire() as conn:
         async with conn.transaction():
@@ -57,6 +60,14 @@ async def command_settings_language(ctx: tanjun.abc.Context, language):
             await conn.fetch(change_language)
     await database.close()
 
+    # SEND TO LOG CHANNEL
+    try:
+        channel = await ctx.rest.fetch_channel(channel=log_channel_id)
+        await channel.send(lang.log_channel_language_changed.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, language=language))
+    except Exception as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
+
+    # SEND RESPONSE
     response = lang.updated_language.format(language=language)
     message = await ctx.respond(response, ensure_result=True)
     await asyncio.sleep(auto_delete_time)
@@ -64,15 +75,17 @@ async def command_settings_language(ctx: tanjun.abc.Context, language):
 
 @settings_group.with_command
 @tanjun.with_author_permission_check(hikari.Permissions.MANAGE_GUILD)
-@tanjun.with_str_slash_option("offset", "The new GMT offset of the server.", choices=["GMT -12","GMT -11","GMT -10","GMT -9","GMT -8","GMT -7","GMT -6","GMT -5","GMT -4","GMT -3","GMT -2","GMT -1","GMT 0", "GMT +1","GMT +2","GMT +3","GMT +4","GMT +5","GMT +6","GMT +7","GMT +8","GMT +9","GMT +10","GMT +11","GMT +12"])
+@tanjun.with_str_slash_option("offset", "The new GMT offset of the server.", choices=["GMT-12","GMT-11","GMT-10","GMT-9","GMT-8","GMT-7","GMT-6","GMT-5","GMT-4","GMT-3","GMT-2","GMT-1","GMT+0", "GMT+1","GMT+2","GMT+3","GMT+4","GMT+5","GMT+6","GMT+7","GMT+8","GMT+9","GMT+10","GMT+11","GMT+12"])
 @tanjun.as_slash_command("timezone", "Set the bots timezone (GMT).")
 async def command_settings_gmt(ctx: tanjun.abc.Context, offset):
     try:
         lang, auto_delete_time = await get_settings.get_language_auto_delete_time_settings(guild_id=ctx.guild_id)
+        log_channel_id = await get_settings.get_log_channel_settings(guild_id=ctx.guild_id)
     except TypeError as e:
         LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
         return
 
+    # UPDATE DATABASE
     database = await DatabaseHandler.acquire_database()
     async with database.acquire() as conn:
         async with conn.transaction():
@@ -81,6 +94,14 @@ async def command_settings_gmt(ctx: tanjun.abc.Context, offset):
             await conn.fetch(change_gmt)
     await database.close()
 
+    # SEND TO LOG CHANNEL
+    try:
+        channel = await ctx.rest.fetch_channel(channel=log_channel_id)
+        await channel.send(lang.log_channel_timezone_changed.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, offset=offset))
+    except Exception as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
+
+    # SEND RESPONSE
     response = lang.updated_gmt.format(gmt=offset)
     message = await ctx.respond(response, ensure_result=True)
     await asyncio.sleep(auto_delete_time)
@@ -93,10 +114,12 @@ async def command_settings_gmt(ctx: tanjun.abc.Context, offset):
 async def command_settings_auto_delete_time(ctx: tanjun.abc.Context, seconds):
     try:
         lang = await get_settings.get_language_settings(guild_id=ctx.guild_id)
+        log_channel_id = await get_settings.get_log_channel_settings(guild_id=ctx.guild_id)
     except TypeError as e:
         LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
         return
     
+    # UPDATE DATABASE
     database = await DatabaseHandler.acquire_database()
     async with database.acquire() as conn:
         async with conn.transaction():
@@ -104,6 +127,14 @@ async def command_settings_auto_delete_time(ctx: tanjun.abc.Context, seconds):
             await conn.fetch(change_auto_delete_time)
     await database.close()
 
+    # SEND TO LOG CHANNEL
+    try:
+        channel = await ctx.rest.fetch_channel(channel=log_channel_id)
+        await channel.send(lang.log_channel_auto_delete_time_changed.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, seconds=seconds))
+    except Exception as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
+
+    # SEND RESPONSE
     response = lang.updated_auto_delete_time.format(seconds=seconds)
     message = await ctx.respond(response, ensure_result=True)
     await asyncio.sleep(seconds)
@@ -111,28 +142,34 @@ async def command_settings_auto_delete_time(ctx: tanjun.abc.Context, seconds):
 
 @settings_group.with_command
 @tanjun.with_author_permission_check(hikari.Permissions.MANAGE_GUILD)
-@tanjun.with_channel_slash_option("channel", "The channel to set as raids channel. If no argument is given, the channel will be set to None", default=None)
+@tanjun.with_channel_slash_option("channel", "The channel to set as raids channel.")
 @tanjun.as_slash_command("raids_channel", "Set the channel to which raids are posted.")
 async def command_settings_raids_channel(ctx: tanjun.abc.Context, channel):
     try:
         lang, auto_delete_time = await get_settings.get_language_auto_delete_time_settings(guild_id=ctx.guild_id)
+        log_channel_id = await get_settings.get_log_channel_settings(guild_id=ctx.guild_id)
     except TypeError as e:
         LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
         return
     
-    if channel is None:
-        change_raids_channel = f'UPDATE "Settings" SET raids_channel = NULL WHERE guild_id = {ctx.guild_id}'
-        response = lang.updated_raids_channel_removed
-    else:
-        change_raids_channel = f'UPDATE "Settings" SET raids_channel = {channel.id} WHERE guild_id = {ctx.guild_id}'
-        response = lang.updated_raids_channel_changed.format(channel=channel)
-
+    # UPDATE DATABASE
     database = await DatabaseHandler.acquire_database()
     async with database.acquire() as conn:
         async with conn.transaction():
+            change_raids_channel = f'UPDATE "Settings" SET raids_channel = {channel.id} WHERE guild_id = {ctx.guild_id}'
             await conn.fetch(change_raids_channel)
     await database.close()
-
+    new_channel = channel.id
+    
+    # SEND TO LOG CHANNEL
+    try:
+        channel = await ctx.rest.fetch_channel(channel=log_channel_id)
+        await channel.send(lang.log_channel_raids_channel_changed.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, channel=new_channel))
+    except Exception as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
+        
+    # SEND RESPONSE
+    response = lang.updated_raids_channel_changed.format(channel=channel)
     message = await ctx.respond(response, ensure_result=True)
     await asyncio.sleep(auto_delete_time)
     await message.delete()
@@ -144,16 +181,20 @@ async def command_settings_raids_channel(ctx: tanjun.abc.Context, channel):
 async def command_settings_log_channel(ctx: tanjun.abc.Context, channel):
     try:
         lang, auto_delete_time = await get_settings.get_language_auto_delete_time_settings(guild_id=ctx.guild_id)
+        log_channel_id = await get_settings.get_log_channel_settings(guild_id=ctx.guild_id)
     except TypeError as e:
         LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
         return
     
+    # UPDATE DATABASE
     if channel is None:
         change_log_channel = f'UPDATE "Settings" SET log_channel = NULL WHERE guild_id = {ctx.guild_id}'
         response = lang.updated_logs_channel_removed
+        new_channel = "NULL"
     else:
         change_log_channel = f'UPDATE "Settings" SET log_channel = {channel.id} WHERE guild_id = {ctx.guild_id}'
         response = lang.updated_logs_channel_changed.format(channel=channel)
+        new_channel = channel.id
 
     database = await DatabaseHandler.acquire_database()
     async with database.acquire() as conn:
@@ -161,6 +202,14 @@ async def command_settings_log_channel(ctx: tanjun.abc.Context, channel):
             await conn.fetch(change_log_channel)
     await database.close()
 
+    # SEND TO LOG CHANNEL
+    try:
+        channel = await ctx.rest.fetch_channel(channel=log_channel_id)
+        await channel.send(lang.log_channel_log_channel_changed.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, channel=new_channel))
+    except Exception as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
+
+    # SEND RESPONSE
     message = await ctx.respond(response, ensure_result=True)
     await asyncio.sleep(auto_delete_time)
     await message.delete()
