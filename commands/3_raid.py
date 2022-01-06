@@ -8,13 +8,10 @@
 # IMPORTS
 # Database and .env
 import os
-import re
-from typing import Text
 import asyncpg
 from dotenv import load_dotenv
 # Hikari
 import hikari
-from hikari.traits import ExecutorAware
 import tanjun
 # Functionality
 import asyncio
