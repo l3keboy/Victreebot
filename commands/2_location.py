@@ -233,15 +233,15 @@ async def command_location_info(ctx: tanjun.abc.Context, location_type, name):
         else:
             embed = (
                 hikari.Embed(
-                    title=lang.info_embed_title,
-                    description=lang.info_embed_discription.format(location=name.lower(), location_type=location_type)
+                    title=lang.location_info_embed_title,
+                    description=lang.location_info_embed_discription.format(location=name.lower(), location_type=location_type)
                 )
                     .set_footer(
                     text=lang.embed_footer.format(member=ctx.member.display_name, auto_delete_time=auto_delete_this_message),
                 )
                     .set_thumbnail()
-                    .add_field(name=lang.info_embed_location_info_field_title, value=lang.info_embed_location_info_field_value.format(latitude=latitude, longitude=longitude), inline=False)
-                    .add_field(name=lang.info_embed_location_google_maps_field_title, value=f"[{lang.info_google_maps}](https://www.google.com/maps/@{latitude},{longitude},14z)", inline=False)
+                    .add_field(name=lang.location_info_embed_location_info_field_title, value=lang.location_info_embed_location_info_field_value.format(latitude=latitude, longitude=longitude), inline=False)
+                    .add_field(name=lang.location_info_embed_location_google_maps_field_title, value=f"[{lang.location_info_google_maps}](https://www.google.com/maps/@{latitude},{longitude},14z)", inline=False)
             )
             message = await ctx.respond(embed=embed, ensure_result=True)
             await asyncio.sleep(auto_delete_this_message)
@@ -255,7 +255,7 @@ async def command_location_info(ctx: tanjun.abc.Context, location_type, name):
         await database.close()
 
         if fetched_info == []:
-            response = lang.info_paginate_embed_no_results.format(location_type=location_type)
+            response = lang.location_info_paginate_embed_no_results.format(location_type=location_type)
             message = await ctx.respond(response, ensure_result=True)
             await asyncio.sleep(auto_delete_time)
             await message.delete()
@@ -266,14 +266,14 @@ async def command_location_info(ctx: tanjun.abc.Context, location_type, name):
                 auto_delete_this_message = auto_delete_time
             embed = (
                 hikari.Embed(
-                    title=lang.info_paginate_embed_title,
-                    description=lang.info_paginate_embed_description
+                    title=lang.location_info_paginate_embed_title,
+                    description=lang.location_info_paginate_embed_description
                 )
                     .set_footer(
                     text=lang.embed_footer.format(member=ctx.member.display_name, auto_delete_time=auto_delete_this_message)
                 )
                     .set_thumbnail()
-                    .add_field(name=lang.info_paginate_embed_locations_title, value=f"\n".join(f"***{location.get('name')}***" + " \n" + f"[{lang.info_google_maps}](https://www.google.com/maps/@{location.get('latitude')},{location.get('longitude')},14z)" + "\n" for location in fetched_info), inline=False)
+                    .add_field(name=lang.location_info_paginate_embed_locations_title, value=f"\n".join(f"***{location.get('name')}***" + " \n" + f"[{lang.location_info_google_maps}](https://www.google.com/maps/@{location.get('latitude')},{location.get('longitude')},14z)" + "\n" for location in fetched_info), inline=False)
             )
             message = await ctx.respond(embed=embed, ensure_result=True)
             await asyncio.sleep(auto_delete_this_message)
@@ -291,14 +291,14 @@ async def command_location_info(ctx: tanjun.abc.Context, location_type, name):
             while i <= pages:
                 embed = (
                     hikari.Embed(
-                        title=lang.info_paginate_embed_title,
-                        description=lang.info_paginate_embed_description
+                        title=lang.location_info_paginate_embed_title,
+                        description=lang.location_info_paginate_embed_description
                     )
                         .set_footer(
                         text=lang.embed_footer.format(member=ctx.member.display_name, auto_delete_time=auto_delete_this_message)
                     )
                         .set_thumbnail()
-                        .add_field(name=lang.info_paginate_embed_locations_title, value=f"\n".join(f"***{location.get('name')}***" + " \n" + f"[{lang.info_google_maps}](https://www.google.com/maps/@{location.get('latitude')},{location.get('longitude')},14z)" + "\n" for location in fetched_info[start:end]), inline=False)
+                        .add_field(name=lang.location_info_paginate_embed_locations_title, value=f"\n".join(f"***{location.get('name')}***" + " \n" + f"[{lang.location_info_google_maps}](https://www.google.com/maps/@{location.get('latitude')},{location.get('longitude')},14z)" + "\n" for location in fetched_info[start:end]), inline=False)
                 )
                 start += 10
                 end += 10
@@ -348,6 +348,7 @@ async def command_location_info(ctx: tanjun.abc.Context, location_type, name):
                         hikari.interactions.base_interactions.ResponseType.DEFERRED_MESSAGE_UPDATE,
                         values[index]
                     )
+
 
 # ------------------------------------------------------------------------- #
 # INITIALIZE #

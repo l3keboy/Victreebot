@@ -56,13 +56,6 @@ async def command_raid_create(ctx: tanjun.abc.Context, raid_type, boss, location
         LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
         return
 
-    # GENERATE ID
-    raid_id = str(uuid.uuid4())[:8]
-
-    # GET TIMESTAMP IN SERVERS TIMEZONE
-    timezone = pytz.timezone(f"Etc/{gmt}")
-    timestamp = datetime.datetime.now(timezone).strftime("%d-%m-%Y %H:%M")
-
     # VALIDATE LOCATION
     location_exists, latitude, longitude = await validate.__validate_location(guild_id=ctx.guild_id, location=location)
     if not location_exists:
@@ -102,6 +95,13 @@ async def command_raid_create(ctx: tanjun.abc.Context, raid_type, boss, location
         await message.delete()
         return
     
+    # GENERATE ID
+    raid_id = str(uuid.uuid4())[:8]
+
+    # GET TIMESTAMP IN SERVERS TIMEZONE
+    timezone = pytz.timezone(f"Etc/{gmt}")
+    timestamp = datetime.datetime.now(timezone).strftime("%d-%m-%Y %H:%M")
+
     # SEND EMBED TO RAID CHANNEL
     emojis = await ctx.rest.fetch_guild_emojis(ctx.guild_id)
     emoji_list = []
@@ -177,10 +177,13 @@ async def command_raid_create(ctx: tanjun.abc.Context, raid_type, boss, location
         LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
 
     # SEND RESPONSE
-    response = lang.raid_successfully_created.format(raid_type=raid_type)
-    message = await ctx.respond(response, ensure_result=True)
-    await asyncio.sleep(auto_delete_time)
-    await message.delete()
+    try:
+        response = lang.raid_successfully_created.format(raid_type=raid_type)
+        message = await ctx.respond(response, ensure_result=True)
+        await asyncio.sleep(auto_delete_time)
+        await message.delete()
+    except Exception as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to respond to create init message! Got error: {e}")
 
     await asyncio.sleep(7200)
     try:
@@ -204,6 +207,7 @@ async def command_raid_delete(ctx: tanjun.abc.Context, raid_type, raid_id):
     try:
         lang, auto_delete_time = await get_settings.get_language_auto_delete_time_settings(guild_id=ctx.guild_id)
         raids_channel_id, log_channel_id = await get_settings.get_channels_settings(guild_id=ctx.guild_id)
+        moderator_role_id = await get_settings.get_moderator_role_settings(guild_id=ctx.guild_id)
     except TypeError as e:
         LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
         return
@@ -219,17 +223,18 @@ async def command_raid_delete(ctx: tanjun.abc.Context, raid_type, raid_id):
 
     # DELETE FROM DATABASE
     if not ctx.member.id == user_id:
-        try:
-            channel = await ctx.rest.fetch_channel(channel=log_channel_id)
-            await channel.send(lang.log_channel_raid_deletion_failed.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, raid_type=raid_type))
-        except Exception as e:
-            LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
+        if not moderator_role_id in ctx.member.role_ids:
+            try:
+                channel = await ctx.rest.fetch_channel(channel=log_channel_id)
+                await channel.send(lang.log_channel_raid_deletion_failed.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, raid_type=raid_type))
+            except Exception as e:
+                LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
 
-        response = lang.raid_unable_to_delete_not_creator
-        message = await ctx.respond(response, ensure_result=True)
-        await asyncio.sleep(auto_delete_time)
-        await message.delete()
-        return
+            response = lang.raid_unable_to_delete_not_creator_or_enough_permissions
+            message = await ctx.respond(response, ensure_result=True)
+            await asyncio.sleep(auto_delete_time)
+            await message.delete()
+            return
 
     database = await DatabaseHandler.acquire_database()
     async with database.acquire() as conn:
@@ -254,10 +259,13 @@ async def command_raid_delete(ctx: tanjun.abc.Context, raid_type, raid_id):
         pass
 
     # SEND RESPONSE
-    response = lang.raid_successfully_deleted.format(id=raid_id)
-    message = await ctx.respond(response, ensure_result=True)
-    await asyncio.sleep(auto_delete_time)
-    await message.delete()
+    try:
+        response = lang.raid_successfully_deleted.format(id=raid_id)
+        message = await ctx.respond(response, ensure_result=True)
+        await asyncio.sleep(auto_delete_time)
+        await message.delete()
+    except Exception as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to respond to delete init message! Got error: {e}")
 
 @raid_group.with_command
 @tanjun.with_str_slash_option("new_date", "New date. If no arguments are given, the date will not change!", default=None)
@@ -272,6 +280,7 @@ async def command_raid_edit(ctx: tanjun.abc.Context, raid_type, raid_id, new_typ
     try:
         lang, gmt, auto_delete_time = await get_settings.get_language_gmt_auto_delete_time_settings(guild_id=ctx.guild_id)
         raids_channel_id, log_channel_id = await get_settings.get_channels_settings(guild_id=ctx.guild_id)
+        moderator_role_id = await get_settings.get_moderator_role_settings(guild_id=ctx.guild_id)
     except TypeError as e:
         LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
         return
@@ -287,17 +296,18 @@ async def command_raid_edit(ctx: tanjun.abc.Context, raid_type, raid_id, new_typ
 
     parameters = []
     if not ctx.member.id == user_id:
-        try:
-            channel = await ctx.rest.fetch_channel(channel=log_channel_id)
-            await channel.send(lang.log_channel_raid_edit_failed.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, raid_type=raid_type))
-        except Exception as e:
-            LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
+        if not moderator_role_id in ctx.member.role_ids:
+            try:
+                channel = await ctx.rest.fetch_channel(channel=log_channel_id)
+                await channel.send(lang.log_channel_raid_edit_failed.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, raid_type=raid_type))
+            except Exception as e:
+                LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
 
-        response = lang.raid_unable_to_edit_not_creator
-        message = await ctx.respond(response, ensure_result=True)
-        await asyncio.sleep(auto_delete_time)
-        await message.delete()
-        return
+            response = lang.raid_unable_to_edit_not_creator_or_enough_permissions
+            message = await ctx.respond(response, ensure_result=True)
+            await asyncio.sleep(auto_delete_time)
+            await message.delete()
+            return
 
     # HANDLE NEW TYPE
     if new_type is not None:
@@ -384,6 +394,15 @@ async def command_raid_edit(ctx: tanjun.abc.Context, raid_type, raid_id, new_typ
             await conn.fetch(update_raid)
     await database.close()
 
+    if instinct_present is None:
+        instinct_present = ["\u200b"]
+    if mystic_present is None:
+        mystic_present = ["\u200b"]
+    if valor_present is None:
+        valor_present = ["\u200b"]
+    if remote_present is None:
+        remote_present = ["\u200b"]
+        
     # EDIT MESSAGE
     embed = (
         hikari.Embed(
@@ -391,7 +410,7 @@ async def command_raid_edit(ctx: tanjun.abc.Context, raid_type, raid_id, new_typ
         )
             .set_author(name=boss, icon=poke_img)
             .set_footer(
-            text=lang.raid_embed_footer.format(member=ctx.member.display_name, attendees=total_attendees),
+            text=lang.raid_embed_footer.format(member=await ctx.rest.fetch_member(ctx.guild_id, user_id), attendees=total_attendees),
         )
             .set_thumbnail(poke_img)
             .add_field(name="Instinct:", value=",".join(user for user in instinct_present), inline=False)
@@ -407,10 +426,13 @@ async def command_raid_edit(ctx: tanjun.abc.Context, raid_type, raid_id, new_typ
         pass
     
     # SEND RESPONSE
-    response = lang.raid_successfully_edited.format(id=raid_id)
-    message = await ctx.respond(response, ensure_result=True)
-    await asyncio.sleep(auto_delete_time)
-    await message.delete()
+    try:
+        response = lang.raid_successfully_edited.format(id=raid_id)
+        message = await ctx.respond(response, ensure_result=True)
+        await asyncio.sleep(auto_delete_time)
+        await message.delete()
+    except Exception as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to respond to edit init message! Got error: {e}")
     
     # SEND EDIT MESSAGE TO LOG CHANNEL
     try:
@@ -418,6 +440,7 @@ async def command_raid_edit(ctx: tanjun.abc.Context, raid_type, raid_id, new_typ
         await channel.send(lang.log_channel_raid_successfully_edited.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, raid_type=raid_type, id=raid_id))
     except Exception as e:
         LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
+
 
 # ------------------------------------------------------------------------- #
 # EVENT LISTENERS #
@@ -677,7 +700,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
         if event.emoji_name == "1️⃣":
             if instinct_present is None:
                 instinct_present = "\u200b"
-            else: 
+            else:
                 instinct_present = instinct_present.split(",")
             if mystic_present is None:
                 mystic_present = "\u200b"
@@ -690,7 +713,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
             if remote_present is None:
                 remote_present = "\u200b"
             else: 
-                remote_present = valor_present.split(",")
+                remote_present = remote_present.split(",")
             
             # UPDATE DATABASE
             database = await DatabaseHandler.acquire_database()
@@ -742,7 +765,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
             if remote_present is None:
                 remote_present = "\u200b"
             else: 
-                remote_present = valor_present.split(",")
+                remote_present = remote_present.split(",")
             
             # UPDATE DATABASE
             database = await DatabaseHandler.acquire_database()
@@ -794,7 +817,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
             if remote_present is None:
                 remote_present = "\u200b"
             else: 
-                remote_present = valor_present.split(",")
+                remote_present = remote_present.split(",")
             
             # UPDATE DATABASE
             database = await DatabaseHandler.acquire_database()

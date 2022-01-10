@@ -28,6 +28,7 @@ async def get_all_settings(guild_id):
                 auto_delete_time = int(fetched_all_settings[0].get("auto_delete_time"))
                 raids_channel_id = int(fetched_all_settings[0].get("raids_channel"))
                 log_channel_id = int(fetched_all_settings[0].get("log_channel"))
+                moderator_role_id = int(fetched_all_settings[0].get("moderator_role"))
             except IndexError as e:
                 LoggingHandler().logger_victreebot_database.error(f"Index error. Guild_id: {guild_id} -- Function: get_all_settings -- Location: /utils/get_settings.py! Is this server inserted in the database?")
                 return
@@ -36,7 +37,7 @@ async def get_all_settings(guild_id):
                 lang = en
 
     await database.close()
-    return lang, gmt, auto_delete_time, raids_channel_id, log_channel_id
+    return lang, language, gmt, auto_delete_time, raids_channel_id, log_channel_id, moderator_role_id
 
 
 # ------------------------------------------------------------------------- #
@@ -194,3 +195,20 @@ async def get_log_channel_settings(guild_id):
 
     await database.close()
     return log_channel_id
+
+# Get moderator_role setting of a server
+async def get_moderator_role_settings(guild_id):
+    database = await DatabaseHandler.acquire_database()
+    async with database.acquire() as conn:
+        async with conn.transaction():
+            select_moderator_role_setting = f'SELECT moderator_role FROM "Settings" WHERE guild_id = {guild_id}'
+            fetched_moderator_role_setting = await conn.fetch(select_moderator_role_setting)
+            
+            try:
+                moderator_role_id = int(fetched_moderator_role_setting[0].get("moderator_role"))
+            except IndexError as e:
+                LoggingHandler().logger_victreebot_database.error(f"Index error. Guild_id: {guild_id} -- Function: get_log_channel_settings -- Location: /utils/get_settings.py! Is this server inserted in the database?")
+                return
+
+    await database.close()
+    return moderator_role_id

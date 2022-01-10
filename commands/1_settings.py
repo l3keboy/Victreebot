@@ -12,13 +12,15 @@ import asyncpg
 from dotenv import load_dotenv
 # Hikari
 import hikari
+from hikari.events.guild_events import GuildLeaveEvent
+from pokebase.loaders import language
 import tanjun
 # Functionality
 import asyncio
 from pathlib import Path
 import datetime
 # Own Files
-from utils import DatabaseHandler, LoggingHandler
+from utils import DatabaseHandler, LoggingHandler, VersionHandler
 from utils.functions import get_settings
 
 # .ENV AND .ENV VARIABLES
@@ -33,6 +35,67 @@ component = tanjun.Component()
 # ------------------------------------------------------------------------- #
 # SLASH COMMANDS #
 # ------------------------------------------------------------------------- #
+@component.with_slash_command
+@tanjun.as_slash_command("info", "Get info about the bot.")
+async def command_info(ctx: tanjun.abc.Context):
+    try:
+        lang, language, gmt, auto_delete_time, raids_channel_id, log_channel_id, moderator_role_id = await get_settings.get_all_settings(guild_id=ctx.guild_id)
+    except TypeError as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
+        return
+
+    version = VersionHandler.VersionHandler().version_full
+
+    raids_channel = await ctx.rest.fetch_channel(channel=raids_channel_id)
+    log_channel = await ctx.rest.fetch_channel(channel=log_channel_id)
+    guild_roles = await ctx.rest.fetch_roles(guild=ctx.guild_id)
+    for role in guild_roles:
+        if role.id == moderator_role_id:
+            moderator_role = role
+
+    if auto_delete_time < 15:
+        auto_delete_this_message = 15
+    else:
+        auto_delete_this_message = auto_delete_time
+
+    embed = (
+        hikari.Embed(
+            title=lang.info_embed_title.format(bot_name=BOT_NAME, version=version),
+            description=lang.info_embed_description.format(bot_name=BOT_NAME),
+        )
+            .set_footer(
+            text=lang.embed_footer.format(member=ctx.member.display_name, auto_delete_time=auto_delete_this_message),
+            icon=ctx.member.avatar_url,
+        )
+            .set_thumbnail()
+            .add_field(name=lang.info_embed_lang_field_name, value=f"`{language}`", inline=False)
+            .add_field(name=lang.info_embed_gmt_field_name, value=f"`{gmt}`", inline=False)
+            .add_field(name=lang.info_embed_auto_delete_field_name, value=f"`{auto_delete_time} {lang.info_embed_auto_delete_field_value}`", inline=False)
+            .add_field(name=lang.info_embed_raids_channel_field_name, value=f"`{raids_channel}`", inline=False)
+            .add_field(name=lang.info_embed_log_channel_field_name, value=f"`{log_channel}`", inline=False)
+            .add_field(name=lang.info_embed_moderator_role_field_name, value=f"`{moderator_role}`", inline=False)
+            # .add_field(name="Help", value=f"The help dialog is available at `/help`\n", inline=False)
+            .add_field(name="\n\u200b", value=f"\n\u200b", inline=False)
+            .add_field(name=lang.info_embed_resources_field_name,
+                       value=f'[{lang.info_embed_resources_field_value_1.format(bot_name=BOT_NAME)}](https://discord.com/oauth2/authorize?client_id=927258608234811394&permissions=3489917008&scope=bot%20applications.commands "{lang.info_embed_resources_field_value_2.format(bot_name=BOT_NAME)}") | '
+                             f'[{lang.info_embed_resources_field_value_3}](https://www.discord.gg/ "{lang.info_embed_resources_field_value_4}")\n', inline=False)
+    )
+
+    message = await ctx.respond(embed=embed, ensure_result=True)
+    await asyncio.sleep(auto_delete_this_message)
+    await message.delete()
+
+    # SEND TO LOG CHANNEL
+    if log_channel_id == 'Not Configured':
+        pass
+    else:
+        try:
+            log_channel = await ctx.rest.fetch_channel(log_channel_id)
+            message = await log_channel.send(lang.log_channel_info_requested.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member)) 
+        except Exception as e:
+            LoggingHandler.LoggingHandler().logger_husqy.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
+
+
 # ------------------------------------------------------------------------- #
 # SETTINGS GROUP COMMAND #
 # ------------------------------------------------------------------------- #
@@ -214,6 +277,40 @@ async def command_settings_log_channel(ctx: tanjun.abc.Context, channel):
     await asyncio.sleep(auto_delete_time)
     await message.delete()
 
+@settings_group.with_command
+@tanjun.with_author_permission_check(hikari.Permissions.MANAGE_GUILD)
+@tanjun.with_role_slash_option("role", "The role to set as moderator role.")
+@tanjun.as_slash_command("moderator_role", "Set the moderator role.")
+async def command_settings_moderator_role(ctx: tanjun.abc.Context, role):
+    try:
+        lang, auto_delete_time = await get_settings.get_language_auto_delete_time_settings(guild_id=ctx.guild_id)
+        log_channel_id = await get_settings.get_log_channel_settings(guild_id=ctx.guild_id)
+    except TypeError as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
+        return
+    
+    # UPDATE DATABASE
+    database = await DatabaseHandler.acquire_database()
+    async with database.acquire() as conn:
+        async with conn.transaction():
+            change_moderator_role = f'UPDATE "Settings" SET moderator_role = {role.id} WHERE guild_id = {ctx.guild_id}'
+            await conn.fetch(change_moderator_role)
+    await database.close()
+    new_moderator_role = role.id
+    
+    # SEND TO LOG CHANNEL
+    try:
+        channel = await ctx.rest.fetch_channel(channel=log_channel_id)
+        await channel.send(lang.log_channel_moderator_role_changed.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, role=new_moderator_role))
+    except Exception as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
+        
+    # SEND RESPONSE
+    response = lang.updated_moderator_role_changed.format(role=new_moderator_role)
+    message = await ctx.respond(response, ensure_result=True)
+    await asyncio.sleep(auto_delete_time)
+    await message.delete()
+
 
 # ------------------------------------------------------------------------- #
 # EVENT LISTENERS #
@@ -245,6 +342,7 @@ async def on_guild_join(event: hikari.GuildJoinEvent):
     instinct_exists = False
     mystic_exists = False
     valor_exists = False
+    moderator_role_exists = False
     all_roles = await event.app.rest.fetch_roles(event.guild_id)
     for role in all_roles:
         if role.name == "Instinct":
@@ -256,6 +354,9 @@ async def on_guild_join(event: hikari.GuildJoinEvent):
         elif role.name == "Valor":
             valor_exists = True
             valor_role = role
+        elif role.name == "Victree Moderator":
+            moderator_role_exists = True
+            moderator_role = role
         else:
             pass
 
@@ -266,6 +367,8 @@ async def on_guild_join(event: hikari.GuildJoinEvent):
             mystic_role = await event.app.rest.create_role(event.guild_id, name="Mystic", color=hikari.Colour(0x2a6ceb), reason="Victree on_guild_join Handler -- Install")
         if not valor_exists:
             valor_role = await event.app.rest.create_role(event.guild_id, name="Valor", color=hikari.Colour(0xff0000), reason="Victree on_guild_join Handler -- Install")
+        if not moderator_role_exists:
+            moderator_role = await event.app.rest.create_role(event.guild_id, name="Victree Moderator", color=hikari.Colour(0xffa500), reason="Victree on_guild_join Handler -- Install")
     except hikari.ForbiddenError as e:
         LoggingHandler.LoggingHandler().logger_victreebot_join_handler.error(f"Permission error in guild: {event.guild_id}! Function: on_guild_join/roles-create -- Location: /commands/1_settings.py! Error: {e}")
 
@@ -297,6 +400,7 @@ async def on_guild_join(event: hikari.GuildJoinEvent):
     default_auto_delete_time = 5
     default_raids_channel = raids_channel.id
     default_log_channel = log_channel.id
+    default_moderator_role = moderator_role.id
 
     database = await DatabaseHandler.acquire_database()
     async with database.acquire() as conn:
@@ -304,7 +408,7 @@ async def on_guild_join(event: hikari.GuildJoinEvent):
             try:
                 language_to_set = "'" + default_language + "'"
                 gmt_to_set = "'" + default_gmt + "'"
-                on_guild_join_query = f'INSERT INTO "Settings" (guild_id, language, gmt, auto_delete_time, raids_channel, log_channel) VALUES ({event.guild_id}, {language_to_set}, {gmt_to_set}, {default_auto_delete_time}, {default_raids_channel}, {default_log_channel})'
+                on_guild_join_query = f'INSERT INTO "Settings" (guild_id, language, gmt, auto_delete_time, raids_channel, log_channel, moderator_role) VALUES ({event.guild_id}, {language_to_set}, {gmt_to_set}, {default_auto_delete_time}, {default_raids_channel}, {default_log_channel}, {default_moderator_role})'
                 await conn.fetch(on_guild_join_query)
             except asyncpg.exceptions.UniqueViolationError as e:
                 LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Guild_id: {event.guild_id}, already exists in Settings table!")
@@ -323,10 +427,56 @@ async def on_guild_join(event: hikari.GuildJoinEvent):
             .add_field(name="\n\u200b", value=f"\n\u200b", inline=False)
             .add_field(name="Custom Emoji's (permanent)", value=f"`name:`  Instinct\n `emoji:`  {instinct_emoji} \n `name:`  Mystic\n `emoji:`  {mystic_emoji} \n `name:`  Valor\n `emoji:`  {valor_emoji}", inline=False)
             .add_field(name="Roles (permanent)", value=f"`name:`  Instinct\n `role_id:`  {instinct_role.id} \n `name:`  Mystic\n `role_id:`  {mystic_role.id} \n `name:`  Valor\n `role_id:`  {valor_role.id}", inline=False)
-            .add_field(name="Other values (changeable)", value=f"`Language:`  en \n `Timezone:`  GMT 0 \n `Auto Delete Time:`  5 \n `Raids Channel:`  {raids_channel.mention} \n `Logs Channel:`  {log_channel.mention} \n\n NOTE: You need the `Manage Guild` permissions to change these!", inline=False)
+            .add_field(name="Other values (changeable)", value=f"`Language:`  en \n `Timezone:`  GMT 0 \n `Auto Delete Time:`  5 \n `Raids Channel:`  {raids_channel.mention} \n `Logs Channel:`  {log_channel.mention} \n `Moderator Role:`  {moderator_role.mention} \n\n NOTE: You need the `Manage Guild` permissions to change these!", inline=False)
     )
 
     await log_channel.send(embed=embed)
+
+
+async def on_guild_leave(event: hikari.GuildLeaveEvent):
+    # REMOVE GUILD FROM SETTINGS
+    database = await DatabaseHandler.acquire_database()
+    async with database.acquire() as conn:
+        async with conn.transaction():
+            try:
+                on_guild_remove_settings_query = f'DELETE FROM "Settings" WHERE guild_id = {event.guild_id}'
+                await conn.fetch(on_guild_remove_settings_query)
+            except Exception as e:
+                LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Something went wrong while trying to remove guild_id: {event.guild_id} from settings table!")
+    await database.close()
+
+    # REMOVE GYMS OF GUILD
+    database = await DatabaseHandler.acquire_database()
+    async with database.acquire() as conn:
+        async with conn.transaction():
+            try:
+                on_guild_remove_gym_query = f'DELETE FROM "Gym" WHERE guild_id = {event.guild_id}'
+                await conn.fetch(on_guild_remove_gym_query)
+            except Exception as e:
+                LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Something went wrong while trying to remove guild_id: {event.guild_id} from gym table!")
+    await database.close()
+
+    # REMOVE POKÉSTOPS OF GUILD
+    database = await DatabaseHandler.acquire_database()
+    async with database.acquire() as conn:
+        async with conn.transaction():
+            try:
+                on_guild_remove_gym_query = f'DELETE FROM "Pokéstop" WHERE guild_id = {event.guild_id}'
+                await conn.fetch(on_guild_remove_gym_query)
+            except Exception as e:
+                LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Something went wrong while trying to remove guild_id: {event.guild_id} from pokéstop table!")
+    await database.close()
+
+    # REMOVE RAIDS OF GUILD
+    database = await DatabaseHandler.acquire_database()
+    async with database.acquire() as conn:
+        async with conn.transaction():
+            try:
+                on_guild_remove_gym_query = f'DELETE FROM "Raid-Events" WHERE guild_id = {event.guild_id}'
+                await conn.fetch(on_guild_remove_gym_query)
+            except Exception as e:
+                LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Something went wrong while trying to remove guild_id: {event.guild_id} from raid-events table!")
+    await database.close()
 
 
 # ------------------------------------------------------------------------- #
@@ -337,3 +487,4 @@ def load_component(client: tanjun.abc.Client) -> None:
     client.add_component(component.copy())
     client.add_component(settings_component.copy())
     client.events.subscribe(hikari.GuildJoinEvent, on_guild_join)
+    client.events.subscribe(hikari.GuildLeaveEvent, on_guild_leave)
