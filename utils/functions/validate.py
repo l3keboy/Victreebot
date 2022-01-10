@@ -57,6 +57,8 @@ async def __validate_location(guild_id, location):
         pass
 
     if not location_exists:
+        latitude = False
+        longitude = False
         try:
             database = await DatabaseHandler.acquire_database()
             async with database.acquire() as conn:

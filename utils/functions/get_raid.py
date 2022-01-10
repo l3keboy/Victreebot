@@ -8,7 +8,7 @@
 # IMPORTS
 # Own files
 from utils import DatabaseHandler
-from utils.LoggingHandler import LoggingHandler
+from utils import LoggingHandler
 
 
 # Get a raid by its raid_id
