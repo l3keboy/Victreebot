@@ -396,7 +396,7 @@ async def on_guild_join(event: hikari.GuildJoinEvent):
 
     # ADD DEFAULTS TO DATABASE
     default_language = "en"
-    default_gmt = "GMT 0"
+    default_gmt = "GMT+0"
     default_auto_delete_time = 5
     default_raids_channel = raids_channel.id
     default_log_channel = log_channel.id
