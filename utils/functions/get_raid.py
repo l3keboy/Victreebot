@@ -24,7 +24,7 @@ async def get_raid_by_raidid_raidtype(search_raid_type, search_raid_id):
             if fetched_raid == []:
                 LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Tried to fetch raid by ID with ID that does not exist!")
                 success = False
-                raid_id, created_at, raid_type, guild_id, channel_id, message_id, user_id, boss, location, time, date, instinct_present, mystic_present, valor_present, remote_present, total_attendees = None
+                raid_id, created_at, raid_type, guild_id, channel_id, message_id, user_id, boss, location, time, date, instinct_present, mystic_present, valor_present, remote_present, total_attendees = None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None
             else:
                 success = True
                 raid_id = fetched_raid[0].get("id")
@@ -59,7 +59,7 @@ async def get_raid_by_guild_channel_message(guild_id, channel_id, message_id):
             if fetched_raid == []:
                 LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Tried to fetch raid by guild, channel and message that does not exist!")
                 success = False
-                raid_id, created_at, raid_type, guild_id, channel_id, message_id, user_id, boss, location, time, date, instinct_present, mystic_present, valor_present, remote_present, total_attendees = None
+                raid_id, created_at, raid_type, guild_id, channel_id, message_id, user_id, boss, location, time, date, instinct_present, mystic_present, valor_present, remote_present, total_attendees = None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None
             else:
                 success = True
                 raid_id = fetched_raid[0].get("id")

@@ -416,8 +416,8 @@ async def on_guild_join(event: hikari.GuildJoinEvent):
 
     embed = (
         hikari.Embed(
-            title="Welcome to Victree!",
-            description="Hello! Welcome to Victree! While joining this server I have done a few things for you, these can be read below! \n\n`NOTE: Please make sure that the VictreeBot role is placed ABOVE other roles!`"
+            title="Welcome to VictreeBot!",
+            description="Hello! Welcome to VictreeBot! While joining this server I have done a few things for you, these can be read below! \n\n`NOTE: Please make sure that the VictreeBot role is placed ABOVE other roles!`"
         )
             .set_footer(
             text="Thanks for using VictreeBot! Encounter issues or any feature ideas? Let us now and we will have a look!",
