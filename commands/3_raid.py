@@ -455,403 +455,401 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
         pass
     else:
         success, raid_id, created_at, raid_type, guild_id, channel_id, message_id, user_id, boss, location, time, date, instinct_present, mystic_present, valor_present, remote_present, total_attendees = await get_raid.get_raid_by_guild_channel_message(guild_id=event.guild_id, channel_id=event.channel_id, message_id=event.message_id)
-        if not success:
-            return
+        if success:
+            if total_attendees is None:
+                total_attendees = 0
 
-        if total_attendees is None:
-            total_attendees = 0
+            if event.emoji_name == "Instinct":
+                if instinct_present is None:
+                    new_instinct_present = [event.member.display_name]
+                else: 
+                    instinct_present_list = instinct_present.split(",")
+                    try:
+                        instinct_present_list.remove("\u200b")
+                    except Exception as e:
+                        pass
+                    instinct_present_list.append(event.member.display_name)
+                    new_instinct_present = instinct_present_list
+                if mystic_present is None:
+                    mystic_present = "\u200b"
+                else: 
+                    mystic_present = mystic_present.split(",")
+                if valor_present is None:
+                    valor_present = "\u200b"
+                else: 
+                    valor_present = valor_present.split(",")
+                if remote_present is None:
+                    remote_present = "\u200b"
+                else: 
+                    remote_present = remote_present.split(",")
+                
+                # UPDATE DATABASE
+                database = await DatabaseHandler.acquire_database()
+                async with database.acquire() as conn:
+                    async with conn.transaction():
+                        new_total_attendees = total_attendees + 1
+                        instinct_present_to_set = "'" + ", ".join(user for user in new_instinct_present) + "'"
+                        update_raid = f'UPDATE "Raid-Events" SET instinct_present = {instinct_present_to_set}, total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
+                        await conn.fetch(update_raid)
+                await database.close()
 
-        if event.emoji_name == "Instinct":
-            if instinct_present is None:
-                new_instinct_present = [event.member.display_name]
-            else: 
-                instinct_present_list = instinct_present.split(",")
+                location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
+                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+
+                # EDIT MESSAGE
+                embed = (
+                    hikari.Embed(
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                    )
+                        .set_author(name=boss, icon=poke_img)
+                        .set_footer(
+                        text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
+                    )
+                        .set_thumbnail(poke_img)
+                        .add_field(name="Instinct:", value=", ".join(user for user in new_instinct_present), inline=False)
+                        .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
+                        .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
+                        .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
+                )
+                
                 try:
-                    instinct_present_list.remove("\u200b")
-                except Exception as e:
+                    raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
+                    await raid_message_to_edit.edit(embed=embed)
+                except hikari.NotFoundError:
                     pass
-                instinct_present_list.append(event.member.display_name)
-                new_instinct_present = instinct_present_list
-            if mystic_present is None:
-                mystic_present = "\u200b"
-            else: 
-                mystic_present = mystic_present.split(",")
-            if valor_present is None:
-                valor_present = "\u200b"
-            else: 
-                valor_present = valor_present.split(",")
-            if remote_present is None:
-                remote_present = "\u200b"
-            else: 
-                remote_present = remote_present.split(",")
-            
-            # UPDATE DATABASE
-            database = await DatabaseHandler.acquire_database()
-            async with database.acquire() as conn:
-                async with conn.transaction():
-                    new_total_attendees = total_attendees + 1
-                    instinct_present_to_set = "'" + ", ".join(user for user in new_instinct_present) + "'"
-                    update_raid = f'UPDATE "Raid-Events" SET instinct_present = {instinct_present_to_set}, total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
-                    await conn.fetch(update_raid)
-            await database.close()
 
-            location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-            success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+            if event.emoji_name == "Mystic":
+                if instinct_present is None:
+                    instinct_present = "\u200b"
+                else: 
+                    instinct_present = instinct_present.split(",")
+                if mystic_present is None:
+                    new_mystic_present = [event.member.display_name]
+                else: 
+                    mystic_present_list = mystic_present.split(",")
+                    try:
+                        mystic_present_list.remove("\u200b")
+                    except Exception as e:
+                        pass
+                    mystic_present_list.append(event.member.display_name)
+                    new_mystic_present = mystic_present_list
+                if valor_present is None:
+                    valor_present = "\u200b"
+                else: 
+                    valor_present = valor_present.split(",")
+                if remote_present is None:
+                    remote_present = "\u200b"
+                else: 
+                    remote_present = remote_present.split(",")
+                
+                # UPDATE DATABASE
+                database = await DatabaseHandler.acquire_database()
+                async with database.acquire() as conn:
+                    async with conn.transaction():
+                        new_total_attendees = total_attendees + 1
+                        mystic_present_to_set = "'" + ", ".join(user for user in new_mystic_present) + "'"
+                        update_raid = f'UPDATE "Raid-Events" SET mystic_present = {mystic_present_to_set}, total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
+                        await conn.fetch(update_raid)
+                await database.close()
 
-            # EDIT MESSAGE
-            embed = (
-                hikari.Embed(
-                    description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
+                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+
+                # EDIT MESSAGE
+                embed = (
+                    hikari.Embed(
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                    )
+                        .set_author(name=boss, icon=poke_img)
+                        .set_footer(
+                        text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
+                    )
+                        .set_thumbnail(poke_img)
+                        .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
+                        .add_field(name="Mystic:", value=", ".join(user for user in new_mystic_present), inline=False)
+                        .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
+                        .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
                 )
-                    .set_author(name=boss, icon=poke_img)
-                    .set_footer(
-                    text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
-                )
-                    .set_thumbnail(poke_img)
-                    .add_field(name="Instinct:", value=", ".join(user for user in new_instinct_present), inline=False)
-                    .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
-                    .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                    .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
-            )
-            
-            try:
-                raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
-                await raid_message_to_edit.edit(embed=embed)
-            except hikari.NotFoundError:
-                pass
-
-        if event.emoji_name == "Mystic":
-            if instinct_present is None:
-                instinct_present = "\u200b"
-            else: 
-                instinct_present = instinct_present.split(",")
-            if mystic_present is None:
-                new_mystic_present = [event.member.display_name]
-            else: 
-                mystic_present_list = mystic_present.split(",")
+                
                 try:
-                    mystic_present_list.remove("\u200b")
-                except Exception as e:
+                    raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
+                    await raid_message_to_edit.edit(embed=embed)
+                except hikari.NotFoundError:
                     pass
-                mystic_present_list.append(event.member.display_name)
-                new_mystic_present = mystic_present_list
-            if valor_present is None:
-                valor_present = "\u200b"
-            else: 
-                valor_present = valor_present.split(",")
-            if remote_present is None:
-                remote_present = "\u200b"
-            else: 
-                remote_present = remote_present.split(",")
-            
-            # UPDATE DATABASE
-            database = await DatabaseHandler.acquire_database()
-            async with database.acquire() as conn:
-                async with conn.transaction():
-                    new_total_attendees = total_attendees + 1
-                    mystic_present_to_set = "'" + ", ".join(user for user in new_mystic_present) + "'"
-                    update_raid = f'UPDATE "Raid-Events" SET mystic_present = {mystic_present_to_set}, total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
-                    await conn.fetch(update_raid)
-            await database.close()
 
-            location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-            success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+            if event.emoji_name == "Valor":
+                if instinct_present is None:
+                    instinct_present = "\u200b"
+                else: 
+                    instinct_present = instinct_present.split(",")
+                if mystic_present is None:
+                    mystic_present = "\u200b"
+                else: 
+                    mystic_present = mystic_present.split(",")
+                if valor_present is None:
+                    new_valor_present = [event.member.display_name]
+                else: 
+                    valor_present_list = valor_present.split(",")
+                    try:
+                        valor_present_list.remove("\u200b")
+                    except Exception as e:
+                        pass
+                    valor_present_list.append(event.member.display_name)
+                    new_valor_present = valor_present_list
+                if remote_present is None:
+                    remote_present = "\u200b"
+                else: 
+                    remote_present = remote_present.split(",")
+                
+                # UPDATE DATABASE
+                database = await DatabaseHandler.acquire_database()
+                async with database.acquire() as conn:
+                    async with conn.transaction():
+                        new_total_attendees = total_attendees + 1
+                        valor_present_to_set = "'" + ",".join(user for user in new_valor_present) + "'"
+                        update_raid = f'UPDATE "Raid-Events" SET valor_present = {valor_present_to_set}, total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
+                        await conn.fetch(update_raid)
+                await database.close()
 
-            # EDIT MESSAGE
-            embed = (
-                hikari.Embed(
-                    description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
+                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+
+                # EDIT MESSAGE
+                embed = (
+                    hikari.Embed(
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                    )
+                        .set_author(name=boss, icon=poke_img)
+                        .set_footer(
+                        text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
+                    )
+                        .set_thumbnail(poke_img)
+                        .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
+                        .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
+                        .add_field(name="Valor:", value=", ".join(user for user in new_valor_present), inline=False)
+                        .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
                 )
-                    .set_author(name=boss, icon=poke_img)
-                    .set_footer(
-                    text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
-                )
-                    .set_thumbnail(poke_img)
-                    .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
-                    .add_field(name="Mystic:", value=", ".join(user for user in new_mystic_present), inline=False)
-                    .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                    .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
-            )
-            
-            try:
-                raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
-                await raid_message_to_edit.edit(embed=embed)
-            except hikari.NotFoundError:
-                pass
-
-        if event.emoji_name == "Valor":
-            if instinct_present is None:
-                instinct_present = "\u200b"
-            else: 
-                instinct_present = instinct_present.split(",")
-            if mystic_present is None:
-                mystic_present = "\u200b"
-            else: 
-                mystic_present = mystic_present.split(",")
-            if valor_present is None:
-                new_valor_present = [event.member.display_name]
-            else: 
-                valor_present_list = valor_present.split(",")
+                
                 try:
-                    valor_present_list.remove("\u200b")
-                except Exception as e:
+                    raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
+                    await raid_message_to_edit.edit(embed=embed)
+                except hikari.NotFoundError:
                     pass
-                valor_present_list.append(event.member.display_name)
-                new_valor_present = valor_present_list
-            if remote_present is None:
-                remote_present = "\u200b"
-            else: 
-                remote_present = remote_present.split(",")
-            
-            # UPDATE DATABASE
-            database = await DatabaseHandler.acquire_database()
-            async with database.acquire() as conn:
-                async with conn.transaction():
-                    new_total_attendees = total_attendees + 1
-                    valor_present_to_set = "'" + ",".join(user for user in new_valor_present) + "'"
-                    update_raid = f'UPDATE "Raid-Events" SET valor_present = {valor_present_to_set}, total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
-                    await conn.fetch(update_raid)
-            await database.close()
 
-            location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-            success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+            if event.emoji_name == "🇷":
+                if instinct_present is None:
+                    instinct_present = "\u200b"
+                else: 
+                    instinct_present = instinct_present.split(",")
+                if mystic_present is None:
+                    mystic_present = "\u200b"
+                else: 
+                    mystic_present = mystic_present.split(",")
+                if valor_present is None:
+                    valor_present = "\u200b"
+                else: 
+                    valor_present = valor_present.split(",")
+                if remote_present is None:
+                    new_remote_present = [event.member.display_name]
+                else: 
+                    remote_present_list = remote_present.split(",")
+                    try:
+                        remote_present_list.remove("\u200b")
+                    except Exception as e:
+                        pass
+                    remote_present_list.append(event.member.display_name)
+                    new_remote_present = remote_present_list
+                
+                # UPDATE DATABASE
+                database = await DatabaseHandler.acquire_database()
+                async with database.acquire() as conn:
+                    async with conn.transaction():
+                        new_total_attendees = total_attendees + 1
+                        remote_present_to_set = "'" + ",".join(user for user in new_remote_present) + "'"
+                        update_raid = f'UPDATE "Raid-Events" SET remote_present = {remote_present_to_set}, total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
+                        await conn.fetch(update_raid)
+                await database.close()
 
-            # EDIT MESSAGE
-            embed = (
-                hikari.Embed(
-                    description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
+                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+
+                # EDIT MESSAGE
+                embed = (
+                    hikari.Embed(
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                    )
+                        .set_author(name=boss, icon=poke_img)
+                        .set_footer(
+                        text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
+                    )
+                        .set_thumbnail(poke_img)
+                        .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
+                        .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
+                        .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
+                        .add_field(name="Remote:", value=",".join(user for user in new_remote_present), inline=False)
                 )
-                    .set_author(name=boss, icon=poke_img)
-                    .set_footer(
-                    text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
-                )
-                    .set_thumbnail(poke_img)
-                    .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
-                    .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
-                    .add_field(name="Valor:", value=", ".join(user for user in new_valor_present), inline=False)
-                    .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
-            )
-            
-            try:
-                raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
-                await raid_message_to_edit.edit(embed=embed)
-            except hikari.NotFoundError:
-                pass
-
-        if event.emoji_name == "🇷":
-            if instinct_present is None:
-                instinct_present = "\u200b"
-            else: 
-                instinct_present = instinct_present.split(",")
-            if mystic_present is None:
-                mystic_present = "\u200b"
-            else: 
-                mystic_present = mystic_present.split(",")
-            if valor_present is None:
-                valor_present = "\u200b"
-            else: 
-                valor_present = valor_present.split(",")
-            if remote_present is None:
-                new_remote_present = [event.member.display_name]
-            else: 
-                remote_present_list = remote_present.split(",")
+                
                 try:
-                    remote_present_list.remove("\u200b")
-                except Exception as e:
+                    raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
+                    await raid_message_to_edit.edit(embed=embed)
+                except hikari.NotFoundError:
                     pass
-                remote_present_list.append(event.member.display_name)
-                new_remote_present = remote_present_list
-            
-            # UPDATE DATABASE
-            database = await DatabaseHandler.acquire_database()
-            async with database.acquire() as conn:
-                async with conn.transaction():
-                    new_total_attendees = total_attendees + 1
-                    remote_present_to_set = "'" + ",".join(user for user in new_remote_present) + "'"
-                    update_raid = f'UPDATE "Raid-Events" SET remote_present = {remote_present_to_set}, total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
-                    await conn.fetch(update_raid)
-            await database.close()
+                
+            if event.emoji_name == "1️⃣":
+                if instinct_present is None:
+                    instinct_present = "\u200b"
+                else:
+                    instinct_present = instinct_present.split(",")
+                if mystic_present is None:
+                    mystic_present = "\u200b"
+                else: 
+                    mystic_present = mystic_present.split(",")
+                if valor_present is None:
+                    valor_present = "\u200b"
+                else: 
+                    valor_present = valor_present.split(",")
+                if remote_present is None:
+                    remote_present = "\u200b"
+                else: 
+                    remote_present = remote_present.split(",")
+                
+                # UPDATE DATABASE
+                database = await DatabaseHandler.acquire_database()
+                async with database.acquire() as conn:
+                    async with conn.transaction():
+                        new_total_attendees = total_attendees + 1
+                        update_raid = f'UPDATE "Raid-Events" SET total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
+                        await conn.fetch(update_raid)
+                await database.close()
 
-            location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-            success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
+                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
 
-            # EDIT MESSAGE
-            embed = (
-                hikari.Embed(
-                    description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                # EDIT MESSAGE
+                embed = (
+                    hikari.Embed(
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                    )
+                        .set_author(name=boss, icon=poke_img)
+                        .set_footer(
+                        text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
+                    )
+                        .set_thumbnail(poke_img)
+                        .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
+                        .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
+                        .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
+                        .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
                 )
-                    .set_author(name=boss, icon=poke_img)
-                    .set_footer(
-                    text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
+                
+                try:
+                    raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
+                    await raid_message_to_edit.edit(embed=embed)
+                except hikari.NotFoundError:
+                    pass
+
+            if event.emoji_name == "2️⃣":
+                if instinct_present is None:
+                    instinct_present = "\u200b"
+                else: 
+                    instinct_present = instinct_present.split(",")
+                if mystic_present is None:
+                    mystic_present = "\u200b"
+                else: 
+                    mystic_present = mystic_present.split(",")
+                if valor_present is None:
+                    valor_present = "\u200b"
+                else: 
+                    valor_present = valor_present.split(",")
+                if remote_present is None:
+                    remote_present = "\u200b"
+                else: 
+                    remote_present = remote_present.split(",")
+                
+                # UPDATE DATABASE
+                database = await DatabaseHandler.acquire_database()
+                async with database.acquire() as conn:
+                    async with conn.transaction():
+                        new_total_attendees = total_attendees + 2
+                        update_raid = f'UPDATE "Raid-Events" SET total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
+                        await conn.fetch(update_raid)
+                await database.close()
+
+                location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
+                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+
+                # EDIT MESSAGE
+                embed = (
+                    hikari.Embed(
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                    )
+                        .set_author(name=boss, icon=poke_img)
+                        .set_footer(
+                        text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
+                    )
+                        .set_thumbnail(poke_img)
+                        .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
+                        .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
+                        .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
+                        .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
                 )
-                    .set_thumbnail(poke_img)
-                    .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
-                    .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
-                    .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                    .add_field(name="Remote:", value=",".join(user for user in new_remote_present), inline=False)
-            )
-            
-            try:
-                raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
-                await raid_message_to_edit.edit(embed=embed)
-            except hikari.NotFoundError:
-                pass
-            
-        if event.emoji_name == "1️⃣":
-            if instinct_present is None:
-                instinct_present = "\u200b"
-            else:
-                instinct_present = instinct_present.split(",")
-            if mystic_present is None:
-                mystic_present = "\u200b"
-            else: 
-                mystic_present = mystic_present.split(",")
-            if valor_present is None:
-                valor_present = "\u200b"
-            else: 
-                valor_present = valor_present.split(",")
-            if remote_present is None:
-                remote_present = "\u200b"
-            else: 
-                remote_present = remote_present.split(",")
-            
-            # UPDATE DATABASE
-            database = await DatabaseHandler.acquire_database()
-            async with database.acquire() as conn:
-                async with conn.transaction():
-                    new_total_attendees = total_attendees + 1
-                    update_raid = f'UPDATE "Raid-Events" SET total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
-                    await conn.fetch(update_raid)
-            await database.close()
+                
+                try:
+                    raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
+                    await raid_message_to_edit.edit(embed=embed)
+                except hikari.NotFoundError:
+                    pass
 
-            location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-            success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+            if event.emoji_name == "3️⃣":
+                if instinct_present is None:
+                    instinct_present = "\u200b"
+                else: 
+                    instinct_present = instinct_present.split(",")
+                if mystic_present is None:
+                    mystic_present = "\u200b"
+                else: 
+                    mystic_present = mystic_present.split(",")
+                if valor_present is None:
+                    valor_present = "\u200b"
+                else: 
+                    valor_present = valor_present.split(",")
+                if remote_present is None:
+                    remote_present = "\u200b"
+                else: 
+                    remote_present = remote_present.split(",")
+                
+                # UPDATE DATABASE
+                database = await DatabaseHandler.acquire_database()
+                async with database.acquire() as conn:
+                    async with conn.transaction():
+                        new_total_attendees = total_attendees + 3
+                        update_raid = f'UPDATE "Raid-Events" SET total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
+                        await conn.fetch(update_raid)
+                await database.close()
 
-            # EDIT MESSAGE
-            embed = (
-                hikari.Embed(
-                    description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
+                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+
+                # EDIT MESSAGE
+                embed = (
+                    hikari.Embed(
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                    )
+                        .set_author(name=boss, icon=poke_img)
+                        .set_footer(
+                        text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
+                    )
+                        .set_thumbnail(poke_img)
+                        .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
+                        .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
+                        .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
+                        .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
                 )
-                    .set_author(name=boss, icon=poke_img)
-                    .set_footer(
-                    text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
-                )
-                    .set_thumbnail(poke_img)
-                    .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
-                    .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
-                    .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                    .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
-            )
-            
-            try:
-                raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
-                await raid_message_to_edit.edit(embed=embed)
-            except hikari.NotFoundError:
-                pass
-
-        if event.emoji_name == "2️⃣":
-            if instinct_present is None:
-                instinct_present = "\u200b"
-            else: 
-                instinct_present = instinct_present.split(",")
-            if mystic_present is None:
-                mystic_present = "\u200b"
-            else: 
-                mystic_present = mystic_present.split(",")
-            if valor_present is None:
-                valor_present = "\u200b"
-            else: 
-                valor_present = valor_present.split(",")
-            if remote_present is None:
-                remote_present = "\u200b"
-            else: 
-                remote_present = remote_present.split(",")
-            
-            # UPDATE DATABASE
-            database = await DatabaseHandler.acquire_database()
-            async with database.acquire() as conn:
-                async with conn.transaction():
-                    new_total_attendees = total_attendees + 2
-                    update_raid = f'UPDATE "Raid-Events" SET total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
-                    await conn.fetch(update_raid)
-            await database.close()
-
-            location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-            success, poke_img = await pokemon.get_pokemon_img(boss=boss)
-
-            # EDIT MESSAGE
-            embed = (
-                hikari.Embed(
-                    description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
-                )
-                    .set_author(name=boss, icon=poke_img)
-                    .set_footer(
-                    text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
-                )
-                    .set_thumbnail(poke_img)
-                    .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
-                    .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
-                    .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                    .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
-            )
-            
-            try:
-                raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
-                await raid_message_to_edit.edit(embed=embed)
-            except hikari.NotFoundError:
-                pass
-
-        if event.emoji_name == "3️⃣":
-            if instinct_present is None:
-                instinct_present = "\u200b"
-            else: 
-                instinct_present = instinct_present.split(",")
-            if mystic_present is None:
-                mystic_present = "\u200b"
-            else: 
-                mystic_present = mystic_present.split(",")
-            if valor_present is None:
-                valor_present = "\u200b"
-            else: 
-                valor_present = valor_present.split(",")
-            if remote_present is None:
-                remote_present = "\u200b"
-            else: 
-                remote_present = remote_present.split(",")
-            
-            # UPDATE DATABASE
-            database = await DatabaseHandler.acquire_database()
-            async with database.acquire() as conn:
-                async with conn.transaction():
-                    new_total_attendees = total_attendees + 3
-                    update_raid = f'UPDATE "Raid-Events" SET total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
-                    await conn.fetch(update_raid)
-            await database.close()
-
-            location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-            success, poke_img = await pokemon.get_pokemon_img(boss=boss)
-
-            # EDIT MESSAGE
-            embed = (
-                hikari.Embed(
-                    description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
-                )
-                    .set_author(name=boss, icon=poke_img)
-                    .set_footer(
-                    text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
-                )
-                    .set_thumbnail(poke_img)
-                    .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
-                    .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
-                    .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                    .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
-            )
-            
-            try:
-                raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
-                await raid_message_to_edit.edit(embed=embed)
-            except hikari.NotFoundError:
-                pass
+                
+                try:
+                    raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
+                    await raid_message_to_edit.edit(embed=embed)
+                except hikari.NotFoundError:
+                    pass
 
 
 async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
@@ -865,398 +863,396 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
         pass
     else:
         success, raid_id, created_at, raid_type, guild_id, channel_id, message_id, user_id, boss, location, time, date, instinct_present, mystic_present, valor_present, remote_present, total_attendees = await get_raid.get_raid_by_guild_channel_message(guild_id=event.guild_id, channel_id=event.channel_id, message_id=event.message_id)
-        if not success:
-            return
-
-        raid_owner = await event.app.rest.fetch_user(user_id)
-        if event.emoji_name == "Instinct":
-            if instinct_present is None:
-                new_instinct_present = "\u200b"
-            else: 
-                instinct_present_list = instinct_present.split(",")
-                instinct_present_list.remove(member.username)
-                if instinct_present_list == []:
+        if success:
+            raid_owner = await event.app.rest.fetch_user(user_id)
+            if event.emoji_name == "Instinct":
+                if instinct_present is None:
                     new_instinct_present = "\u200b"
-                else:
-                    new_instinct_present = instinct_present_list
-            if mystic_present is None:
-                mystic_present = "\u200b"
-            else: 
-                mystic_present = mystic_present.split(",")
-            if valor_present is None:
-                valor_present = "\u200b"
-            else: 
-                valor_present = valor_present.split(",")
-            if remote_present is None:
-                remote_present = "\u200b"
-            else: 
-                remote_present = remote_present.split(",")
-            
-            # UPDATE DATABASE
-            database = await DatabaseHandler.acquire_database()
-            async with database.acquire() as conn:
-                async with conn.transaction():
-                    new_total_attendees = total_attendees - 1
-                    instinct_present_to_set = "'" + ",".join(user for user in new_instinct_present) + "'"
-                    update_raid = f'UPDATE "Raid-Events" SET instinct_present = {instinct_present_to_set}, total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
-                    await conn.fetch(update_raid)
-            await database.close()
+                else: 
+                    instinct_present_list = instinct_present.split(",")
+                    instinct_present_list.remove(member.username)
+                    if instinct_present_list == []:
+                        new_instinct_present = "\u200b"
+                    else:
+                        new_instinct_present = instinct_present_list
+                if mystic_present is None:
+                    mystic_present = "\u200b"
+                else: 
+                    mystic_present = mystic_present.split(",")
+                if valor_present is None:
+                    valor_present = "\u200b"
+                else: 
+                    valor_present = valor_present.split(",")
+                if remote_present is None:
+                    remote_present = "\u200b"
+                else: 
+                    remote_present = remote_present.split(",")
+                
+                # UPDATE DATABASE
+                database = await DatabaseHandler.acquire_database()
+                async with database.acquire() as conn:
+                    async with conn.transaction():
+                        new_total_attendees = total_attendees - 1
+                        instinct_present_to_set = "'" + ",".join(user for user in new_instinct_present) + "'"
+                        update_raid = f'UPDATE "Raid-Events" SET instinct_present = {instinct_present_to_set}, total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
+                        await conn.fetch(update_raid)
+                await database.close()
 
-            location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-            success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
+                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
 
-            # EDIT MESSAGE
-            embed = (
-                hikari.Embed(
-                    description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                # EDIT MESSAGE
+                embed = (
+                    hikari.Embed(
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                    )
+                        .set_author(name=boss, icon=poke_img)
+                        .set_footer(
+                        text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
+                    )
+                        .set_thumbnail(poke_img)
+                        .add_field(name="Instinct:", value=", ".join(user for user in new_instinct_present), inline=False)
+                        .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
+                        .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
+                        .add_field(name="Remote:", value=", ".join(user for user in remote_present), inline=False)
                 )
-                    .set_author(name=boss, icon=poke_img)
-                    .set_footer(
-                    text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
-                )
-                    .set_thumbnail(poke_img)
-                    .add_field(name="Instinct:", value=", ".join(user for user in new_instinct_present), inline=False)
-                    .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
-                    .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                    .add_field(name="Remote:", value=", ".join(user for user in remote_present), inline=False)
-            )
-            
-            try:
-                raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
-                await raid_message_to_edit.edit(embed=embed)
-            except hikari.NotFoundError:
-                pass
+                
+                try:
+                    raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
+                    await raid_message_to_edit.edit(embed=embed)
+                except hikari.NotFoundError:
+                    pass
 
-        if event.emoji_name == "Mystic":
-            if instinct_present is None:
-                instinct_present = "\u200b"
-            else: 
-                instinct_present = instinct_present.split(",")
-            if mystic_present is None:
-                new_mystic_present = "\u200b"
-            else: 
-                mystic_present_list = mystic_present.split(",")
-                mystic_present_list.remove(member.username)
-                if mystic_present_list == []:
+            if event.emoji_name == "Mystic":
+                if instinct_present is None:
+                    instinct_present = "\u200b"
+                else: 
+                    instinct_present = instinct_present.split(",")
+                if mystic_present is None:
                     new_mystic_present = "\u200b"
-                else:
-                    new_mystic_present = mystic_present_list
-            if valor_present is None:
-                valor_present = "\u200b"
-            else: 
-                valor_present = valor_present.split(",")
-            if remote_present is None:
-                remote_present = "\u200b"
-            else: 
-                remote_present = remote_present.split(",")
-            
-            # UPDATE DATABASE
-            database = await DatabaseHandler.acquire_database()
-            async with database.acquire() as conn:
-                async with conn.transaction():
-                    new_total_attendees = total_attendees - 1
-                    mystic_present_to_set = "'" + ",".join(user for user in new_mystic_present) + "'"
-                    update_raid = f'UPDATE "Raid-Events" SET mystic_present = {mystic_present_to_set}, total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
-                    await conn.fetch(update_raid)
-            await database.close()
+                else: 
+                    mystic_present_list = mystic_present.split(",")
+                    mystic_present_list.remove(member.username)
+                    if mystic_present_list == []:
+                        new_mystic_present = "\u200b"
+                    else:
+                        new_mystic_present = mystic_present_list
+                if valor_present is None:
+                    valor_present = "\u200b"
+                else: 
+                    valor_present = valor_present.split(",")
+                if remote_present is None:
+                    remote_present = "\u200b"
+                else: 
+                    remote_present = remote_present.split(",")
+                
+                # UPDATE DATABASE
+                database = await DatabaseHandler.acquire_database()
+                async with database.acquire() as conn:
+                    async with conn.transaction():
+                        new_total_attendees = total_attendees - 1
+                        mystic_present_to_set = "'" + ",".join(user for user in new_mystic_present) + "'"
+                        update_raid = f'UPDATE "Raid-Events" SET mystic_present = {mystic_present_to_set}, total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
+                        await conn.fetch(update_raid)
+                await database.close()
 
-            location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-            success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
+                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
 
-            # EDIT MESSAGE
-            embed = (
-                hikari.Embed(
-                    description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                # EDIT MESSAGE
+                embed = (
+                    hikari.Embed(
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                    )
+                        .set_author(name=boss, icon=poke_img)
+                        .set_footer(
+                        text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
+                    )
+                        .set_thumbnail(poke_img)
+                        .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
+                        .add_field(name="Mystic:", value=", ".join(user for user in new_mystic_present), inline=False)
+                        .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
+                        .add_field(name="Remote:", value=", ".join(user for user in remote_present), inline=False)
                 )
-                    .set_author(name=boss, icon=poke_img)
-                    .set_footer(
-                    text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
-                )
-                    .set_thumbnail(poke_img)
-                    .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
-                    .add_field(name="Mystic:", value=", ".join(user for user in new_mystic_present), inline=False)
-                    .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                    .add_field(name="Remote:", value=", ".join(user for user in remote_present), inline=False)
-            )
-            
-            try:
-                raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
-                await raid_message_to_edit.edit(embed=embed)
-            except hikari.NotFoundError:
-                pass
+                
+                try:
+                    raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
+                    await raid_message_to_edit.edit(embed=embed)
+                except hikari.NotFoundError:
+                    pass
 
-        if event.emoji_name == "Valor":
-            if instinct_present is None:
-                instinct_present = "\u200b"
-            else: 
-                instinct_present = instinct_present.split(",")
-            if mystic_present is None:
-                mystic_present = "\u200b"
-            else: 
-                mystic_present = mystic_present.split(",")
-            if valor_present is None:
-                new_valor_present = "\u200b"
-            else: 
-                valor_present_list = valor_present.split(",")
-                valor_present_list.remove(member.username)
-                if valor_present_list == []:
+            if event.emoji_name == "Valor":
+                if instinct_present is None:
+                    instinct_present = "\u200b"
+                else: 
+                    instinct_present = instinct_present.split(",")
+                if mystic_present is None:
+                    mystic_present = "\u200b"
+                else: 
+                    mystic_present = mystic_present.split(",")
+                if valor_present is None:
                     new_valor_present = "\u200b"
-                else:
-                    new_valor_present = valor_present_list
-            if remote_present is None:
-                remote_present = "\u200b"
-            else: 
-                remote_present = remote_present.split(",")
-            
-            # UPDATE DATABASE
-            database = await DatabaseHandler.acquire_database()
-            async with database.acquire() as conn:
-                async with conn.transaction():
-                    new_total_attendees = total_attendees - 1
-                    valor_present_to_set = "'" + ",".join(user for user in new_valor_present) + "'"
-                    update_raid = f'UPDATE "Raid-Events" SET valor_present = {valor_present_to_set}, total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
-                    await conn.fetch(update_raid)
-            await database.close()
+                else: 
+                    valor_present_list = valor_present.split(",")
+                    valor_present_list.remove(member.username)
+                    if valor_present_list == []:
+                        new_valor_present = "\u200b"
+                    else:
+                        new_valor_present = valor_present_list
+                if remote_present is None:
+                    remote_present = "\u200b"
+                else: 
+                    remote_present = remote_present.split(",")
+                
+                # UPDATE DATABASE
+                database = await DatabaseHandler.acquire_database()
+                async with database.acquire() as conn:
+                    async with conn.transaction():
+                        new_total_attendees = total_attendees - 1
+                        valor_present_to_set = "'" + ",".join(user for user in new_valor_present) + "'"
+                        update_raid = f'UPDATE "Raid-Events" SET valor_present = {valor_present_to_set}, total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
+                        await conn.fetch(update_raid)
+                await database.close()
 
-            location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-            success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
+                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
 
-            # EDIT MESSAGE
-            embed = (
-                hikari.Embed(
-                    description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                # EDIT MESSAGE
+                embed = (
+                    hikari.Embed(
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                    )
+                        .set_author(name=boss, icon=poke_img)
+                        .set_footer(
+                        text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
+                    )
+                        .set_thumbnail(poke_img)
+                        .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
+                        .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
+                        .add_field(name="Valor:", value=", ".join(user for user in new_valor_present), inline=False)
+                        .add_field(name="Remote:", value=", ".join(user for user in remote_present), inline=False)
                 )
-                    .set_author(name=boss, icon=poke_img)
-                    .set_footer(
-                    text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
-                )
-                    .set_thumbnail(poke_img)
-                    .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
-                    .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
-                    .add_field(name="Valor:", value=", ".join(user for user in new_valor_present), inline=False)
-                    .add_field(name="Remote:", value=", ".join(user for user in remote_present), inline=False)
-            )
-            
-            try:
-                raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
-                await raid_message_to_edit.edit(embed=embed)
-            except hikari.NotFoundError:
-                pass
+                
+                try:
+                    raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
+                    await raid_message_to_edit.edit(embed=embed)
+                except hikari.NotFoundError:
+                    pass
 
-        if event.emoji_name == "🇷":
-            if instinct_present is None:
-                instinct_present = "\u200b"
-            else: 
-                instinct_present = instinct_present.split(",")
-            if mystic_present is None:
-                mystic_present = "\u200b"
-            else: 
-                mystic_present = mystic_present.split(",")
-            if valor_present is None:
-                valor_present = "\u200b"
-            else: 
-                valor_present = valor_present.split(",")
-            if remote_present is None:
-                new_remote_present = "\u200b"
-            else: 
-                remote_present_list = remote_present.split(",")
-                remote_present_list.remove(member.username)
-                if remote_present_list == []:
+            if event.emoji_name == "🇷":
+                if instinct_present is None:
+                    instinct_present = "\u200b"
+                else: 
+                    instinct_present = instinct_present.split(",")
+                if mystic_present is None:
+                    mystic_present = "\u200b"
+                else: 
+                    mystic_present = mystic_present.split(",")
+                if valor_present is None:
+                    valor_present = "\u200b"
+                else: 
+                    valor_present = valor_present.split(",")
+                if remote_present is None:
                     new_remote_present = "\u200b"
-                else:
-                    new_remote_present = remote_present_list
+                else: 
+                    remote_present_list = remote_present.split(",")
+                    remote_present_list.remove(member.username)
+                    if remote_present_list == []:
+                        new_remote_present = "\u200b"
+                    else:
+                        new_remote_present = remote_present_list
 
-            
-            # UPDATE DATABASE
-            database = await DatabaseHandler.acquire_database()
-            async with database.acquire() as conn:
-                async with conn.transaction():
-                    new_total_attendees = total_attendees - 1
-                    remote_present_to_set = "'" + ",".join(user for user in new_remote_present) + "'"
-                    update_raid = f'UPDATE "Raid-Events" SET remote_present = {remote_present_to_set}, total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
-                    await conn.fetch(update_raid)
-            await database.close()
+                
+                # UPDATE DATABASE
+                database = await DatabaseHandler.acquire_database()
+                async with database.acquire() as conn:
+                    async with conn.transaction():
+                        new_total_attendees = total_attendees - 1
+                        remote_present_to_set = "'" + ",".join(user for user in new_remote_present) + "'"
+                        update_raid = f'UPDATE "Raid-Events" SET remote_present = {remote_present_to_set}, total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
+                        await conn.fetch(update_raid)
+                await database.close()
 
-            location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-            success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
+                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
 
-            # EDIT MESSAGE
-            embed = (
-                hikari.Embed(
-                    description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                # EDIT MESSAGE
+                embed = (
+                    hikari.Embed(
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                    )
+                        .set_author(name=boss, icon=poke_img)
+                        .set_footer(
+                        text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
+                    )
+                        .set_thumbnail(poke_img)
+                        .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
+                        .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
+                        .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
+                        .add_field(name="Remote:", value=", ".join(user for user in new_remote_present), inline=False)
                 )
-                    .set_author(name=boss, icon=poke_img)
-                    .set_footer(
-                    text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
+                
+                try:
+                    raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
+                    await raid_message_to_edit.edit(embed=embed)
+                except hikari.NotFoundError:
+                    pass
+
+            if event.emoji_name == "1️⃣":
+                if instinct_present is None:
+                    instinct_present = "\u200b"
+                else: 
+                    instinct_present = instinct_present.split(",")
+                if mystic_present is None:
+                    mystic_present = "\u200b"
+                else: 
+                    mystic_present = mystic_present.split(",")
+                if valor_present is None:
+                    valor_present = "\u200b"
+                else: 
+                    valor_present = valor_present.split(",")
+                if remote_present is None:
+                    remote_present = "\u200b"
+                else: 
+                    remote_present = valor_present.split(",")
+                
+                # UPDATE DATABASE
+                database = await DatabaseHandler.acquire_database()
+                async with database.acquire() as conn:
+                    async with conn.transaction():
+                        new_total_attendees = total_attendees - 1
+                        update_raid = f'UPDATE "Raid-Events" SET total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
+                        await conn.fetch(update_raid)
+                await database.close()
+
+                location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
+                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+
+                # EDIT MESSAGE
+                embed = (
+                    hikari.Embed(
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                    )
+                        .set_author(name=boss, icon=poke_img)
+                        .set_footer(
+                        text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
+                    )
+                        .set_thumbnail(poke_img)
+                        .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
+                        .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
+                        .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
+                        .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
                 )
-                    .set_thumbnail(poke_img)
-                    .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
-                    .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
-                    .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                    .add_field(name="Remote:", value=", ".join(user for user in new_remote_present), inline=False)
-            )
-            
-            try:
-                raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
-                await raid_message_to_edit.edit(embed=embed)
-            except hikari.NotFoundError:
-                pass
+                
+                try:
+                    raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
+                    await raid_message_to_edit.edit(embed=embed)
+                except hikari.NotFoundError:
+                    pass
 
-        if event.emoji_name == "1️⃣":
-            if instinct_present is None:
-                instinct_present = "\u200b"
-            else: 
-                instinct_present = instinct_present.split(",")
-            if mystic_present is None:
-                mystic_present = "\u200b"
-            else: 
-                mystic_present = mystic_present.split(",")
-            if valor_present is None:
-                valor_present = "\u200b"
-            else: 
-                valor_present = valor_present.split(",")
-            if remote_present is None:
-                remote_present = "\u200b"
-            else: 
-                remote_present = valor_present.split(",")
-            
-            # UPDATE DATABASE
-            database = await DatabaseHandler.acquire_database()
-            async with database.acquire() as conn:
-                async with conn.transaction():
-                    new_total_attendees = total_attendees - 1
-                    update_raid = f'UPDATE "Raid-Events" SET total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
-                    await conn.fetch(update_raid)
-            await database.close()
+            if event.emoji_name == "2️⃣":
+                if instinct_present is None:
+                    instinct_present = "\u200b"
+                else: 
+                    instinct_present = instinct_present.split(",")
+                if mystic_present is None:
+                    mystic_present = "\u200b"
+                else: 
+                    mystic_present = mystic_present.split(",")
+                if valor_present is None:
+                    valor_present = "\u200b"
+                else: 
+                    valor_present = valor_present.split(",")
+                if remote_present is None:
+                    remote_present = "\u200b"
+                else: 
+                    remote_present = valor_present.split(",")
+                
+                # UPDATE DATABASE
+                database = await DatabaseHandler.acquire_database()
+                async with database.acquire() as conn:
+                    async with conn.transaction():
+                        new_total_attendees = total_attendees - 2
+                        update_raid = f'UPDATE "Raid-Events" SET total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
+                        await conn.fetch(update_raid)
+                await database.close()
 
-            location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-            success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
+                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
 
-            # EDIT MESSAGE
-            embed = (
-                hikari.Embed(
-                    description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                # EDIT MESSAGE
+                embed = (
+                    hikari.Embed(
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                    )
+                        .set_author(name=boss, icon=poke_img)
+                        .set_footer(
+                        text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
+                    )
+                        .set_thumbnail(poke_img)
+                        .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
+                        .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
+                        .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
+                        .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
                 )
-                    .set_author(name=boss, icon=poke_img)
-                    .set_footer(
-                    text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
+                
+                try:
+                    raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
+                    await raid_message_to_edit.edit(embed=embed)
+                except hikari.NotFoundError:
+                    pass
+
+            if event.emoji_name == "3️⃣":
+                if instinct_present is None:
+                    instinct_present = "\u200b"
+                else: 
+                    instinct_present = instinct_present.split(",")
+                if mystic_present is None:
+                    mystic_present = "\u200b"
+                else: 
+                    mystic_present = mystic_present.split(",")
+                if valor_present is None:
+                    valor_present = "\u200b"
+                else: 
+                    valor_present = valor_present.split(",")
+                if remote_present is None:
+                    remote_present = "\u200b"
+                else: 
+                    remote_present = valor_present.split(",")
+                
+                # UPDATE DATABASE
+                database = await DatabaseHandler.acquire_database()
+                async with database.acquire() as conn:
+                    async with conn.transaction():
+                        new_total_attendees = total_attendees - 3
+                        update_raid = f'UPDATE "Raid-Events" SET total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
+                        await conn.fetch(update_raid)
+                await database.close()
+
+                location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
+                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+
+                # EDIT MESSAGE
+                embed = (
+                    hikari.Embed(
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                    )
+                        .set_author(name=boss, icon=poke_img)
+                        .set_footer(
+                        text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
+                    )
+                        .set_thumbnail(poke_img)
+                        .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
+                        .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
+                        .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
+                        .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
                 )
-                    .set_thumbnail(poke_img)
-                    .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
-                    .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
-                    .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                    .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
-            )
-            
-            try:
-                raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
-                await raid_message_to_edit.edit(embed=embed)
-            except hikari.NotFoundError:
-                pass
-
-        if event.emoji_name == "2️⃣":
-            if instinct_present is None:
-                instinct_present = "\u200b"
-            else: 
-                instinct_present = instinct_present.split(",")
-            if mystic_present is None:
-                mystic_present = "\u200b"
-            else: 
-                mystic_present = mystic_present.split(",")
-            if valor_present is None:
-                valor_present = "\u200b"
-            else: 
-                valor_present = valor_present.split(",")
-            if remote_present is None:
-                remote_present = "\u200b"
-            else: 
-                remote_present = valor_present.split(",")
-            
-            # UPDATE DATABASE
-            database = await DatabaseHandler.acquire_database()
-            async with database.acquire() as conn:
-                async with conn.transaction():
-                    new_total_attendees = total_attendees - 2
-                    update_raid = f'UPDATE "Raid-Events" SET total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
-                    await conn.fetch(update_raid)
-            await database.close()
-
-            location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-            success, poke_img = await pokemon.get_pokemon_img(boss=boss)
-
-            # EDIT MESSAGE
-            embed = (
-                hikari.Embed(
-                    description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
-                )
-                    .set_author(name=boss, icon=poke_img)
-                    .set_footer(
-                    text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
-                )
-                    .set_thumbnail(poke_img)
-                    .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
-                    .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
-                    .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                    .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
-            )
-            
-            try:
-                raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
-                await raid_message_to_edit.edit(embed=embed)
-            except hikari.NotFoundError:
-                pass
-
-        if event.emoji_name == "3️⃣":
-            if instinct_present is None:
-                instinct_present = "\u200b"
-            else: 
-                instinct_present = instinct_present.split(",")
-            if mystic_present is None:
-                mystic_present = "\u200b"
-            else: 
-                mystic_present = mystic_present.split(",")
-            if valor_present is None:
-                valor_present = "\u200b"
-            else: 
-                valor_present = valor_present.split(",")
-            if remote_present is None:
-                remote_present = "\u200b"
-            else: 
-                remote_present = valor_present.split(",")
-            
-            # UPDATE DATABASE
-            database = await DatabaseHandler.acquire_database()
-            async with database.acquire() as conn:
-                async with conn.transaction():
-                    new_total_attendees = total_attendees - 3
-                    update_raid = f'UPDATE "Raid-Events" SET total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
-                    await conn.fetch(update_raid)
-            await database.close()
-
-            location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-            success, poke_img = await pokemon.get_pokemon_img(boss=boss)
-
-            # EDIT MESSAGE
-            embed = (
-                hikari.Embed(
-                    description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
-                )
-                    .set_author(name=boss, icon=poke_img)
-                    .set_footer(
-                    text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
-                )
-                    .set_thumbnail(poke_img)
-                    .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
-                    .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
-                    .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                    .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
-            )
-            
-            try:
-                raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
-                await raid_message_to_edit.edit(embed=embed)
-            except hikari.NotFoundError:
-                pass
+                
+                try:
+                    raid_message_to_edit = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
+                    await raid_message_to_edit.edit(embed=embed)
+                except hikari.NotFoundError:
+                    pass
 
 
 # ------------------------------------------------------------------------- #
