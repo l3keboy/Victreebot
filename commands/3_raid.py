@@ -413,10 +413,10 @@ async def command_raid_edit(ctx: tanjun.abc.Context, raid_type, raid_id, new_typ
             text=lang.raid_embed_footer.format(member=await ctx.rest.fetch_member(ctx.guild_id, user_id), attendees=total_attendees),
         )
             .set_thumbnail(poke_img)
-            .add_field(name="Instinct:", value=",".join(user for user in instinct_present), inline=False)
-            .add_field(name="Mystic:", value=",".join(user for user in mystic_present), inline=False)
-            .add_field(name="Valor:", value=",".join(user for user in valor_present), inline=False)
-            .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
+            .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
+            .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
+            .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
+            .add_field(name="Remote:", value=", ".join(user for user in remote_present), inline=False)
     )
     
     try:
@@ -510,7 +510,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                         .add_field(name="Instinct:", value=", ".join(user for user in new_instinct_present), inline=False)
                         .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
                         .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                        .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
+                        .add_field(name="Remote:", value=", ".join(user for user in remote_present), inline=False)
                 )
                 
                 try:
@@ -569,7 +569,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                         .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
                         .add_field(name="Mystic:", value=", ".join(user for user in new_mystic_present), inline=False)
                         .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                        .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
+                        .add_field(name="Remote:", value=", ".join(user for user in remote_present), inline=False)
                 )
                 
                 try:
@@ -628,7 +628,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                         .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
                         .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
                         .add_field(name="Valor:", value=", ".join(user for user in new_valor_present), inline=False)
-                        .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
+                        .add_field(name="Remote:", value=", ".join(user for user in remote_present), inline=False)
                 )
                 
                 try:
@@ -687,7 +687,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                         .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
                         .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
                         .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                        .add_field(name="Remote:", value=",".join(user for user in new_remote_present), inline=False)
+                        .add_field(name="Remote:", value=", ".join(user for user in new_remote_present), inline=False)
                 )
                 
                 try:
@@ -739,7 +739,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                         .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
                         .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
                         .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                        .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
+                        .add_field(name="Remote:", value=", ".join(user for user in remote_present), inline=False)
                 )
                 
                 try:
@@ -791,7 +791,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                         .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
                         .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
                         .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                        .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
+                        .add_field(name="Remote:", value=", ".join(user for user in remote_present), inline=False)
                 )
                 
                 try:
@@ -843,7 +843,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                         .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
                         .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
                         .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                        .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
+                        .add_field(name="Remote:", value=", ".join(user for user in remote_present), inline=False)
                 )
                 
                 try:
@@ -1115,7 +1115,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                 if remote_present is None:
                     remote_present = "\u200b"
                 else: 
-                    remote_present = valor_present.split(",")
+                    remote_present = remote_present.split(",")
                 
                 # UPDATE DATABASE
                 database = await DatabaseHandler.acquire_database()
@@ -1142,7 +1142,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                         .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
                         .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
                         .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                        .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
+                        .add_field(name="Remote:", value=", ".join(user for user in remote_present), inline=False)
                 )
                 
                 try:
@@ -1167,7 +1167,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                 if remote_present is None:
                     remote_present = "\u200b"
                 else: 
-                    remote_present = valor_present.split(",")
+                    remote_present = remote_present.split(",")
                 
                 # UPDATE DATABASE
                 database = await DatabaseHandler.acquire_database()
@@ -1194,7 +1194,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                         .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
                         .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
                         .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                        .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
+                        .add_field(name="Remote:", value=", ".join(user for user in remote_present), inline=False)
                 )
                 
                 try:
@@ -1219,7 +1219,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                 if remote_present is None:
                     remote_present = "\u200b"
                 else: 
-                    remote_present = valor_present.split(",")
+                    remote_present = remote_present.split(",")
                 
                 # UPDATE DATABASE
                 database = await DatabaseHandler.acquire_database()
@@ -1246,7 +1246,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                         .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
                         .add_field(name="Mystic:", value=", ".join(user for user in mystic_present), inline=False)
                         .add_field(name="Valor:", value=", ".join(user for user in valor_present), inline=False)
-                        .add_field(name="Remote:", value=",".join(user for user in remote_present), inline=False)
+                        .add_field(name="Remote:", value=", ".join(user for user in remote_present), inline=False)
                 )
                 
                 try:
