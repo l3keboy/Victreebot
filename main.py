@@ -109,9 +109,13 @@ class Bot(hikari.GatewayBot):
         await self.check_for_updates()
         await self.get_active_servers(event)
 
-        AsyncIOScheduler().add_job(self.check_for_updates, 'cron', day_of_week='mon-sun', hour=3)
-        AsyncIOScheduler().add_job(self.get_active_servers, 'interval', [event], hours=6)
-        AsyncIOScheduler().start()
+        schedule_update = AsyncIOScheduler()
+        schedule_update.add_job(self.check_for_updates, 'cron', day_of_week='mon-sun', hour=3)
+        schedule_update.start()
+
+        schedule_active_servers = AsyncIOScheduler()
+        schedule_active_servers.add_job(self.get_active_servers, 'interval', [event], hours=6)
+        schedule_active_servers.start()
 
 
 # ------------------------------------------------------------------------- #
