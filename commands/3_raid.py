@@ -456,6 +456,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
     else:
         success, raid_id, created_at, raid_type, guild_id, channel_id, message_id, user_id, boss, location, time, date, instinct_present, mystic_present, valor_present, remote_present, total_attendees = await get_raid.get_raid_by_guild_channel_message(guild_id=event.guild_id, channel_id=event.channel_id, message_id=event.message_id)
         if success:
+            raid_owner = await event.app.rest.fetch_user(user_id)
             if total_attendees is None:
                 total_attendees = 0
 
@@ -503,7 +504,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
-                        text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
+                        text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
                     )
                         .set_thumbnail(poke_img)
                         .add_field(name="Instinct:", value=", ".join(user for user in new_instinct_present), inline=False)
@@ -562,7 +563,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
-                        text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
+                        text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
                     )
                         .set_thumbnail(poke_img)
                         .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
@@ -621,7 +622,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
-                        text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
+                        text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
                     )
                         .set_thumbnail(poke_img)
                         .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
@@ -680,7 +681,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
-                        text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
+                        text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
                     )
                         .set_thumbnail(poke_img)
                         .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
@@ -732,7 +733,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
-                        text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
+                        text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
                     )
                         .set_thumbnail(poke_img)
                         .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
@@ -784,7 +785,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
-                        text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
+                        text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
                     )
                         .set_thumbnail(poke_img)
                         .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
@@ -836,7 +837,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
-                        text=lang.raid_embed_footer.format(member=event.member.display_name, attendees=new_total_attendees),
+                        text=lang.raid_embed_footer.format(member=raid_owner.username, attendees=new_total_attendees),
                     )
                         .set_thumbnail(poke_img)
                         .add_field(name="Instinct:", value=", ".join(user for user in instinct_present), inline=False)
