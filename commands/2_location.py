@@ -78,7 +78,6 @@ location_component = tanjun.Component().add_slash_command(location_group)
 
 
 @location_group.with_command
-@tanjun.with_author_permission_check(hikari.Permissions.MANAGE_GUILD)
 @tanjun.with_float_slash_option("longitude", "The longitude of the location.")
 @tanjun.with_float_slash_option("latitude", "The latitude of the location.")
 @tanjun.with_str_slash_option("name", "The name of the location.")
@@ -138,7 +137,6 @@ async def command_location_create(ctx: tanjun.abc.Context, location_type, name, 
             LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
 
 @location_group.with_command
-@tanjun.with_author_permission_check(hikari.Permissions.MANAGE_GUILD)
 @tanjun.with_str_slash_option("name", "The name of the location.")
 @tanjun.with_str_slash_option("location_type", "The type of the location.", choices=["Gym", "Pokéstop"])
 @tanjun.as_slash_command("delete", "Delete a location.")
@@ -181,7 +179,6 @@ async def command_location_delete(ctx: tanjun.abc.Context, location_type, name):
             LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
 
 @location_group.with_command
-@tanjun.with_author_permission_check(hikari.Permissions.MANAGE_GUILD)
 @tanjun.with_str_slash_option("name", "The name of the location. No arguments will show a list of all location types", default=None)
 @tanjun.with_str_slash_option("location_type", "The type of the location.", choices=["Gym", "Pokéstop"])
 @tanjun.as_slash_command("info", "Get info about location.")
