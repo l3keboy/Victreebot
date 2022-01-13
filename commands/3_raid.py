@@ -17,7 +17,7 @@ import tanjun
 import asyncio
 import uuid
 import datetime
-import pytz
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 # Own Files
 from utils import DatabaseHandler, LoggingHandler
 from utils.functions import get_raid, get_settings, pokemon, validate
@@ -30,6 +30,66 @@ load_dotenv()
 BOT_NAME = os.getenv("BOT_NAME")
 
 component = tanjun.Component()
+
+
+# ------------------------------------------------------------------------- #
+# FUNCTIONS COMMANDS #
+# ------------------------------------------------------------------------- #
+async def check_old_raids(event):
+    LoggingHandler.LoggingHandler().logger_victreebot_raid_channel.info(f"Check_old_raids started.....")
+    database = await DatabaseHandler.acquire_database()
+    async with database.acquire() as conn:
+        async with conn.transaction():
+            interval = "'3 hours'"
+            get_old_raids = f'SELECT * FROM "Raid-Events" WHERE created_at < current_timestamp - INTERVAL {interval}'
+            fetched_old_raids = await conn.fetch(get_old_raids)
+            if fetched_old_raids == []:
+                LoggingHandler.LoggingHandler().logger_victreebot_raid_channel.info(f"Check_old_raids finished..... No old raids found, checking again in 5 minutes")
+                return
+    await database.close()
+
+    index = 0
+    total_number_old_raids = len(fetched_old_raids)
+
+    while index < total_number_old_raids:
+        try:
+            raid_id = fetched_old_raids[index].get("id")
+            created_at = fetched_old_raids[index].get("created_at")
+            raid_type = fetched_old_raids[index].get("type")
+            guild_id = fetched_old_raids[index].get("guild_id")
+            channel_id = fetched_old_raids[index].get("channel_id")
+            message_id = fetched_old_raids[index].get("message_id")
+            user_id = fetched_old_raids[index].get("user_id")
+            boss = fetched_old_raids[index].get("boss")
+            location = fetched_old_raids[index].get("location")
+            time = fetched_old_raids[index].get("time")
+            date = fetched_old_raids[index].get("date")
+            instinct_present = fetched_old_raids[index].get("instinct_present")
+            mystic_present = fetched_old_raids[index].get("mystic_present")
+            valor_present = fetched_old_raids[index].get("valor_present")
+            remote_present = fetched_old_raids[index].get("remote_present")
+            total_attendees = fetched_old_raids[index].get("total_attendees")
+        except IndexError as e:
+            LoggingHandler().logger_victreebot_database.error(f"Index error while trying to get all old raids -- Function: check_old_raids -- Location: /commands/3_raid.py!")
+            return
+
+        database = await DatabaseHandler.acquire_database()
+        async with database.acquire() as conn:
+            async with conn.transaction():
+                id_to_delete = "'" + str(raid_id) + "'" 
+                delete_raid = f'DELETE FROM "Raid-Events" WHERE id = {id_to_delete} AND guild_id = {guild_id}'
+                await conn.fetch(delete_raid)
+        await database.close()
+
+        try:
+            raid_message = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
+            await raid_message.delete()
+        except hikari.NotFoundError:
+            LoggingHandler.LoggingHandler().logger_victreebot_raid_channel.error(f"Unable to find old raid message -- Function: check_old_raids -- Location: /commands/3_raid.py!")
+
+        index += 1
+
+    LoggingHandler.LoggingHandler().logger_victreebot_raid_channel.info(f"Check_old_raids finished..... deleted {index-1} old raids")
 
 
 # ------------------------------------------------------------------------- #
@@ -98,10 +158,6 @@ async def command_raid_create(ctx: tanjun.abc.Context, raid_type, boss, location
     # GENERATE ID
     raid_id = str(uuid.uuid4())[:8]
 
-    # GET TIMESTAMP IN SERVERS TIMEZONE
-    timezone = pytz.timezone(f"Etc/{gmt}")
-    timestamp = datetime.datetime.now(timezone).strftime("%d-%m-%Y %H:%M")
-
     # SEND EMBED TO RAID CHANNEL
     emojis = await ctx.rest.fetch_guild_emojis(ctx.guild_id)
     emoji_list = []
@@ -142,13 +198,12 @@ async def command_raid_create(ctx: tanjun.abc.Context, raid_type, boss, location
         async with conn.transaction():
             try:
                 id_to_set = "'" + str(raid_id) + "'" 
-                timestamp_to_set = "'" + str(timestamp) + "'"
                 type_to_set = "'" + raid_type + "'"
                 boss_to_set = "'" + boss + "'"
                 location_to_set = "'" + location + "'"
                 time_to_set = "'" + time + "'"
                 date_to_set = "'" + date + "'"
-                add_raid = f'INSERT INTO "Raid-Events" (id, created_at, type, guild_id, channel_id, message_id, user_id, boss, location, time, date, instinct_present, mystic_present, valor_present, remote_present, total_attendees) VALUES ({id_to_set}, {timestamp_to_set}, {type_to_set}, {ctx.guild_id}, {raid_message.channel_id}, {raid_message.id}, {ctx.member.id}, {boss_to_set}, {location_to_set}, {time_to_set}, {date_to_set}, NULL, NULL, NULL, NULL, {0})'
+                add_raid = f'INSERT INTO "Raid-Events" (id, type, guild_id, channel_id, message_id, user_id, boss, location, time, date, instinct_present, mystic_present, valor_present, remote_present, total_attendees) VALUES ({id_to_set}, {type_to_set}, {ctx.guild_id}, {raid_message.channel_id}, {raid_message.id}, {ctx.member.id}, {boss_to_set}, {location_to_set}, {time_to_set}, {date_to_set}, NULL, NULL, NULL, NULL, {0})'
                 await conn.fetch(add_raid)
                 database_success = True
             except asyncpg.exceptions.UniqueViolationError:
@@ -184,20 +239,6 @@ async def command_raid_create(ctx: tanjun.abc.Context, raid_type, boss, location
         await message.delete()
     except Exception as e:
         LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to respond to create init message! Got error: {e}")
-
-    await asyncio.sleep(7200)
-    try:
-        await raid_message.delete()
-    except hikari.NotFoundError:
-        pass
-
-    database = await DatabaseHandler.acquire_database()
-    async with database.acquire() as conn:
-        async with conn.transaction():
-            id_to_delete = "'" + str(raid_id) + "'" 
-            delete_raid = f'DELETE FROM "Raid-Events" WHERE id = {id_to_delete} AND guild_id = {ctx.guild_id}'
-            await conn.fetch(delete_raid)
-    await database.close()
 
 @raid_group.with_command
 @tanjun.with_str_slash_option("raid_id", "The ID of the raid to delete")
@@ -1256,6 +1297,14 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                     pass
 
 
+async def on_started(event: hikari.Event):
+    await check_old_raids(event)
+
+    schedule_check_old_raid = AsyncIOScheduler()
+    schedule_check_old_raid.add_job(check_old_raids, 'interval', [event], minutes=5)
+    schedule_check_old_raid.start()
+
+
 # ------------------------------------------------------------------------- #
 # INITIALIZE #
 # ------------------------------------------------------------------------- #
@@ -1265,3 +1314,4 @@ def load_component(client: tanjun.abc.Client) -> None:
     client.add_component(raid_component.copy())
     client.events.subscribe(hikari.GuildReactionAddEvent, on_guild_reaction_add)
     client.events.subscribe(hikari.GuildReactionDeleteEvent, on_guild_reaction_delete)
+    client.events.subscribe(hikari.StartedEvent, on_started)
