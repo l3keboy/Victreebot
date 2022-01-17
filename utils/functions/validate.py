@@ -22,6 +22,8 @@ async def __latitude_longitude_check(latitude, longitude):
     valid_latitude = False
     valid_longitude = False
 
+    print(latitude, longitude)
+
     if latitude >= -90 and latitude <= 90:
         valid_latitude = True
     else:

@@ -92,6 +92,7 @@ async def command_location_create(ctx: tanjun.abc.Context, location_type, name, 
         return
 
     # VALIDATE LATITUDE LONGITUDE
+    print(latitude, longitude)
     valid_latitude, valid_longitude = await validate.__latitude_longitude_check(latitude=latitude, longitude=longitude)
     if not valid_latitude:
         response = lang.error_latitude_invalid.format(latitude=latitude)
@@ -179,7 +180,7 @@ async def command_location_delete(ctx: tanjun.abc.Context, location_type, name):
             LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
 
 @location_group.with_command
-@tanjun.with_str_slash_option("name", "The name of the location. No arguments will show a list of all location types", default=None)
+@tanjun.with_str_slash_option("name", "The name of the location. No arguments will show a list of all location types.", default=None)
 @tanjun.with_str_slash_option("location_type", "The type of the location.", choices=["Gym", "Pokéstop"])
 @tanjun.as_slash_command("info", "Get info about location.")
 async def command_location_info(ctx: tanjun.abc.Context, location_type, name):

@@ -12,8 +12,6 @@ import asyncpg
 from dotenv import load_dotenv
 # Hikari
 import hikari
-from hikari.events.guild_events import GuildLeaveEvent
-from pokebase.loaders import language
 import tanjun
 # Functionality
 import asyncio
@@ -239,7 +237,7 @@ async def command_settings_raids_channel(ctx: tanjun.abc.Context, channel):
 
 @settings_group.with_command
 @tanjun.with_author_permission_check(hikari.Permissions.MANAGE_GUILD)
-@tanjun.with_channel_slash_option("channel", "The channel to set as log channel. If no argument is given, the channel will be set to None", default=None)
+@tanjun.with_channel_slash_option("channel", "The channel to set as log channel. If no argument is given, the channel will be set to None.", default=None)
 @tanjun.as_slash_command("log_channel", "Set the channel to which logs will be posted (including changes to raids).")
 async def command_settings_log_channel(ctx: tanjun.abc.Context, channel):
     try:
@@ -321,20 +319,20 @@ async def on_guild_join(event: hikari.GuildJoinEvent):
     for emoji in all_server_emojis:
         if emoji.name == "Instinct" or emoji.name == "Mystic" or emoji.name == "Valor":
             try:
-                await event.app.rest.delete_emoji(event.guild_id, emoji=emoji.id, reason="Victree on_guild_join Handler -- Re-ïnstall")
+                await event.app.rest.delete_emoji(event.guild_id, emoji=emoji.id, reason="VictreeBot on_guild_join Handler -- Re-ïnstall")
             except hikari.ForbiddenError as e:
                 LoggingHandler.LoggingHandler().logger_victreebot_join_handler.error(f"Permission error in guild: {event.guild_id}! Function: on_guild_join/emojis-delete -- Location: /commands/1_settings.py! Error: {e}")
 
     try:
         with open(Path("./img/emoji/instinct.png"), "rb") as image:
             instinct_image_bytes = image.read()
-            instinct_emoji = await event.app.rest.create_emoji(guild=event.guild_id, name="Instinct", image=instinct_image_bytes, reason="Victree on_guild_join Handler -- Install")
+            instinct_emoji = await event.app.rest.create_emoji(guild=event.guild_id, name="Instinct", image=instinct_image_bytes, reason="VictreeBot on_guild_join Handler -- Install")
         with open(Path("./img/emoji/mystic.png"), "rb") as image:
             mystic_image_bytes = image.read()
-            mystic_emoji = await event.app.rest.create_emoji(guild=event.guild_id, name="Mystic", image=mystic_image_bytes, reason="Victree on_guild_join Handler -- Install")
+            mystic_emoji = await event.app.rest.create_emoji(guild=event.guild_id, name="Mystic", image=mystic_image_bytes, reason="VictreeBot on_guild_join Handler -- Install")
         with open(Path("./img/emoji/valor.png"), "rb") as image:
             valor_image_bytes = image.read()
-            valor_emoji = await event.app.rest.create_emoji(guild=event.guild_id, name="Valor", image=valor_image_bytes, reason="Victree on_guild_join Handler -- Install")
+            valor_emoji = await event.app.rest.create_emoji(guild=event.guild_id, name="Valor", image=valor_image_bytes, reason="VictreeBot on_guild_join Handler -- Install")
     except hikari.ForbiddenError as e:
         LoggingHandler.LoggingHandler().logger_victreebot_join_handler.error(f"Permission error in guild: {event.guild_id}! Function: on_guild_join/emojis-create -- Location: /commands/1_settings.py! Error: {e}")
 
@@ -354,7 +352,7 @@ async def on_guild_join(event: hikari.GuildJoinEvent):
         elif role.name == "Valor":
             valor_exists = True
             valor_role = role
-        elif role.name == "Victree Moderator":
+        elif role.name == "VictreeBot Moderator":
             moderator_role_exists = True
             moderator_role = role
         else:
@@ -362,13 +360,13 @@ async def on_guild_join(event: hikari.GuildJoinEvent):
 
     try:
         if not instinct_exists:
-            instinct_role = await event.app.rest.create_role(event.guild_id, name="Instinct", color=hikari.Colour(0xfdff00), reason="Victree on_guild_join Handler -- Install")
+            instinct_role = await event.app.rest.create_role(event.guild_id, name="Instinct", color=hikari.Colour(0xfdff00), reason="VictreeBot on_guild_join Handler -- Install")
         if not mystic_exists:
-            mystic_role = await event.app.rest.create_role(event.guild_id, name="Mystic", color=hikari.Colour(0x2a6ceb), reason="Victree on_guild_join Handler -- Install")
+            mystic_role = await event.app.rest.create_role(event.guild_id, name="Mystic", color=hikari.Colour(0x2a6ceb), reason="VictreeBot on_guild_join Handler -- Install")
         if not valor_exists:
-            valor_role = await event.app.rest.create_role(event.guild_id, name="Valor", color=hikari.Colour(0xff0000), reason="Victree on_guild_join Handler -- Install")
+            valor_role = await event.app.rest.create_role(event.guild_id, name="Valor", color=hikari.Colour(0xff0000), reason="VictreeBot on_guild_join Handler -- Install")
         if not moderator_role_exists:
-            moderator_role = await event.app.rest.create_role(event.guild_id, name="Victree Moderator", color=hikari.Colour(0xffa500), reason="Victree on_guild_join Handler -- Install")
+            moderator_role = await event.app.rest.create_role(event.guild_id, name="VictreeBot Moderator", color=hikari.Colour(0xffa500), reason="VictreeBot on_guild_join Handler -- Install")
     except hikari.ForbiddenError as e:
         LoggingHandler.LoggingHandler().logger_victreebot_join_handler.error(f"Permission error in guild: {event.guild_id}! Function: on_guild_join/roles-create -- Location: /commands/1_settings.py! Error: {e}")
 
@@ -377,10 +375,10 @@ async def on_guild_join(event: hikari.GuildJoinEvent):
     log_channel_exists = False
     all_channels = await event.app.rest.fetch_guild_channels(event.guild_id)
     for channel in all_channels:
-        if channel.name == "victree-raids-channel":
+        if channel.name == "victreebot-raids-channel":
             raids_channel = channel
             raids_channel_exists = True
-        elif channel.name == "victree-logs-channel":
+        elif channel.name == "victreebot-logs-channel":
             log_channel = channel
             log_channel_exists = True
         else:
@@ -388,9 +386,9 @@ async def on_guild_join(event: hikari.GuildJoinEvent):
 
     try:
         if not raids_channel_exists:
-            raids_channel = await event.app.rest.create_guild_text_channel(event.guild_id, name="victree-raids-channel", topic="Channel for the raids!", reason="Victree on_guild_join Handler -- Install")
+            raids_channel = await event.app.rest.create_guild_text_channel(event.guild_id, name="victreebot-raids-channel", topic="Channel for the raids!", reason="VictreeBot on_guild_join Handler -- Install")
         if not log_channel_exists:
-            log_channel = await event.app.rest.create_guild_text_channel(event.guild_id, name="victree-logs-channel", topic="Channel for the raids!", reason="Victree on_guild_join Handler -- Install")
+            log_channel = await event.app.rest.create_guild_text_channel(event.guild_id, name="victreebot-logs-channel", topic="Channel for the raids!", reason="VictreeBot on_guild_join Handler -- Install")
     except hikari.ForbiddenError as e:
         LoggingHandler.LoggingHandler().logger_victreebot_join_handler.error(f"Permission error in guild: {event.guild_id}! Function: on_guild_join/channel-create -- Location: /commands/1_settings.py! Error: {e}")
 
