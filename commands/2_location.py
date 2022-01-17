@@ -78,8 +78,8 @@ location_component = tanjun.Component().add_slash_command(location_group)
 
 
 @location_group.with_command
-@tanjun.with_float_slash_option("longitude", "The longitude of the location.")
-@tanjun.with_float_slash_option("latitude", "The latitude of the location.")
+@tanjun.with_str_slash_option("longitude", "The longitude of the location.")
+@tanjun.with_str_slash_option("latitude", "The latitude of the location.")
 @tanjun.with_str_slash_option("name", "The name of the location.")
 @tanjun.with_str_slash_option("location_type", "The type of the location.", choices=["Gym", "Pokéstop"])
 @tanjun.as_slash_command("create", "Create a location.")
@@ -90,9 +90,24 @@ async def command_location_create(ctx: tanjun.abc.Context, location_type, name, 
     except TypeError as e:
         LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
         return
+    
+    # VALIDATE FLOAT OF LATITUDE LONGITUDE
+    valid_float_latitude, valid_float_longitude = await validate.__float_latitude_longitude_check(latitude=latitude, longitude=longitude)
+    if not valid_float_latitude:
+        response = lang.error_float_latitude_invalid.format(latitude=latitude)
+        message = await ctx.respond(response, ensure_result=True)
+        await asyncio.sleep(auto_delete_time)
+        await message.delete()
+        return
+    if not valid_float_longitude:
+        response = lang.error_float_longitude_invalid.format(latitude=latitude)
+        message = await ctx.respond(response, ensure_result=True)
+        await asyncio.sleep(auto_delete_time)
+        await message.delete()
+        return
 
     # VALIDATE LATITUDE LONGITUDE
-    valid_latitude, valid_longitude = await validate.__latitude_longitude_check(latitude=latitude, longitude=longitude)
+    valid_latitude, valid_longitude = await validate.__latitude_longitude_check(latitude=float(latitude), longitude=float(longitude))
     if not valid_latitude:
         response = lang.error_latitude_invalid.format(latitude=latitude)
         message = await ctx.respond(response, ensure_result=True)
@@ -179,7 +194,7 @@ async def command_location_delete(ctx: tanjun.abc.Context, location_type, name):
             LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
 
 @location_group.with_command
-@tanjun.with_str_slash_option("name", "The name of the location. No arguments will show a list of all location types", default=None)
+@tanjun.with_str_slash_option("name", "The name of the location. No arguments will show a list of all location types.", default=None)
 @tanjun.with_str_slash_option("location_type", "The type of the location.", choices=["Gym", "Pokéstop"])
 @tanjun.as_slash_command("info", "Get info about location.")
 async def command_location_info(ctx: tanjun.abc.Context, location_type, name):

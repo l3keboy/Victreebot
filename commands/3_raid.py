@@ -89,7 +89,7 @@ async def check_old_raids(event):
 
         index += 1
 
-    LoggingHandler.LoggingHandler().logger_victreebot_raid_channel.info(f"Check_old_raids finished..... deleted {index-1} old raids")
+    LoggingHandler.LoggingHandler().logger_victreebot_raid_channel.info(f"Check_old_raids finished..... deleted {index} old raids")
 
 
 # ------------------------------------------------------------------------- #
@@ -102,7 +102,7 @@ raid_group = tanjun.slash_command_group("raid", f"Create/Delete/Get info about a
 raid_component = tanjun.Component().add_slash_command(raid_group)
 
 @raid_group.with_command
-@tanjun.with_str_slash_option("date", "The date the raid take place. MUST BE IN FORMAT: DD-MM-YYYY", default="Current date in your timezone")
+@tanjun.with_str_slash_option("date", "The date the raid take place. MUST BE IN FORMAT: DD-MM-YYYY!", default="Current date in your timezone")
 @tanjun.with_str_slash_option("time", "The time of the raid (f.e. 12:00). MUST BE IN FORMAT: HH:MM!")
 @tanjun.with_str_slash_option("location", "The location of the raid.")
 @tanjun.with_str_slash_option("boss", "The boss to fight.")
@@ -241,7 +241,7 @@ async def command_raid_create(ctx: tanjun.abc.Context, raid_type, boss, location
         LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to respond to create init message! Got error: {e}")
 
 @raid_group.with_command
-@tanjun.with_str_slash_option("raid_id", "The ID of the raid to delete")
+@tanjun.with_str_slash_option("raid_id", "The ID of the raid to delete.")
 @tanjun.with_str_slash_option("raid_type", "The type of the raid to delete.", choices=["Raid", "Mega-Raid", "EX-Raid"])
 @tanjun.as_slash_command("delete", "Delete a raid.")
 async def command_raid_delete(ctx: tanjun.abc.Context, raid_type, raid_id):
@@ -314,7 +314,7 @@ async def command_raid_delete(ctx: tanjun.abc.Context, raid_type, raid_id):
 @tanjun.with_str_slash_option("new_location", "New location. If no arguments are given, the location will not change!", default=None)
 @tanjun.with_str_slash_option("new_boss", "New boss. If no arguments are given, the boss will not change!", default=None)
 @tanjun.with_str_slash_option("new_type", "New type. If no arguments are given, the type will not change!", default=None, choices=["Raid", "Mega-Raid", "EX-Raid"])
-@tanjun.with_str_slash_option("raid_id", "The ID of the raid to edit")
+@tanjun.with_str_slash_option("raid_id", "The ID of the raid to edit.")
 @tanjun.with_str_slash_option("raid_type", "The type of the raid to edit.", choices=["Raid", "Mega-Raid", "EX-Raid"])
 @tanjun.as_slash_command("edit", "Edit a raid.")
 async def command_raid_edit(ctx: tanjun.abc.Context, raid_type, raid_id, new_type, new_boss, new_location, new_time, new_date):

@@ -80,6 +80,8 @@ raid_successfully_edited="The raid with id: `{id}` successfully edited!"
 # General
 error_command_in_development="The command: `{command}` is in development and will be added later. Your input: {input}!"
 # Validate
+error_float_latitude_invalid="I am sorry, the given `latitude` can't be converted to float!"
+error_float_longitude_invalid="I am sorry, the given `longitude` can't be converted to float!"
 error_latitude_invalid="I am sorry, the given `latitude` is invalid! Your input: `{latitude}`!"
 error_longitude_invalid="I am sorry, the given `longitude` is invalid! Your input: `{longitude}`!"
 # Pokemon

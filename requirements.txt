@@ -15,7 +15,7 @@ hikari-tanjun
 GitPython
 # Functionality
 pokebase
-pathlib
+pathlib2
 pyfiglet
 apscheduler
 datetime

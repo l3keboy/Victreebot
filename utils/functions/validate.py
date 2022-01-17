@@ -17,6 +17,25 @@ from utils import DatabaseHandler, LoggingHandler
 # ------------------------------------------------------------------------- #
 # LATITUDE LONGITUDE #
 # ------------------------------------------------------------------------- #
+# Validate float latitude and float longitude
+async def __float_latitude_longitude_check(latitude, longitude):
+    valid_float_latitude = False 
+    valid_float_longitude = False
+
+    try:
+        float(latitude)
+        valid_float_latitude = True
+    except Exception as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_validator.error("Invalid latitude given, text format not convertable to float!")
+
+    try:
+        float(longitude)
+        valid_float_longitude = True
+    except Exception as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_validator.error("Invalid longitude given, text format not convertable to float!")
+
+    return valid_float_latitude, valid_float_longitude
+
 # Validate latitude and longitude
 async def __latitude_longitude_check(latitude, longitude):
     valid_latitude = False
@@ -25,11 +44,12 @@ async def __latitude_longitude_check(latitude, longitude):
     if latitude >= -90 and latitude <= 90:
         valid_latitude = True
     else:
-        LoggingHandler.LoggingHandler().logger_victreebot_validator.error("Invalid latitude given!")
+        LoggingHandler.LoggingHandler().logger_victreebot_validator.error("Invalid latitude given, out of range float!")
+
     if longitude >= -180 and longitude <=180:
         valid_longitude = True
     else:
-        LoggingHandler.LoggingHandler().logger_victreebot_validator.error("Invalid longitude given!")
+        LoggingHandler.LoggingHandler().logger_victreebot_validator.error("Invalid longitude given, out of range float!")
 
     return valid_latitude, valid_longitude
 
