@@ -262,6 +262,21 @@ async def command_raid_delete(ctx: tanjun.abc.Context, raid_type, raid_id):
         await message.delete()
         return
 
+    # VALIDATE IF USER IS CREATOR OR MODERATOR
+    if not ctx.member.id == user_id:
+        if not moderator_role_id in ctx.member.role_ids:
+            try:
+                channel = await ctx.rest.fetch_channel(channel=log_channel_id)
+                await channel.send(lang.log_channel_raid_deletion_failed.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, raid_type=raid_type))
+            except Exception as e:
+                LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
+
+            response = lang.raid_unable_to_delete_not_creator_or_enough_permissions
+            message = await ctx.respond(response, ensure_result=True)
+            await asyncio.sleep(auto_delete_time)
+            await message.delete()
+            return
+
     # DELETE FROM DATABASE
     if not ctx.member.id == user_id:
         if not moderator_role_id in ctx.member.role_ids:
@@ -336,6 +351,8 @@ async def command_raid_edit(ctx: tanjun.abc.Context, raid_type, raid_id, new_typ
         return
 
     parameters = []
+
+    # VALIDATE IF USER IS CREATOR OR MODERATOR
     if not ctx.member.id == user_id:
         if not moderator_role_id in ctx.member.role_ids:
             try:
