@@ -101,6 +101,7 @@ async def check_old_raids(event):
 raid_group = tanjun.slash_command_group("raid", f"Create/Delete/Get info about a raid.")
 raid_component = tanjun.Component().add_slash_command(raid_group)
 
+
 @raid_group.with_command
 @tanjun.with_str_slash_option("date", "The date the raid take place. MUST BE IN FORMAT: DD-MM-YYYY!", default="Current date in your timezone")
 @tanjun.with_str_slash_option("time", "The time of the raid (f.e. 12:00). MUST BE IN FORMAT: HH:MM!")

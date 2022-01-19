@@ -14,7 +14,6 @@ import hikari
 import tanjun
 # Functionality
 import asyncio
-import math
 import datetime
 # Own Files
 from utils import LoggingHandler 

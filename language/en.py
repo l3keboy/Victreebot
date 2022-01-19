@@ -75,6 +75,28 @@ raid_unable_to_edit_not_creator_or_enough_permissions="You can't edit this raid 
 raid_successfully_edited="The raid with id: `{id}` successfully edited!"
 
 # ------------------------------------------------------------------------- #
+# 4_trade #
+# ------------------------------------------------------------------------- #
+trade_proposal_created=" created a trade proposal!"
+trade_proposal_embed_title="Trade proposal"
+trade_proposal_embed_description="Hello everyone!\n\n I am looking for `{pokémon_want}`!\n I have `{pokémon_have}` to offer!"
+trade_proposal_embed_footer="Trade proposed by: {member}. If you have any interest or would like to negotiate, please contact me!"
+trade_proposal_embed_offering="Offering Pokémon:"
+trade_proposal_embed_looking_for="Looking for Pokémon:"
+
+trade_offer_created=" created a trade offer!"
+trade_offer_embed_title="Trade offer"
+trade_offer_embed_description="Hello everyone!\n\n I am offering `{pokémon_have}`!"
+trade_offer_embed_footer="Trade offer by: {member}. If you have any interest, please contact me!"
+trade_offer_embed_offering="Offering Pokémon:"
+
+trade_search_created=" created a trade search!"
+trade_search_embed_title="Trade search"
+trade_search_embed_description="Hello everyone!\n\n I am searching for `{pokémon_want}`!"
+trade_search_embed_footer="Trade search by: {member}. If you want to trade this Pokémon, please contact me!"
+trade_search_embed_looking_for="Looking for Pokémon:"
+
+# ------------------------------------------------------------------------- #
 # 99_explanation #
 # ------------------------------------------------------------------------- #
 explanation_sending="I am sending the explanation to your DM!"
@@ -170,6 +192,11 @@ log_channel_raid_successfully_deleted="`[{datetime}]` - **{member}** deleted `{r
 log_channel_raid_deletion_failed="`[{datetime}]` - **{member}** tried deleting a `{raid_type}` but the execution failed!"
 log_channel_raid_successfully_edited="`[{datetime}]` - **{member}** edited the `{raid_type}` with id: `{id}`!"
 log_channel_raid_edit_failed="`[{datetime}]` - **{member}** tried editing a `{raid_type}` but the execution failed!"
+
+# 4_trade
+log_channel_trade_proposal_created="`[{datetime}]` - **{member}** created a trade proposal!"
+log_channel_trade_offer_created="`[{datetime}]` - **{member}** created a trade offer!"
+log_channel_trade_search_created="`[{datetime}]` - **{member}** created a trade search!"
 
 # 99_explanation
 log_channel_explanation_location_sending="`[{datetime}]` - **{member}** requested the explanation for `location commands`, I am sending it to their DM!"
