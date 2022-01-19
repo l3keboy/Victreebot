@@ -12,6 +12,7 @@ import asyncpg
 from dotenv import load_dotenv
 # Hikari
 import hikari
+import pytz
 import tanjun
 # Functionality
 import asyncio
@@ -137,7 +138,12 @@ async def command_raid_create(ctx: tanjun.abc.Context, raid_type, boss, location
 
     # VALIDATE DATE
     if date == "Current date in your timezone":
-        date = datetime.datetime.now().strftime('%d-%m-%Y')
+        if "-" in gmt:
+            gmt_inverted = gmt.replace("-", "+")
+        if "+" in gmt:
+            gmt_inverted = gmt.replace("+", "-")
+        timezone = pytz.timezone(f"Etc/{gmt_inverted}")
+        date = datetime.datetime.now(timezone).strftime('%d-%m-%Y')
     else:
         date_is_valid = await validate.__validate_date(date=date)
         if not date_is_valid:

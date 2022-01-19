@@ -137,7 +137,7 @@ async def command_settings_language(ctx: tanjun.abc.Context, language):
 
 @settings_group.with_command
 @tanjun.with_author_permission_check(hikari.Permissions.MANAGE_GUILD)
-@tanjun.with_str_slash_option("offset", "The new GMT offset of the server.", choices=["GMT-12","GMT-11","GMT-10","GMT-9","GMT-8","GMT-7","GMT-6","GMT-5","GMT-4","GMT-3","GMT-2","GMT-1","GMT+0", "GMT+1","GMT+2","GMT+3","GMT+4","GMT+5","GMT+6","GMT+7","GMT+8","GMT+9","GMT+10","GMT+11","GMT+12"])
+@tanjun.with_str_slash_option("offset", "The new GMT offset of the server.", choices=["GMT-12","GMT-11","GMT-10","GMT-9","GMT-8","GMT-7","GMT-6","GMT-5","GMT-4","GMT-3","GMT-2","GMT-1","GMT+0","GMT+1","GMT+2","GMT+3","GMT+4","GMT+5","GMT+6","GMT+7","GMT+8","GMT+9","GMT+10","GMT+11","GMT+12"])
 @tanjun.as_slash_command("timezone", "Set the bots timezone (GMT).")
 async def command_settings_gmt(ctx: tanjun.abc.Context, offset):
     try:
