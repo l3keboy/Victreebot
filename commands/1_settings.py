@@ -100,6 +100,7 @@ async def command_info(ctx: tanjun.abc.Context):
 settings_group = tanjun.slash_command_group("settings", f"Change settings for {BOT_NAME}.")
 settings_component = tanjun.Component().add_slash_command(settings_group)
 
+
 @settings_group.with_command
 @tanjun.with_author_permission_check(hikari.Permissions.MANAGE_GUILD)
 @tanjun.with_str_slash_option("language", "The new language of the server.", choices=["en"])
