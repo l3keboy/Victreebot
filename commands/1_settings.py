@@ -221,12 +221,11 @@ async def command_settings_raids_channel(ctx: tanjun.abc.Context, channel):
             change_raids_channel = f'UPDATE "Settings" SET raids_channel = {channel.id} WHERE guild_id = {ctx.guild_id}'
             await conn.fetch(change_raids_channel)
     await database.close()
-    new_channel = channel.id
     
     # SEND TO LOG CHANNEL
     try:
-        channel = await ctx.rest.fetch_channel(channel=log_channel_id)
-        await channel.send(lang.log_channel_raids_channel_changed.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, channel=new_channel))
+        log_channel = await ctx.rest.fetch_channel(channel=log_channel_id)
+        await log_channel.send(lang.log_channel_raids_channel_changed.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, channel=channel))
     except Exception as e:
         LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
         
@@ -256,7 +255,7 @@ async def command_settings_log_channel(ctx: tanjun.abc.Context, channel):
     else:
         change_log_channel = f'UPDATE "Settings" SET log_channel = {channel.id} WHERE guild_id = {ctx.guild_id}'
         response = lang.updated_logs_channel_changed.format(channel=channel)
-        new_channel = channel.id
+        new_channel = channel
 
     database = await DatabaseHandler.acquire_database()
     async with database.acquire() as conn:
@@ -266,8 +265,8 @@ async def command_settings_log_channel(ctx: tanjun.abc.Context, channel):
 
     # SEND TO LOG CHANNEL
     try:
-        channel = await ctx.rest.fetch_channel(channel=log_channel_id)
-        await channel.send(lang.log_channel_log_channel_changed.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, channel=new_channel))
+        log_channel = await ctx.rest.fetch_channel(channel=log_channel_id)
+        await log_channel.send(lang.log_channel_log_channel_changed.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, channel=new_channel))
     except Exception as e:
         LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
 
