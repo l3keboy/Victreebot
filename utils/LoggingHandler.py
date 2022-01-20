@@ -20,6 +20,7 @@ class LoggingHandler:
         self.logger_victreebot = logging.getLogger("victreebot")
         self.logger_victreebot_join_handler = logging.getLogger("victreebot.handlers.join")
         self.logger_victreebot_validator = logging.getLogger("victreebot.validator")
+        self.logger_victreebot_stats = logging.getLogger("victreebot.stats")
         self.logger_victreebot_logger = logging.getLogger("victreebot.logger")
         self.logger_victreebot_raid_channel = logging.getLogger("victreebot.raid_channel")
         self.logger_victreebot_database = logging.getLogger("victreebot.database")

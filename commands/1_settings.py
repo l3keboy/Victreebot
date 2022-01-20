@@ -412,6 +412,45 @@ async def on_guild_join(event: hikari.GuildJoinEvent):
                 LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Guild_id: {event.guild_id}, already exists in Settings table!")
     await database.close()
 
+    # CREATE GUILD TABLE
+    database = await DatabaseHandler.acquire_database()
+    async with database.acquire() as conn:
+        async with conn.transaction():
+            try:
+                on_guild_join_query_2 = f'CREATE TABLE public."{event.guild_id}" (user_id int8 NULL, friend_codes text NULL, location text NULL, stats_raids_created int4 NULL, stats_raids_participated int4 NULL, CONSTRAINT "{event.guild_id}_un" UNIQUE (user_id))'
+                await conn.execute(on_guild_join_query_2)
+            except asyncpg.exceptions.DuplicateTableError:
+                pass
+            except Exception as e:
+                LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Something went wrong while creating a database table for guild_id {event.guild_id}! Got error: {e}")
+    await database.close()
+
+    # ADD MEMBERS TO GUILD TABLE
+    for member in event.guild.get_members():
+        database = await DatabaseHandler.acquire_database()
+        async with database.acquire() as conn:
+            async with conn.transaction():
+                try:
+                    on_guild_join_query_3 = f'INSERT INTO "{event.guild_id}" (user_id, stats_raids_created, stats_raids_participated) VALUES ({member}, {0}, {0})'
+                    await conn.execute(on_guild_join_query_3)
+                except asyncpg.exceptions.UniqueViolationError:
+                    pass
+                except Exception as e:
+                    LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Something went wrong while adding a user to guild_id {event.guild_id} database table! Got error: {e}")
+        await database.close()
+
+    # ADD SERVER TO SERVERSTATS TABLE
+    database = await DatabaseHandler.acquire_database()
+    async with database.acquire() as conn:
+        async with conn.transaction():
+            try:
+                on_guild_join_query_4 = f'INSERT INTO "ServerStats" (guild_id, stats_raids_created, stats_raids_deleted, stats_raids_completed) VALUES ({event.guild_id}, {0}, {0}, {0})'
+                await conn.fetch(on_guild_join_query_4)
+            except asyncpg.exceptions.UniqueViolationError as e:
+                LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Guild_id: {event.guild_id}, already exists in ServerStats table!")
+    await database.close()
+
+    # SEND MESSAGE
     embed = (
         hikari.Embed(
             title="Welcome to VictreeBot!",
@@ -441,6 +480,28 @@ async def on_guild_leave(event: hikari.GuildLeaveEvent):
                 await conn.fetch(on_guild_remove_settings_query)
             except Exception as e:
                 LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Something went wrong while trying to remove guild_id: {event.guild_id} from settings table!")
+    await database.close()
+
+    # REMOVE GUILD TABLE
+    database = await DatabaseHandler.acquire_database()
+    async with database.acquire() as conn:
+        async with conn.transaction():
+            try:
+                on_guild_remove_guild_table_query = f'DROP TABLE "{event.guild_id}"'
+                await conn.execute(on_guild_remove_guild_table_query)
+            except Exception as e:
+                LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Something went wrong while trying to drop guild_id {event.guild_id} table! Got error: {e}")
+    await database.close()
+
+    # REMOVE GUILD FROM SERVERSTATS
+    database = await DatabaseHandler.acquire_database()
+    async with database.acquire() as conn:
+        async with conn.transaction():
+            try:
+                on_guild_remove_serverstats_table_query = f'DELETE FROM "ServerStats" WHERE guild_id = {event.guild_id}'
+                await conn.fetch(on_guild_remove_serverstats_table_query)
+            except Exception as e:
+                LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Something went wrong while trying to remove guild_id: {event.guild_id} from ServerStats table!")
     await database.close()
 
     # REMOVE GYMS OF GUILD
@@ -477,6 +538,36 @@ async def on_guild_leave(event: hikari.GuildLeaveEvent):
     await database.close()
 
 
+async def on_member_create(event: hikari.MemberCreateEvent):
+    # ADD NEW USER TO GUILD TABLE
+    database = await DatabaseHandler.acquire_database()
+    async with database.acquire() as conn:
+        async with conn.transaction():
+            try:
+                on_member_create_query = f'INSERT INTO "{event.guild_id}" (user_id, stats_raids_created, stats_raids_participated) VALUES ({event.user_id}, {0}, {0})'
+                await conn.execute(on_member_create_query)
+            except asyncpg.exceptions.UniqueViolationError:
+                pass
+            except Exception as e:
+                LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Something went while trying to add a user to the servers database table for guild_id {event.guild_id}! Got error: {e}")
+    await database.close()
+
+
+async def on_member_delete(event: hikari.MemberDeleteEvent):
+    # REMOVE USER FROM GUILD TABLE
+    database = await DatabaseHandler.acquire_database()
+    async with database.acquire() as conn:
+        async with conn.transaction():
+            try:
+                on_member_delete_query = f'DELETE FROM "{event.guild_id}" WHERE user_id = {event.user_id}'
+                await conn.execute(on_member_delete_query)
+            except asyncpg.exceptions.UniqueViolationError:
+                pass
+            except Exception as e:
+                LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Something went while trying to remove a user from the servers database table for guild_id {event.guild_id}! Got error: {e}")
+    await database.close()
+
+
 # ------------------------------------------------------------------------- #
 # INITIALIZE #
 # ------------------------------------------------------------------------- #
@@ -486,3 +577,5 @@ def load_component(client: tanjun.abc.Client) -> None:
     client.add_component(settings_component.copy())
     client.events.subscribe(hikari.GuildJoinEvent, on_guild_join)
     client.events.subscribe(hikari.GuildLeaveEvent, on_guild_leave)
+    client.events.subscribe(hikari.MemberCreateEvent, on_member_create)
+    client.events.subscribe(hikari.MemberDeleteEvent, on_member_delete)

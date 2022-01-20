@@ -61,7 +61,8 @@ location_info_paginate_embed_no_results="There are no `{location_type}'s` availa
 raid_location_does_not_exist="There are no locations with the name: `{name}`!"
 raid_invalid_time_format="The given time was in an invalid format, please use `HH:MM`!"
 raid_invalid_date_format="The given date was in an invalid format, please use `DD-MM-YYYY`!"
-raid_generated_id_duplicate="The generated idea already exists, please try again!"
+raid_id_database_error="The generated raid couldn't not be created! A raid with the same ID already exists, please try again! NOTE: PLEASE LET THE SERVER ADMINISTRATOR DELETE THE CREATED EMBED!"
+raid_unknown_database_error="The generated raid couldn't be created! Please try again! NOTE: PLEASE LET THE SERVER ADMINISTRATOR DELETE DELETE THE CREATED EMBED!"
 
 raid_successfully_created="The `{raid_type}` is created!"
 raid_embed_description="**Raid ID:** {raid_id}\n**Time:** {time}\n**Date:** {date}\n**Location:** [{location}](https://www.google.com/maps/@{latitude},{longitude},14z)\n**Type:** {raid_type}"
@@ -95,6 +96,41 @@ trade_search_embed_title="Trade search"
 trade_search_embed_description="Hello everyone!\n\n I am searching for `{pokémon_want}`!"
 trade_search_embed_footer="Trade search by: {member}. If you want to trade this Pokémon, please contact me!"
 trade_search_embed_looking_for="Looking for Pokémon:"
+
+# ------------------------------------------------------------------------- #
+# 90_stats #
+# ------------------------------------------------------------------------- #
+server_stats_embed_title="Stats of {guild_name}"
+server_stats_embed_description="All stats of the `{guild_name}` server!"
+server_stats_embed_raids_created_title="Raids Created:"
+server_stats_embed_raids_created_description="✅ | {raids_created}"
+server_stats_embed_raids_deleted_title="Raids Deleted:"
+server_stats_embed_raids_deleted_description="❌ | {raids_deleted}"
+server_stats_embed_raids_completed_title="Raids Completed:"
+server_stats_embed_raids_completed_description="🥇 | {raids_completed}"
+
+user_stats_embed_title="Stats of {user_name}"
+user_stats_embed_description="All stats of `{user_name}`!"
+user_stats_embed_raids_created_title="Raids Created:"
+user_stats_embed_raids_created_description="✅ | {raids_created}"
+user_stats_embed_raids_participated_title="Raids Participated:"
+user_stats_embed_raids_participated_description="🥇 | {raids_participated}"
+user_stats_embed_user_locations_title="Active in locations:"
+user_stats_embed_user_friend_codes_title="Friend Codes:"
+user_stats_embed_no_locations_set="No active locations set!"
+user_stats_embed_no_friend_codes_set="No friend codes set!"
+
+# ------------------------------------------------------------------------- #
+# 98_profile #
+# ------------------------------------------------------------------------- #
+profile_added_location="I have added `{location}` to your active locations!"
+profile_removed_location="I have removed `{location}` from your active locations!"
+profile_no_locations_set="You haven't set any locations!"
+profile_specified_location_not_found="I haven't found that location in your active locations!"
+profile_added_friend_code="I have added `{friend_code}` to your friend codes!"
+profile_removed_friend_code="I have removed `{friend_code}` from your friend codes!"
+profile_no_friend_code_set="You haven't set any friend codes!"
+profile_specified_friend_code_not_found="I haven't found that friend code in your friend codes!"
 
 # ------------------------------------------------------------------------- #
 # 99_explanation #
@@ -163,6 +199,7 @@ error_float_latitude_invalid="I am sorry, the given `latitude` can't be converte
 error_float_longitude_invalid="I am sorry, the given `longitude` can't be converted to float!"
 error_latitude_invalid="I am sorry, the given `latitude` is invalid! Your input: `{latitude}`!"
 error_longitude_invalid="I am sorry, the given `longitude` is invalid! Your input: `{longitude}`!"
+error_friend_code_invalid="I am sorry, the given `friend code` is invalid! Your input: `{friend_code}`!"
 # Pokemon
 pokemon_not_found="I could not find `{pokemon}`!"
 
@@ -197,6 +234,16 @@ log_channel_raid_edit_failed="`[{datetime}]` - **{member}** tried editing a `{ra
 log_channel_trade_proposal_created="`[{datetime}]` - **{member}** created a trade proposal!"
 log_channel_trade_offer_created="`[{datetime}]` - **{member}** created a trade offer!"
 log_channel_trade_search_created="`[{datetime}]` - **{member}** created a trade search!"
+
+# 90_stats
+log_channel_server_stats_requested="`[{datetime}]` - **{member}** requested the stats of the server!"
+log_channel_user_stats_requested="`[{datetime}]` - **{member}** requested the stats of `{user_name}`!"
+
+# 98_profile
+log_channel_profile_location_added="`[{datetime}]` - **{member}** added a location to their profile!"
+log_channel_profile_location_removed="`[{datetime}]` - **{member}** removed a location from their profile!"
+log_channel_profile_friendcode_added="`[{datetime}]` - **{member}** added a friend code to their profile!"
+log_channel_profile_friendcode_removed="`[{datetime}]` - **{member}** removed a friend code from their profile!"
 
 # 99_explanation
 log_channel_explanation_location_sending="`[{datetime}]` - **{member}** requested the explanation for `location commands`, I am sending it to their DM!"

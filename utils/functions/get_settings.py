@@ -31,6 +31,7 @@ async def get_all_settings(guild_id):
                 moderator_role_id = int(fetched_all_settings[0].get("moderator_role"))
             except IndexError as e:
                 LoggingHandler().logger_victreebot_database.error(f"Index error. Guild_id: {guild_id} -- Function: get_all_settings -- Location: /utils/get_settings.py! Is this server inserted in the database?")
+                await database.close()
                 return
 
             if language == "en":
@@ -56,6 +57,7 @@ async def get_language_auto_delete_time_settings(guild_id):
                 auto_delete_time = int(fetched_lang_auto_delete_time_settings[0].get("auto_delete_time"))
             except IndexError as e:
                 LoggingHandler().logger_victreebot_database.error(f"Index error. Guild_id: {guild_id} -- Function: get_language_auto_delete_time_settings -- Location: /utils/get_settings.py! Is this server inserted in the database?")
+                await database.close()
                 return
 
             if language == "en":
@@ -78,6 +80,7 @@ async def get_language_gmt_auto_delete_time_settings(guild_id):
                 auto_delete_time = int(fetched_lang_gmt_auto_delete_time_settings[0].get("auto_delete_time"))
             except IndexError as e:
                 LoggingHandler().logger_victreebot_database.error(f"Index error. Guild_id: {guild_id} -- Function: get_language_gmt_auto_delete_time_settings -- Location: /utils/get_settings.py! Is this server inserted in the database?")
+                await database.close()
                 return
 
             if language == "en":
@@ -99,6 +102,7 @@ async def get_channels_settings(guild_id):
                 log_channel_id = int(fetched_channels_settings[0].get("log_channel"))
             except IndexError as e:
                 LoggingHandler().logger_victreebot_database.error(f"Index error. Guild_id: {guild_id} -- Function: get_language_auto_delete_time_settings -- Location: /utils/get_settings.py! Is this server inserted in the database?")
+                await database.close()
                 return
 
     await database.close()
@@ -120,6 +124,7 @@ async def get_language_settings(guild_id):
                 language = fetched_language_setting[0].get("language")
             except IndexError as e:
                 LoggingHandler().logger_victreebot_database.error(f"Index error. Guild_id: {guild_id} -- Function: get_language_settings -- Location: /utils/get_settings.py! Is this server inserted in the database?")
+                await database.close()
                 return
 
             if language == "en":
@@ -140,6 +145,7 @@ async def get_gmt_settings(guild_id):
                 gmt = fetched_gmt_setting[0].get("gmt")
             except IndexError as e:
                 LoggingHandler().logger_victreebot_database.error(f"Index error. Guild_id: {guild_id} -- Function: get_gmt_settings -- Location: /utils/get_settings.py! Is this server inserted in the database?")
+                await database.close()
                 return
 
     await database.close()
@@ -157,6 +163,7 @@ async def get_auto_delete_time_settings(guild_id):
                 auto_delete_time = int(fetched_auto_delete_time_setting[0].get("auto_delete_time"))
             except IndexError as e:
                 LoggingHandler().logger_victreebot_database.error(f"Index error. Guild_id: {guild_id} -- Function: get_auto_delete_time_settings -- Location: /utils/get_settings.py! Is this server inserted in the database?")
+                await database.close()
                 return
 
     await database.close()
@@ -174,6 +181,7 @@ async def get_raids_channel_settings(guild_id):
                 raids_channel_id = int(fetched_raids_channel_setting[0].get("raids_channel"))
             except IndexError as e:
                 LoggingHandler().logger_victreebot_database.error(f"Index error. Guild_id: {guild_id} -- Function: get_raids_channel_settings -- Location: /utils/get_settings.py! Is this server inserted in the database?")
+                await database.close()
                 return
 
     await database.close()
@@ -191,6 +199,7 @@ async def get_log_channel_settings(guild_id):
                 log_channel_id = int(fetched_log_channel_setting[0].get("log_channel"))
             except IndexError as e:
                 LoggingHandler().logger_victreebot_database.error(f"Index error. Guild_id: {guild_id} -- Function: get_log_channel_settings -- Location: /utils/get_settings.py! Is this server inserted in the database?")
+                await database.close()
                 return
 
     await database.close()
@@ -208,6 +217,7 @@ async def get_moderator_role_settings(guild_id):
                 moderator_role_id = int(fetched_moderator_role_setting[0].get("moderator_role"))
             except IndexError as e:
                 LoggingHandler().logger_victreebot_database.error(f"Index error. Guild_id: {guild_id} -- Function: get_log_channel_settings -- Location: /utils/get_settings.py! Is this server inserted in the database?")
+                await database.close()
                 return
 
     await database.close()
