@@ -39,13 +39,13 @@ async def __create(location_type, guild_id, name, latitude, longitude):
     async with database.acquire() as conn:
         async with conn.transaction():
             try:
-                name_to_set = "'" + name + "'"
+                name_to_set = "'" + name.replace("'", "''") + "'"
                 create_query = f'INSERT INTO "{location_type}" (guild_id, name, latitude, longitude) VALUES ({guild_id}, {name_to_set}, {latitude}, {longitude})'
                 await conn.fetch(create_query)
                 success = True
             except Exception as e:
                 success = False
-                LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Something went wrong while creating a {location_type} for guild_id: {guild_id}! Error: {e}")
+                LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Something went wrong while creating a {location_type} for guild_id: {guild_id}! Error: {e} -- Query: {create_query}")
     await database.close()
     return success
 

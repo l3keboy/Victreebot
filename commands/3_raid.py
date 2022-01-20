@@ -21,7 +21,7 @@ import datetime
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 # Own Files
 from utils import DatabaseHandler, LoggingHandler
-from utils.functions import get_raid, get_settings, pokemon, validate
+from utils.functions import get_raid, get_settings, pokemon, validate, stats
 
 # .ENV AND .ENV VARIABLES
 # Load .env
@@ -82,6 +82,35 @@ async def check_old_raids(event):
                 await conn.fetch(delete_raid)
         await database.close()
 
+        # UPDATE STATS
+        all_guild_members = await event.app.rest.fetch_members(guild_id)
+        try:
+            await stats.update_server_stats(guild_id=guild_id, stat="stats_raids_completed")
+        except Exception as e:
+            LoggingHandler.LoggingHandler().logger_victreebot_stats.error(f"Something went wrong while trying to update server stats for guild_id: {guild_id}! -- Function: check_old_raids -- Location: /commands/3_raid.py! Got error: {e}")
+        
+        try:
+            for member in all_guild_members:
+                if instinct_present is not None:
+                    instinct_present_list = instinct_present.split(",")
+                    if member.display_name in instinct_present_list:
+                        await stats.update_user_stats(guild_id=guild_id, user_id=member.id, stat="stats_raids_participated")
+                if mystic_present is not None:
+                    mystic_present_list = mystic_present.split(",")
+                    if member.display_name in mystic_present_list:
+                        await stats.update_user_stats(guild_id=guild_id, user_id=member.id, stat="stats_raids_participated")
+                if valor_present is not None:
+                    valor_present_list = valor_present.split(",")
+                    if member.display_name in valor_present_list:
+                        await stats.update_user_stats(guild_id=guild_id, user_id=member.id, stat="stats_raids_participated")
+                if remote_present is not None:
+                    remote_present_list = remote_present.split(",")
+                    if member.display_name in remote_present_list:
+                        await stats.update_user_stats(guild_id=guild_id, user_id=member.id, stat="stats_raids_participated")
+        except Exception as e:
+            LoggingHandler.LoggingHandler().logger_victreebot_stats.error(f"Something went wrong while trying to update user stats for user_id: {member.id} in guild_id: {guild_id}! -- Function: check_old_raids -- Location: /commands/3_raid.py! Got error: {e}")
+
+        # DELETE RAID MESSAGE
         try:
             raid_message = await event.app.rest.fetch_message(channel=channel_id, message=message_id)
             await raid_message.delete()
@@ -200,6 +229,8 @@ async def command_raid_create(ctx: tanjun.abc.Context, raid_type, boss, location
         LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send raid embed for guild_id: {ctx.guild_id}! Got error: {e}")
 
     # ADD RAID TO DATABASE
+    id_database_error = False
+    unknown_database_error = False
     database = await DatabaseHandler.acquire_database()
     async with database.acquire() as conn:
         async with conn.transaction():
@@ -215,7 +246,12 @@ async def command_raid_create(ctx: tanjun.abc.Context, raid_type, boss, location
                 database_success = True
             except asyncpg.exceptions.UniqueViolationError:
                 database_success = False
-                LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Something went wrong while trying to insert a new raid. ID already exists!")
+                id_database_error = True
+                LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Something went wrong while trying to insert a new raid! ID already exists!")
+            except Exception as e:
+                database_success = False
+                unknown_database_error = True
+                LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Something went wrong while trying to insert a new raid! Got error: {e}!")
     await database.close()
 
     if not database_success:
@@ -225,11 +261,29 @@ async def command_raid_create(ctx: tanjun.abc.Context, raid_type, boss, location
         except Exception as e:
             LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
 
-        response = lang.raid_generated_id_duplicate
-        message = await ctx.respond(response, ensure_result=True)
-        await asyncio.sleep(auto_delete_time)
-        await message.delete()
+        if id_database_error:
+            response = lang.raid_id_database_error
+            message = await ctx.respond(response, ensure_result=True)
+            await asyncio.sleep(auto_delete_time)
+            await message.delete()
+        if unknown_database_error:
+            response = lang.raid_unknown_database_error
+            message = await ctx.respond(response, ensure_result=True)
+            await asyncio.sleep(auto_delete_time)
+            await message.delete() 
         return
+
+    # UPDATE STATS
+    try:
+        await stats.update_server_stats(guild_id=ctx.guild_id, stat="stats_raids_created")
+    except Exception as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_stats.error(f"Something went wrong while trying to update server stats for guild_id: {ctx.guild_id}! -- Function: command_raid_create -- Location: /commands/3_raid.py! Got error: {e}")
+
+    try:
+        await stats.update_user_stats(guild_id=ctx.guild_id, user_id=ctx.member.id, stat="stats_raids_created")
+    except Exception as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_stats.error(f"Something went wrong while trying to update stats for user_id: {ctx.member.id} in guild_id: {ctx.guild_id}! -- Function: command_raid_create -- Location: /commands/3_raid.py! Got error: {e}")
+
 
     # SEND CREATE MESSAGE TO LOG CHANNEL
     try:
@@ -306,6 +360,12 @@ async def command_raid_delete(ctx: tanjun.abc.Context, raid_type, raid_id):
             delete_raid = f'DELETE FROM "Raid-Events" WHERE id = {id_to_delete} AND guild_id = {ctx.guild_id} AND user_id = {ctx.member.id}'
             await conn.fetch(delete_raid)
     await database.close()
+
+    # UPDATE STATS
+    try:
+        await stats.update_server_stats(guild_id=ctx.guild_id, stat="stats_raids_deleted")
+    except Exception as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_stats.error(f"Something went wrong while trying to update server stats for guild_id: {ctx.guild_id}! -- Function: command_raid_delete -- Location: /commands/3_raid.py! Got error: {e}")
 
     # SEND DELETE MESSAGE TO LOG CHANNEL
     try:
@@ -554,7 +614,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                 async with database.acquire() as conn:
                     async with conn.transaction():
                         new_total_attendees = total_attendees + 1
-                        instinct_present_to_set = "'" + ", ".join(user for user in new_instinct_present) + "'"
+                        instinct_present_to_set = "'" + ",".join(user for user in new_instinct_present) + "'"
                         update_raid = f'UPDATE "Raid-Events" SET instinct_present = {instinct_present_to_set}, total_attendees = {new_total_attendees} WHERE guild_id = {event.guild_id} AND channel_id = {event.channel_id} AND message_id = {event.message_id}'
                         await conn.fetch(update_raid)
                 await database.close()
@@ -565,7 +625,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                 # EDIT MESSAGE
                 embed = (
                     hikari.Embed(
-                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%d-%m-%Y').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
@@ -624,7 +684,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                 # EDIT MESSAGE
                 embed = (
                     hikari.Embed(
-                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%d-%m-%Y').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
@@ -683,7 +743,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                 # EDIT MESSAGE
                 embed = (
                     hikari.Embed(
-                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%d-%m-%Y').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
@@ -742,7 +802,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                 # EDIT MESSAGE
                 embed = (
                     hikari.Embed(
-                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%d-%m-%Y').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
@@ -794,7 +854,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                 # EDIT MESSAGE
                 embed = (
                     hikari.Embed(
-                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%d-%m-%Y').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
@@ -846,7 +906,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                 # EDIT MESSAGE
                 embed = (
                     hikari.Embed(
-                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%d-%m-%Y').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
@@ -898,7 +958,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                 # EDIT MESSAGE
                 embed = (
                     hikari.Embed(
-                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%d-%m-%Y').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
@@ -931,6 +991,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
         success, raid_id, created_at, raid_type, guild_id, channel_id, message_id, user_id, boss, location, time, date, instinct_present, mystic_present, valor_present, remote_present, total_attendees = await get_raid.get_raid_by_guild_channel_message(guild_id=event.guild_id, channel_id=event.channel_id, message_id=event.message_id)
         if success:
             raid_owner = await event.app.rest.fetch_user(user_id)
+            
             if event.emoji_name == "Instinct":
                 if instinct_present is None:
                     new_instinct_present = "\u200b"
@@ -970,7 +1031,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                 # EDIT MESSAGE
                 embed = (
                     hikari.Embed(
-                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%d-%m-%Y').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
@@ -1028,7 +1089,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                 # EDIT MESSAGE
                 embed = (
                     hikari.Embed(
-                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%d-%m-%Y').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
@@ -1086,7 +1147,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                 # EDIT MESSAGE
                 embed = (
                     hikari.Embed(
-                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%d-%m-%Y').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
@@ -1145,7 +1206,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                 # EDIT MESSAGE
                 embed = (
                     hikari.Embed(
-                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%d-%m-%Y').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
@@ -1197,7 +1258,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                 # EDIT MESSAGE
                 embed = (
                     hikari.Embed(
-                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%d-%m-%Y').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
@@ -1249,7 +1310,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                 # EDIT MESSAGE
                 embed = (
                     hikari.Embed(
-                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%d-%m-%Y').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(
@@ -1301,7 +1362,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                 # EDIT MESSAGE
                 embed = (
                     hikari.Embed(
-                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+                        description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%d-%m-%Y').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
                     )
                         .set_author(name=boss, icon=poke_img)
                         .set_footer(

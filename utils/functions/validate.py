@@ -10,6 +10,7 @@
 import asyncpg
 # Functionality
 import datetime
+import re
 # Own Files
 from utils import DatabaseHandler, LoggingHandler
 
@@ -119,4 +120,15 @@ async def __validate_date(date):
         return True
     except ValueError:
         LoggingHandler.LoggingHandler().logger_victreebot_validator.error("Invalid date format given!")
+        return False
+
+# ------------------------------------------------------------------------- #
+# FRIEND_CODES #
+# ------------------------------------------------------------------------- #
+async def __validate_friend_code(friend_code):
+    friend_code_regex = r"^\d{4}\-\d{4}\-\d{4}$"
+    if re.match(friend_code_regex, friend_code):
+        return True
+    else: 
+        LoggingHandler.LoggingHandler().logger_victreebot_validator.error("Invalid friend code format given!")
         return False
