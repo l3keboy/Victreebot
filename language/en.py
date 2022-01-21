@@ -103,6 +103,11 @@ trade_search_embed_looking_for="Looking for Pokémon:"
 pokedex_sending_dm="Sending the information of `{pokemon}` to your DM!"
 
 # ------------------------------------------------------------------------- #
+# 6_pokebattler #
+# ------------------------------------------------------------------------- #
+pokebattler_sending_dm="Sending the information of `{pokemon}` to your DM!"
+
+# ------------------------------------------------------------------------- #
 # 90_stats #
 # ------------------------------------------------------------------------- #
 server_stats_embed_title="Stats of {guild_name}"
@@ -297,6 +302,10 @@ log_channel_trade_search_created="`[{datetime}]` - **{member}** created a trade 
 # 5_pokedex
 log_channel_pokedex_request_failed="`[{datetime}]` - **{member}** tried to access the Pokédex but the request failed with status code: `{status_code}`!"
 log_channel_pokedex_requested="`[{datetime}]` - **{member}** requested the details of a Pokémon (Pokédex command)!"
+
+# 6_pokebattler
+log_channel_pokebattler_request_failed="`[{datetime}]` - **{member}** tried to access the Pokébattler but the request failed with status code: `{status_code}`!"
+log_channel_pokebattler_requested="`[{datetime}]` - **{member}** requested the details of a Pokémon (Pokébattler command)!"
 
 # 90_stats
 log_channel_server_stats_requested="`[{datetime}]` - **{member}** requested the stats of the server!"
