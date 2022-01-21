@@ -98,6 +98,11 @@ trade_search_embed_footer="Trade search by: {member}. If you want to trade this 
 trade_search_embed_looking_for="Looking for Pokémon:"
 
 # ------------------------------------------------------------------------- #
+# 5_pokedex #
+# ------------------------------------------------------------------------- #
+pokedex_sending_dm="Sending the information of `{pokemon}` to your DM!"
+
+# ------------------------------------------------------------------------- #
 # 90_stats #
 # ------------------------------------------------------------------------- #
 server_stats_embed_title="Stats of {guild_name}"
@@ -247,6 +252,7 @@ explanation_trade_page_4_field_1_value="If you are looking a Pokémon but don't 
 # ------------------------------------------------------------------------- #
 # General
 error_command_in_development="The command: `{command}` is in development and will be added later. Your input: {input}!"
+error_request_failed="I am sorry, the request failed with status code: `{status_code}`!"
 # Validate
 error_float_latitude_invalid="I am sorry, the given `latitude` can't be converted to float!"
 error_float_longitude_invalid="I am sorry, the given `longitude` can't be converted to float!"
@@ -287,6 +293,10 @@ log_channel_raid_edit_failed="`[{datetime}]` - **{member}** tried editing a `{ra
 log_channel_trade_proposal_created="`[{datetime}]` - **{member}** created a trade proposal!"
 log_channel_trade_offer_created="`[{datetime}]` - **{member}** created a trade offer!"
 log_channel_trade_search_created="`[{datetime}]` - **{member}** created a trade search!"
+
+# 5_pokedex
+log_channel_pokedex_request_failed="`[{datetime}]` - **{member}** tried to access the Pokédex but the request failed with status code: `{status_code}`!"
+log_channel_pokedex_requested="`[{datetime}]` - **{member}** requested the details of a Pokémon (Pokédex command)!"
 
 # 90_stats
 log_channel_server_stats_requested="`[{datetime}]` - **{member}** requested the stats of the server!"
