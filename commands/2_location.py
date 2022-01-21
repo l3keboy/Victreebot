@@ -20,6 +20,7 @@ import datetime
 # Own Files
 from utils import DatabaseHandler, LoggingHandler 
 from utils.functions import get_settings, validate
+from utils.config import const
 
 # .ENV AND .ENV VARIABLES
 # Load .env
@@ -81,7 +82,7 @@ location_component = tanjun.Component().add_slash_command(location_group)
 @tanjun.with_str_slash_option("longitude", "The longitude of the location.")
 @tanjun.with_str_slash_option("latitude", "The latitude of the location.")
 @tanjun.with_str_slash_option("name", "The name of the location.")
-@tanjun.with_str_slash_option("location_type", "The type of the location.", choices=["Gym", "Pokéstop"])
+@tanjun.with_str_slash_option("location_type", "The type of the location.", choices=[loc_type for loc_type in const.LOCATION_TYPES])
 @tanjun.as_slash_command("create", "Create a location.")
 async def command_location_create(ctx: tanjun.abc.Context, location_type, name, latitude, longitude):
     try:
@@ -153,7 +154,7 @@ async def command_location_create(ctx: tanjun.abc.Context, location_type, name, 
 
 @location_group.with_command
 @tanjun.with_str_slash_option("name", "The name of the location.")
-@tanjun.with_str_slash_option("location_type", "The type of the location.", choices=["Gym", "Pokéstop"])
+@tanjun.with_str_slash_option("location_type", "The type of the location.", choices=[loc_type for loc_type in const.LOCATION_TYPES])
 @tanjun.as_slash_command("delete", "Delete a location.")
 async def command_location_delete(ctx: tanjun.abc.Context, location_type, name):
     try:
@@ -195,7 +196,7 @@ async def command_location_delete(ctx: tanjun.abc.Context, location_type, name):
 
 @location_group.with_command
 @tanjun.with_str_slash_option("name", "The name of the location. No arguments will show a list of all location types.", default=None)
-@tanjun.with_str_slash_option("location_type", "The type of the location.", choices=["Gym", "Pokéstop"])
+@tanjun.with_str_slash_option("location_type", "The type of the location.", choices=[loc_type for loc_type in const.LOCATION_TYPES])
 @tanjun.as_slash_command("info", "Get info about location.")
 async def command_location_info(ctx: tanjun.abc.Context, location_type, name):
     try:

@@ -20,6 +20,7 @@ import datetime
 # Own Files
 from utils import DatabaseHandler, LoggingHandler, VersionHandler
 from utils.functions import get_settings
+from utils.config import const
 
 # .ENV AND .ENV VARIABLES
 # Load .env
@@ -34,7 +35,7 @@ component = tanjun.Component()
 # SLASH COMMANDS #
 # ------------------------------------------------------------------------- #
 @component.with_slash_command
-@tanjun.as_slash_command("info", "Get info about the bot.")
+@tanjun.as_slash_command("info", "Get info about {BOT_NAME}.")
 async def command_info(ctx: tanjun.abc.Context):
     try:
         lang, language, gmt, auto_delete_time, raids_channel_id, log_channel_id, moderator_role_id = await get_settings.get_all_settings(guild_id=ctx.guild_id)
@@ -103,7 +104,7 @@ settings_component = tanjun.Component().add_slash_command(settings_group)
 
 @settings_group.with_command
 @tanjun.with_author_permission_check(hikari.Permissions.MANAGE_GUILD)
-@tanjun.with_str_slash_option("language", "The new language of the server.", choices=["en"])
+@tanjun.with_str_slash_option("language", "The new language of the server.", choices=[language for language in const.SUPPORTED_LANGUAGES.keys()])
 @tanjun.as_slash_command("language", "Set the bots language.")
 async def command_settings_language(ctx: tanjun.abc.Context, language):
     try:
@@ -137,7 +138,7 @@ async def command_settings_language(ctx: tanjun.abc.Context, language):
 
 @settings_group.with_command
 @tanjun.with_author_permission_check(hikari.Permissions.MANAGE_GUILD)
-@tanjun.with_str_slash_option("offset", "The new GMT offset of the server.", choices=["GMT-12","GMT-11","GMT-10","GMT-9","GMT-8","GMT-7","GMT-6","GMT-5","GMT-4","GMT-3","GMT-2","GMT-1","GMT+0","GMT+1","GMT+2","GMT+3","GMT+4","GMT+5","GMT+6","GMT+7","GMT+8","GMT+9","GMT+10","GMT+11","GMT+12"])
+@tanjun.with_str_slash_option("offset", "The new GMT offset of the server.", choices=[offset for offset in const.SUPPORTED_TIMEZONES])
 @tanjun.as_slash_command("timezone", "Set the bots timezone (GMT).")
 async def command_settings_gmt(ctx: tanjun.abc.Context, offset):
     try:
