@@ -22,6 +22,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 # Own Files
 from utils import DatabaseHandler, LoggingHandler
 from utils.functions import get_raid, get_settings, pokemon, validate, stats
+from utils.config import const
 
 # .ENV AND .ENV VARIABLES
 # Load .env
@@ -137,7 +138,7 @@ raid_component = tanjun.Component().add_slash_command(raid_group)
 @tanjun.with_str_slash_option("time", "The time of the raid (f.e. 12:00). MUST BE IN FORMAT: HH:MM!")
 @tanjun.with_str_slash_option("location", "The location of the raid.")
 @tanjun.with_str_slash_option("boss", "The boss to fight.")
-@tanjun.with_str_slash_option("raid_type", "The type of the raid.", choices=["Raid", "Mega-Raid", "EX-Raid"])
+@tanjun.with_str_slash_option("raid_type", "The type of the raid.", choices=[r_type for r_type in const.RAID_TYPES])
 @tanjun.as_slash_command("create", "Create a raid.")
 async def command_raid_create(ctx: tanjun.abc.Context, raid_type, boss, location, time, date):
     try:
@@ -303,7 +304,7 @@ async def command_raid_create(ctx: tanjun.abc.Context, raid_type, boss, location
 
 @raid_group.with_command
 @tanjun.with_str_slash_option("raid_id", "The ID of the raid to delete.")
-@tanjun.with_str_slash_option("raid_type", "The type of the raid to delete.", choices=["Raid", "Mega-Raid", "EX-Raid"])
+@tanjun.with_str_slash_option("raid_type", "The type of the raid to delete.", choices=[r_type for r_type in const.RAID_TYPES])
 @tanjun.as_slash_command("delete", "Delete a raid.")
 async def command_raid_delete(ctx: tanjun.abc.Context, raid_type, raid_id):
     try:
@@ -395,9 +396,9 @@ async def command_raid_delete(ctx: tanjun.abc.Context, raid_type, raid_id):
 @tanjun.with_str_slash_option("new_time", "New time. If no arguments are given, the time will not change!", default=None)
 @tanjun.with_str_slash_option("new_location", "New location. If no arguments are given, the location will not change!", default=None)
 @tanjun.with_str_slash_option("new_boss", "New boss. If no arguments are given, the boss will not change!", default=None)
-@tanjun.with_str_slash_option("new_type", "New type. If no arguments are given, the type will not change!", default=None, choices=["Raid", "Mega-Raid", "EX-Raid"])
+@tanjun.with_str_slash_option("new_type", "New type. If no arguments are given, the type will not change!", default=None, choices=[r_type for r_type in const.RAID_TYPES])
 @tanjun.with_str_slash_option("raid_id", "The ID of the raid to edit.")
-@tanjun.with_str_slash_option("raid_type", "The type of the raid to edit.", choices=["Raid", "Mega-Raid", "EX-Raid"])
+@tanjun.with_str_slash_option("raid_type", "The type of the raid to edit.", choices=[r_type for r_type in const.RAID_TYPES])
 @tanjun.as_slash_command("edit", "Edit a raid.")
 async def command_raid_edit(ctx: tanjun.abc.Context, raid_type, raid_id, new_type, new_boss, new_location, new_time, new_date):
     try:

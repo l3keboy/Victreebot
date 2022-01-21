@@ -8,7 +8,7 @@
 # IMPORTS
 # Own files
 from utils import DatabaseHandler
-from language import en
+from utils.config import const
 from utils.LoggingHandler import LoggingHandler
 
 # ------------------------------------------------------------------------- #
@@ -34,8 +34,7 @@ async def get_all_settings(guild_id):
                 await database.close()
                 return
 
-            if language == "en":
-                lang = en
+            lang = const.SUPPORTED_LANGUAGES.get(language)
 
     await database.close()
     return lang, language, gmt, auto_delete_time, raids_channel_id, log_channel_id, moderator_role_id
@@ -60,8 +59,7 @@ async def get_language_auto_delete_time_settings(guild_id):
                 await database.close()
                 return
 
-            if language == "en":
-                lang = en
+            lang = const.SUPPORTED_LANGUAGES.get(language)
 
     await database.close()
     return lang, auto_delete_time
@@ -83,8 +81,7 @@ async def get_language_gmt_auto_delete_time_settings(guild_id):
                 await database.close()
                 return
 
-            if language == "en":
-                lang = en
+            lang = const.SUPPORTED_LANGUAGES.get(language)
 
     await database.close()
     return lang, gmt, auto_delete_time
@@ -127,8 +124,7 @@ async def get_language_settings(guild_id):
                 await database.close()
                 return
 
-            if language == "en":
-                lang = en
+            lang = const.SUPPORTED_LANGUAGES.get(language)
 
     await database.close()
     return lang
