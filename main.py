@@ -63,6 +63,7 @@ class Bot(hikari.GatewayBot):
         LoggingHandler.LoggingHandler().hikari_tanjun_clients.info("Loading modules.....")
         self.client = tanjun.Client.from_gateway_bot(self, declare_global_commands=True)
         self.client.load_modules(*Path("../VictreeBot/commands").glob("*.py"))
+        self.client.set_auto_defer_after(0)
         LoggingHandler.LoggingHandler().hikari_tanjun_clients.info("Loading Complete!\n")
 
     def run(self):

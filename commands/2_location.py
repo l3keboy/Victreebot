@@ -254,7 +254,7 @@ async def command_location_info(ctx: tanjun.abc.Context, location_type, name):
                 )
                     .set_thumbnail()
                     .add_field(name=lang.location_info_embed_location_info_field_title, value=lang.location_info_embed_location_info_field_value.format(latitude=latitude, longitude=longitude), inline=False)
-                    .add_field(name=lang.location_info_embed_location_google_maps_field_title, value=f"[{lang.location_info_google_maps}](https://www.google.com/maps/@{latitude},{longitude},14z)", inline=False)
+                    .add_field(name=lang.location_info_embed_location_google_maps_field_title, value=f"[{lang.location_info_google_maps}](https://www.google.com/maps/place/@{latitude},{longitude})", inline=False)
             )
             message = await ctx.respond(embed=embed, ensure_result=True)
             await asyncio.sleep(auto_delete_this_message)
@@ -286,7 +286,7 @@ async def command_location_info(ctx: tanjun.abc.Context, location_type, name):
                     text=lang.embed_footer.format(member=ctx.member.display_name, auto_delete_time=auto_delete_this_message)
                 )
                     .set_thumbnail()
-                    .add_field(name=lang.location_info_paginate_embed_locations_title, value=f"\n".join(f"***{location.get('name')}***" + " \n" + f"[{lang.location_info_google_maps}](https://www.google.com/maps/@{location.get('latitude')},{location.get('longitude')},14z)" + "\n" for location in fetched_info), inline=False)
+                    .add_field(name=lang.location_info_paginate_embed_locations_title, value=f"\n".join(f"***{location.get('name')}***" + " \n" + f"[{lang.location_info_google_maps}](https://www.google.com/maps/place/{location.get('latitude')},{location.get('longitude')})" + "\n" for location in fetched_info), inline=False)
             )
             message = await ctx.respond(embed=embed, ensure_result=True)
             await asyncio.sleep(auto_delete_this_message)
@@ -311,7 +311,7 @@ async def command_location_info(ctx: tanjun.abc.Context, location_type, name):
                         text=lang.embed_footer.format(member=ctx.member.display_name, auto_delete_time=auto_delete_this_message)
                     )
                         .set_thumbnail()
-                        .add_field(name=lang.location_info_paginate_embed_locations_title, value=f"\n".join(f"***{location.get('name')}***" + " \n" + f"[{lang.location_info_google_maps}](https://www.google.com/maps/@{location.get('latitude')},{location.get('longitude')},14z)" + "\n" for location in fetched_info[start:end]), inline=False)
+                        .add_field(name=lang.location_info_paginate_embed_locations_title, value=f"\n".join(f"***{location.get('name')}***" + " \n" + f"[{lang.location_info_google_maps}](https://www.google.com/maps/place/{location.get('latitude')},{location.get('longitude')})" + "\n" for location in fetched_info[start:end]), inline=False)
                 )
                 start += 10
                 end += 10

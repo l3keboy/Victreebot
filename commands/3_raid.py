@@ -147,7 +147,7 @@ async def command_raid_create(ctx: tanjun.abc.Context, raid_type, boss, location
     except TypeError as e:
         LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
         return
-
+        
     # VALIDATE LOCATION
     location_exists, latitude, longitude = await validate.__validate_location(guild_id=ctx.guild_id, location=location)
     if not location_exists:
