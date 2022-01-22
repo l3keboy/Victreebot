@@ -65,7 +65,7 @@ raid_id_database_error="The generated raid couldn't not be created! A raid with 
 raid_unknown_database_error="The generated raid couldn't be created! Please try again! NOTE: PLEASE LET THE SERVER ADMINISTRATOR DELETE DELETE THE CREATED EMBED!"
 
 raid_successfully_created="The `{raid_type}` is created!"
-raid_embed_description="**Raid ID:** {raid_id}\n**Time:** {time}\n**Date:** {date}\n**Location:** [{location}](https://www.google.com/maps/@{latitude},{longitude},14z)\n**Type:** {raid_type}"
+raid_embed_description="**Raid ID:** {raid_id}\n**Time:** {time}\n**Date:** {date}\n**Location:** [{location}](https://www.google.com/maps/place/@{latitude},{longitude})\n**Type:** {raid_type}"
 raid_embed_footer="Raid created by: {member} | Total attendees: {attendees}"
 
 raid_unable_to_delete_not_creator_or_enough_permissions="You can't delete this raid because you didn't create it and you don't have the right permissions!"
