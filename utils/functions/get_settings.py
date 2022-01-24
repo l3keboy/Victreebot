@@ -25,6 +25,7 @@ async def get_all_settings(guild_id):
             try:
                 language = fetched_all_settings[0].get("language")
                 gmt = fetched_all_settings[0].get("gmt")
+                unit_system = fetched_all_settings[0].get("unit_system")
                 auto_delete_time = int(fetched_all_settings[0].get("auto_delete_time"))
                 raids_channel_id = int(fetched_all_settings[0].get("raids_channel"))
                 log_channel_id = int(fetched_all_settings[0].get("log_channel"))
@@ -37,7 +38,7 @@ async def get_all_settings(guild_id):
             lang = const.SUPPORTED_LANGUAGES.get(language)
 
     await database.close()
-    return lang, language, gmt, auto_delete_time, raids_channel_id, log_channel_id, moderator_role_id
+    return lang, language, gmt, auto_delete_time, raids_channel_id, log_channel_id, moderator_role_id, unit_system
 
 
 # ------------------------------------------------------------------------- #
@@ -146,6 +147,24 @@ async def get_gmt_settings(guild_id):
 
     await database.close()
     return gmt
+
+# Get Unit System setting of a server
+async def get_unit_system_settings(guild_id):
+    database = await DatabaseHandler.acquire_database()
+    async with database.acquire() as conn:
+        async with conn.transaction():
+            select_unit_system_setting = f'SELECT unit_system FROM "Settings" WHERE guild_id = {guild_id}'
+            fetched_unit_system_setting = await conn.fetch(select_unit_system_setting)
+            
+            try:
+                unit_system = fetched_unit_system_setting[0].get("unit_system")
+            except IndexError as e:
+                LoggingHandler().logger_victreebot_database.error(f"Index error. Guild_id: {guild_id} -- Function: get_unit_system_settings -- Location: /utils/get_settings.py! Is this server inserted in the database?")
+                await database.close()
+                return
+
+    await database.close()
+    return unit_system
 
 # Get auto_delete_time setting of a server
 async def get_auto_delete_time_settings(guild_id):

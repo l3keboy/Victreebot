@@ -13,22 +13,42 @@ import pokebase as pb
 from utils import LoggingHandler
 from utils.config import const
 
-# Get image/icon of pokemon
-async def get_pokemon_img(boss):
+# Validate Pokémon by name and return
+async def validate_pokemon_by_name(boss):
     try:
-        pokemon = pb.pokemon(str(boss.lower()))
-        pokemon.id
+        pokémon = pb.pokemon(str(boss.lower()))
+        pokémon.id
         success=True
     except Exception as e:
         LoggingHandler.LoggingHandler().logger_victreebot_validator.error(f"Invalid pokemon {boss.lower()}!")
         success=False 
+        pokémon = None
         
     if success:
-        poke_img = pb.SpriteResource('pokemon', pokemon.id).url
+        poke_img = pb.SpriteResource('pokemon', pokémon.id).url
     else:
         poke_img = None
     
-    return success, poke_img
+    return success, poke_img, pokémon
+
+
+# Validate Pokémon by ID and return
+async def validate_pokemon_by_id(boss):
+    try:
+        pokémon = pb.pokemon(int(boss))
+        pokémon.id
+        success=True
+    except Exception as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_validator.error(f"Invalid pokemon {boss}!")
+        success=False
+        pokémon = None
+
+    if success:
+        poke_img = pb.SpriteResource('pokemon', pokémon.id).url
+    else:
+        poke_img = None
+
+    return success, poke_img, pokémon
 
 
 # Battle Options checker
