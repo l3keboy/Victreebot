@@ -88,7 +88,7 @@ async def command_info(ctx: tanjun.abc.Context):
     # SEND TO LOG CHANNEL
     try:
         log_channel = await ctx.rest.fetch_channel(log_channel_id)
-        message = await log_channel.send(lang.log_channel_pokedex_requested.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member)) 
+        message = await log_channel.send(lang.log_channel_info_requested.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member)) 
     except Exception as e:
         LoggingHandler.LoggingHandler().logger_husqy.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
 
