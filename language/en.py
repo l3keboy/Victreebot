@@ -9,12 +9,23 @@
 embed_footer="Info requested by: {member}. This dialog will show for {auto_delete_time} seconds."
 
 # ------------------------------------------------------------------------- #
+# MEASUREMENTS #
+# ------------------------------------------------------------------------- #
+height_metric_system="meters"
+height_imperial_system="foot"
+height_united_states_customary_unit_system="inches"
+weigth_metric_system="kilograms"
+weigth_imperial_system="pounds"
+weigth_united_states_customary_unit_system="pounds"
+
+# ------------------------------------------------------------------------- #
 # SETTINGS #
 # ------------------------------------------------------------------------- #
 info_embed_title="Welcome to {bot_name}! {version}"
 info_embed_description="{bot_name} for Discord"
 info_embed_lang_field_name="Language"
 info_embed_gmt_field_name="Timezone"
+info_embed_unit_system_name="Unit System"
 info_embed_auto_delete_field_name="Automatically delete Bot messages"
 info_embed_auto_delete_field_value="seconds"
 info_embed_raids_channel_field_name="Raids Channel"
@@ -28,6 +39,7 @@ info_embed_resources_field_value_4="Visit Discords website!"
 
 updated_language="The language of this server is now set to `{language}`!"
 updated_gmt="The timezone of this server is now set to `{gmt}`!"
+updated_unit_system="The unit system for this server is now set to `{system}`!"
 updated_auto_delete_time="The auto delete time for this server is now set to `{seconds} seconds`!"
 updated_raids_channel_changed="The raids channel for this server is now set to `{channel}`!"
 updated_raids_channel_removed="The raids channel for this server is now `removed`!"
@@ -100,7 +112,11 @@ trade_search_embed_looking_for="Looking for Pokémon:"
 # ------------------------------------------------------------------------- #
 # 5_pokedex #
 # ------------------------------------------------------------------------- #
-pokedex_sending_dm="Sending the information of `{pokemon}` to your DM!"
+pokedex_embed_title="Pokédex information about {pokemon}"
+pokedex_embed_name_title="Pokémon name"
+pokedex_embed_id_title="Pokémon ID"
+pokedex_embed_length_weight_title="Height and Weight"
+pokedex_embed_abilities_title="Abilities"
 
 # ------------------------------------------------------------------------- #
 # 6_pokebattler #
@@ -173,7 +189,7 @@ explanation_raid_page_1_description="Hello! Welcome to the raids (commands) help
 explanation_raid_page_2_title="/raid create [raid_type] [boss] [location] [time] | +1 optional"
 explanation_raid_page_2_description="*Optional: **date***"
 explanation_raid_page_2_field_1_title="Creating a raid"
-explanation_raid_page_2_field_1_value="A new raid can be created using the command `/raid create`. This command has 4 required and 1 optional argument.\n\n *Required arguments:*\n - **Raid_type:** The raid_type gives 3 options: Raid, Mega-raid and EX-raid, choose the raid_type you wish to create!\n - **Boss:** The boss is the desired pokémon, f.e. Pikachu, this argument is not case sensitive and your input will be validated.\n - **Location:** The location is the name of the location where the raid takes place, this argument is also not case sensitive and will be validated.\n - **Time:** The time the raid takes place, f.e. 12:00, this is in military time using the HH:MM format!\n\n *The optional arguments:*\n - **Date:** The date the raid takes place, by default the current date will be used, but you can set a custom date using the DD-MM-YYYY format.\n\u200b"
+explanation_raid_page_2_field_1_value="A new raid can be created using the command `/raid create`. This command has 4 required and 1 optional argument.\n\n *Required arguments:*\n - **Raid_type:** The raid_type gives 3 options: Raid, Mega-raid and EX-raid, choose the raid_type you wish to create!\n - **Boss:** The boss is the name or ID of the desired pokémon, f.e. Pikachu, this argument is not case sensitive and your input will be validated.\n - **Location:** The location is the name of the location where the raid takes place, this argument is also not case sensitive and will be validated.\n - **Time:** The time the raid takes place, f.e. 12:00, this is in military time using the HH:MM format!\n\n *The optional arguments:*\n - **Date:** The date the raid takes place, by default the current date will be used, but you can set a custom date using the DD-MM-YYYY format.\n\u200b"
 explanation_raid_page_2_field_2_title="The raid_id"
 explanation_raid_page_2_field_2_value="When creating a new raid, a raid_id will be generated. This ID will be linked to the generated raid and can be used to delete or edit the specific raid.\n\u200b"
 explanation_raid_page_2_field_3_title="The raid message"
@@ -187,7 +203,7 @@ explanation_raid_page_3_field_2_value="This in combination of raid_type and raid
 explanation_raid_page_4_title="/raid edit [raid_type] [raid_id] | +5 optional"
 explanation_raid_page_4_description="*Optional: **New_type**, **New_boss**, **New_location**, **New_time**, **New_date***"
 explanation_raid_page_4_field_1_title="Editing a raid"
-explanation_raid_page_4_field_1_value="If raid details are wrong or have changed, you can edit that raid using the command `/raid edit`. This command has 2 required and 5 optional arguments.\n\n *Required arguments:*\n - **Raid_type:** This is the type of the raid you wish to edit, again, the three options: Raid, Mega-raid and EX-raid are given.\n - **Raid_id:** This is the generated id (raid_id) of the raid you wish to edit.\n\n *Optional arguments:*\n - **New_type:** The new type of the raid (the options: Raid, Mega-raid and EX-raid are given)\n - **New_boss:** The new boss.\n - **New_location:** The name of the new location.\n - **New_time:** The new time the raid takes place, in military time using the HH:MM format!.\n - **New_date:** The new date the raid takes place, using the DD-MM-YYYY format.\n\u200b"
+explanation_raid_page_4_field_1_value="If raid details are wrong or have changed, you can edit that raid using the command `/raid edit`. This command has 2 required and 5 optional arguments.\n\n *Required arguments:*\n - **Raid_type:** This is the type of the raid you wish to edit, again, the three options: Raid, Mega-raid and EX-raid are given.\n - **Raid_id:** This is the generated id (raid_id) of the raid you wish to edit.\n\n *Optional arguments:*\n - **New_type:** The new type of the raid (the options: Raid, Mega-raid and EX-raid are given)\n - **New_boss:** The name or ID of the new boss.\n - **New_location:** The name of the new location.\n - **New_time:** The new time the raid takes place, in military time using the HH:MM format!.\n - **New_date:** The new date the raid takes place, using the DD-MM-YYYY format.\n\u200b"
 explanation_raid_page_4_field_2_title="Why the combination of raid_type and raid_id?"
 explanation_raid_page_4_field_2_value="This in combination of raid_type and raid_id ensures the right raid is edited. When a raid is edited the raid message and all corresponding entries in the database will be changed.\n\u200b"
 explanation_raid_page_4_field_3_title="What happens if I don't set an optional argument?"
@@ -242,15 +258,15 @@ explanation_trade_page_1_description="Hello! Welcome to the trade (commands) hel
 explanation_trade_page_2_title="/trade proposal [pokémon_have] [pokémon_want] | +0 optional"
 explanation_trade_page_2_description="*Optional: **none***"
 explanation_trade_page_2_field_1_title="Proposing a trade"
-explanation_trade_page_2_field_1_value="You can propose a raid to other users by using the command `/trade proposal`. This command has 2 required and 0 optional argument.\n\n *Required arguments:*\n - **Pokémon_have:** This is the pokemon you have and you want to trade with.\n - **Pokémon_want:** This is the Pokémon you want in trade of the Pokémon you have.\n\n *Optional arguments:*\n - **None:** There are no optional arguments!\n\u200b"
+explanation_trade_page_2_field_1_value="You can propose a raid to other users by using the command `/trade proposal`. This command has 2 required and 0 optional argument.\n\n *Required arguments:*\n - **Pokémon_have:** This is the name or ID of the pokemon you have and you want to trade with.\n - **Pokémon_want:** This is the name or ID of the Pokémon you want in trade of the Pokémon you have.\n\n *Optional arguments:*\n - **None:** There are no optional arguments!\n\u200b"
 explanation_trade_page_3_title="/trade offer [pokémon_have] | +0 optional"
 explanation_trade_page_3_description="*Optional: **none***"
 explanation_trade_page_3_field_1_title="Offering a Pokémon for a trade"
-explanation_trade_page_3_field_1_value="If you have a Pokémon you want to trade but don't specificaly know what Pokémon you want in return, you can offer this Pokémon using the command `/trade offer`. This command has 1 required and 0 optional arguments.\n\n *Required arguments:*\n - **Pokémon_have:** This is the pokemon you have and you want to trade with.\n\n *Optional arguments:*\n - **None:** There are no optional arguments!\n\u200b"
+explanation_trade_page_3_field_1_value="If you have a Pokémon you want to trade but don't specificaly know what Pokémon you want in return, you can offer this Pokémon using the command `/trade offer`. This command has 1 required and 0 optional arguments.\n\n *Required arguments:*\n - **Pokémon_have:** This is the name or ID of the pokemon you have and you want to trade with.\n\n *Optional arguments:*\n - **None:** There are no optional arguments!\n\u200b"
 explanation_trade_page_4_title="/trade search [pokémon_want] | +0 optional"
 explanation_trade_page_4_description="*Optional: **none***"
 explanation_trade_page_4_field_1_title="Looking for a Pokémon trade"
-explanation_trade_page_4_field_1_value="If you are looking a Pokémon but don't specificaly know what Pokémon you have in return, you can search this Pokémon using the command `/trade search`. This command has 1 required and 0 optional arguments.\n\n *Required arguments:*\n - **Pokémon_want:** This is the pokemon you want.\n\n *Optional arguments:*\n - **None:** There are no optional arguments!\n\u200b"
+explanation_trade_page_4_field_1_value="If you are looking a Pokémon but don't specificaly know what Pokémon you have in return, you can search this Pokémon using the command `/trade search`. This command has 1 required and 0 optional arguments.\n\n *Required arguments:*\n - **Pokémon_want:** This is the name or ID of the pokemon you want.\n\n *Optional arguments:*\n - **None:** There are no optional arguments!\n\u200b"
 
 # ------------------------------------------------------------------------- #
 # ERRORS #
@@ -274,6 +290,7 @@ pokemon_not_found="I could not find `{pokemon}`!"
 log_channel_info_requested="`[{datetime}]` - **{member}** requested information about me!"
 log_channel_language_changed="`[{datetime}]` - **{member}** changed the language for this server to `{language}`!"
 log_channel_timezone_changed="`[{datetime}]` - **{member}** changed the timezone for this server to `{offset}`!"
+log_channel_unit_system_changed="`[{datetime}]` - **{member}** changed the unit system for this server to `{system}`!"
 log_channel_auto_delete_time_changed="`[{datetime}]` - **{member}** changed the auto delete time for this server to `{seconds} seconds`!"
 log_channel_raids_channel_changed="`[{datetime}]` - **{member}** changed the raids channel for this server to `{channel}`!"
 log_channel_log_channel_changed="`[{datetime}]` - **{member}** changed the log channel for this server to `{channel}`!"

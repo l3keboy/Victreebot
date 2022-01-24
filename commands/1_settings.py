@@ -38,7 +38,7 @@ component = tanjun.Component()
 @tanjun.as_slash_command("info", "Get info about {BOT_NAME}.")
 async def command_info(ctx: tanjun.abc.Context):
     try:
-        lang, language, gmt, auto_delete_time, raids_channel_id, log_channel_id, moderator_role_id = await get_settings.get_all_settings(guild_id=ctx.guild_id)
+        lang, language, gmt, auto_delete_time, raids_channel_id, log_channel_id, moderator_role_id, unit_system = await get_settings.get_all_settings(guild_id=ctx.guild_id)
     except TypeError as e:
         LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
         return
@@ -69,6 +69,7 @@ async def command_info(ctx: tanjun.abc.Context):
             .set_thumbnail()
             .add_field(name=lang.info_embed_lang_field_name, value=f"`{language}`", inline=False)
             .add_field(name=lang.info_embed_gmt_field_name, value=f"`{gmt}`", inline=False)
+            .add_field(name=lang.info_embed_unit_system_name, value=f"`{unit_system}`", inline=False)
             .add_field(name=lang.info_embed_auto_delete_field_name, value=f"`{auto_delete_time} {lang.info_embed_auto_delete_field_value}`", inline=False)
             .add_field(name=lang.info_embed_raids_channel_field_name, value=f"`{raids_channel}`", inline=False)
             .add_field(name=lang.info_embed_log_channel_field_name, value=f"`{log_channel}`", inline=False)
@@ -85,14 +86,11 @@ async def command_info(ctx: tanjun.abc.Context):
     await message.delete()
 
     # SEND TO LOG CHANNEL
-    if log_channel_id == 'Not Configured':
-        pass
-    else:
-        try:
-            log_channel = await ctx.rest.fetch_channel(log_channel_id)
-            message = await log_channel.send(lang.log_channel_info_requested.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member)) 
-        except Exception as e:
-            LoggingHandler.LoggingHandler().logger_husqy.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
+    try:
+        log_channel = await ctx.rest.fetch_channel(log_channel_id)
+        message = await log_channel.send(lang.log_channel_pokedex_requested.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member)) 
+    except Exception as e:
+        LoggingHandler.LoggingHandler().logger_husqy.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
 
 
 # ------------------------------------------------------------------------- #
@@ -166,6 +164,40 @@ async def command_settings_gmt(ctx: tanjun.abc.Context, offset):
 
     # SEND RESPONSE
     response = lang.updated_gmt.format(gmt=offset)
+    message = await ctx.respond(response, ensure_result=True)
+    await asyncio.sleep(auto_delete_time)
+    await message.delete()
+
+@settings_group.with_command
+@tanjun.with_author_permission_check(hikari.Permissions.MANAGE_GUILD)
+@tanjun.with_str_slash_option("system", "The system to use.", choices=[system for system in const.SUPPORTED_UNITS])
+@tanjun.as_slash_command("unit_system", "Set the bots unit system to use.")
+async def command_settings_language(ctx: tanjun.abc.Context, system):
+    try:
+        lang, auto_delete_time = await get_settings.get_language_auto_delete_time_settings(guild_id=ctx.guild_id)
+        log_channel_id = await get_settings.get_log_channel_settings(guild_id=ctx.guild_id)
+    except TypeError as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
+        return
+
+    # UPDATE DATABASE
+    database = await DatabaseHandler.acquire_database()
+    async with database.acquire() as conn:
+        async with conn.transaction():
+            units_to_set = "'" + system + "'"
+            change_language = f'UPDATE "Settings" SET unit_system = {units_to_set} WHERE guild_id = {ctx.guild_id}'
+            await conn.fetch(change_language)
+    await database.close()
+
+    # SEND TO LOG CHANNEL
+    try:
+        channel = await ctx.rest.fetch_channel(channel=log_channel_id)
+        await channel.send(lang.log_channel_unit_system_changed.format(datetime=datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S'), member=ctx.member, system=system))
+    except Exception as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
+
+    # SEND RESPONSE
+    response = lang.updated_unit_system.format(system=system)
     message = await ctx.respond(response, ensure_result=True)
     await asyncio.sleep(auto_delete_time)
     await message.delete()
@@ -396,6 +428,7 @@ async def on_guild_join(event: hikari.GuildJoinEvent):
     # ADD DEFAULTS TO DATABASE
     default_language = "en"
     default_gmt = "GMT+0"
+    default_unit_system = "Metric System"
     default_auto_delete_time = 5
     default_raids_channel = raids_channel.id
     default_log_channel = log_channel.id
@@ -407,7 +440,8 @@ async def on_guild_join(event: hikari.GuildJoinEvent):
             try:
                 language_to_set = "'" + default_language + "'"
                 gmt_to_set = "'" + default_gmt + "'"
-                on_guild_join_query = f'INSERT INTO "Settings" (guild_id, language, gmt, auto_delete_time, raids_channel, log_channel, moderator_role) VALUES ({event.guild_id}, {language_to_set}, {gmt_to_set}, {default_auto_delete_time}, {default_raids_channel}, {default_log_channel}, {default_moderator_role})'
+                unit_system_to_set = "'" + default_unit_system + "'"
+                on_guild_join_query = f'INSERT INTO "Settings" (guild_id, language, gmt, unit_system, auto_delete_time, raids_channel, log_channel, moderator_role) VALUES ({event.guild_id}, {language_to_set}, {gmt_to_set}, {unit_system_to_set}, {default_auto_delete_time}, {default_raids_channel}, {default_log_channel}, {default_moderator_role})'
                 await conn.fetch(on_guild_join_query)
             except asyncpg.exceptions.UniqueViolationError as e:
                 LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Guild_id: {event.guild_id}, already exists in Settings table!")
@@ -465,7 +499,7 @@ async def on_guild_join(event: hikari.GuildJoinEvent):
             .add_field(name="\n\u200b", value=f"\n\u200b", inline=False)
             .add_field(name="Custom Emoji's (permanent)", value=f"`name:`  Instinct\n `emoji:`  {instinct_emoji} \n `name:`  Mystic\n `emoji:`  {mystic_emoji} \n `name:`  Valor\n `emoji:`  {valor_emoji}", inline=False)
             .add_field(name="Roles (permanent)", value=f"`name:`  Instinct\n `role_id:`  {instinct_role.id} \n `name:`  Mystic\n `role_id:`  {mystic_role.id} \n `name:`  Valor\n `role_id:`  {valor_role.id}", inline=False)
-            .add_field(name="Other values (changeable)", value=f"`Language:`  en \n `Timezone:`  GMT 0 \n `Auto Delete Time:`  5 \n `Raids Channel:`  {raids_channel.mention} \n `Logs Channel:`  {log_channel.mention} \n `Moderator Role:`  {moderator_role.mention} \n\n NOTE: You need the `Manage Guild` permissions to change these!", inline=False)
+            .add_field(name="Other values (changeable)", value=f"`Language:`  en \n `Timezone:`  GMT 0 \n `Unit System:` Metric System \n `Auto Delete Time:`  5 \n `Raids Channel:`  {raids_channel.mention} \n `Logs Channel:`  {log_channel.mention} \n `Moderator Role:`  {moderator_role.mention} \n\n NOTE: You need the `Manage Guild` permissions to change these!", inline=False)
     )
 
     await log_channel.send(embed=embed)

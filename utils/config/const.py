@@ -33,6 +33,10 @@ SUPPORTED_TIMEZONES=[
     "GMT+12"
 ]
 
+SUPPORTED_UNITS=[
+    "Metric System", "Imperial System", "United States Customary Unit System"
+]
+
 # 2_location
 LOCATION_TYPES=[
     "Gym", "Pokéstop"

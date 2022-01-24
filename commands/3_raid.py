@@ -137,7 +137,7 @@ raid_component = tanjun.Component().add_slash_command(raid_group)
 @tanjun.with_str_slash_option("date", "The date the raid take place. MUST BE IN FORMAT: DD-MM-YYYY!", default="Current date in your timezone")
 @tanjun.with_str_slash_option("time", "The time of the raid (f.e. 12:00). MUST BE IN FORMAT: HH:MM!")
 @tanjun.with_str_slash_option("location", "The location of the raid.")
-@tanjun.with_str_slash_option("boss", "The boss to fight.")
+@tanjun.with_str_slash_option("boss", "The name or ID of the boss to fight.")
 @tanjun.with_str_slash_option("raid_type", "The type of the raid.", choices=[r_type for r_type in const.RAID_TYPES])
 @tanjun.as_slash_command("create", "Create a raid.")
 async def command_raid_create(ctx: tanjun.abc.Context, raid_type, boss, location, time, date):
@@ -183,14 +183,25 @@ async def command_raid_create(ctx: tanjun.abc.Context, raid_type, boss, location
             await message.delete()
             return
         
-    # VALIDATE BOSS
-    success, poke_img = await pokemon.get_pokemon_img(boss=boss)
-    if not success:
-        response = lang.pokemon_not_found.format(pokemon=boss.lower())
-        message = await ctx.respond(response, ensure_result=True)
-        await asyncio.sleep(auto_delete_time)
-        await message.delete()
-        return
+    valid_id = await validate.__validate_int(boss)
+    if valid_id:
+        # VALIDATE POKÉMON
+        success, poke_img, pokémon = await pokemon.validate_pokemon_by_id(boss=int(boss))
+        if not success:
+            response = lang.pokemon_not_found.format(pokemon=boss)
+            message = await ctx.respond(response, ensure_result=True)
+            await asyncio.sleep(auto_delete_time)
+            await message.delete()
+            return
+    else:
+        # VALIDATE POKÉMON
+        success, poke_img, pokémon = await pokemon.validate_pokemon_by_name(boss=boss)
+        if not success:
+            response = lang.pokemon_not_found.format(pokemon=boss.lower())
+            message = await ctx.respond(response, ensure_result=True)
+            await asyncio.sleep(auto_delete_time)
+            await message.delete()
+            return
     
     # GENERATE ID
     raid_id = str(uuid.uuid4())[:8]
@@ -210,7 +221,7 @@ async def command_raid_create(ctx: tanjun.abc.Context, raid_type, boss, location
         hikari.Embed(
             description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{time} - {gmt}", date=date, location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
         )
-            .set_author(name=boss, icon=poke_img)
+            .set_author(name=pokémon.name, icon=poke_img)
             .set_footer(
             text=lang.raid_embed_footer.format(member=ctx.member.display_name, attendees="0"),
         )
@@ -238,7 +249,7 @@ async def command_raid_create(ctx: tanjun.abc.Context, raid_type, boss, location
             try:
                 id_to_set = "'" + str(raid_id) + "'" 
                 type_to_set = "'" + raid_type + "'"
-                boss_to_set = "'" + boss + "'"
+                boss_to_set = "'" + str(pokémon.name).lower() + "'"
                 location_to_set = "'" + location + "'"
                 time_to_set = "'" + time + "'"
                 date_to_set = "'" + date + "'"
@@ -395,7 +406,7 @@ async def command_raid_delete(ctx: tanjun.abc.Context, raid_type, raid_id):
 @tanjun.with_str_slash_option("new_date", "New date. If no arguments are given, the date will not change!", default=None)
 @tanjun.with_str_slash_option("new_time", "New time. If no arguments are given, the time will not change!", default=None)
 @tanjun.with_str_slash_option("new_location", "New location. If no arguments are given, the location will not change!", default=None)
-@tanjun.with_str_slash_option("new_boss", "New boss. If no arguments are given, the boss will not change!", default=None)
+@tanjun.with_str_slash_option("new_boss", "New name or ID of the boss. If no arguments are given, the boss will not change!", default=None)
 @tanjun.with_str_slash_option("new_type", "New type. If no arguments are given, the type will not change!", default=None, choices=[r_type for r_type in const.RAID_TYPES])
 @tanjun.with_str_slash_option("raid_id", "The ID of the raid to edit.")
 @tanjun.with_str_slash_option("raid_type", "The type of the raid to edit.", choices=[r_type for r_type in const.RAID_TYPES])
@@ -443,7 +454,7 @@ async def command_raid_edit(ctx: tanjun.abc.Context, raid_type, raid_id, new_typ
         raid_type = new_type
 
     # VALIDATE BOSS
-    success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+    success, poke_img, pokémon = await pokemon.validate_pokemon_by_name(boss=boss)
     if not success:
         response = lang.pokemon_not_found.format(pokemon=boss.lower())
         message = await ctx.respond(response, ensure_result=True)
@@ -452,15 +463,27 @@ async def command_raid_edit(ctx: tanjun.abc.Context, raid_type, raid_id, new_typ
         return
 
     if new_boss is not None:
-        success, poke_img = await pokemon.get_pokemon_img(boss=new_boss)
-        if not success:
-            response = lang.pokemon_not_found.format(pokemon=new_boss.lower())
-            message = await ctx.respond(response, ensure_result=True)
-            await asyncio.sleep(auto_delete_time)
-            await message.delete()
-            return
+        valid_id = await validate.__validate_int(new_boss)
+        if valid_id:
+            # VALIDATE POKÉMON
+            success, poke_img, pokémon = await pokemon.validate_pokemon_by_id(boss=int(new_boss))
+            if not success:
+                response = lang.pokemon_not_found.format(pokemon=new_boss)
+                message = await ctx.respond(response, ensure_result=True)
+                await asyncio.sleep(auto_delete_time)
+                await message.delete()
+                return
+        else:
+            # VALIDATE POKÉMON
+            success, poke_img, pokémon = await pokemon.validate_pokemon_by_name(boss=new_boss)
+            if not success:
+                response = lang.pokemon_not_found.format(pokemon=new_boss.lower())
+                message = await ctx.respond(response, ensure_result=True)
+                await asyncio.sleep(auto_delete_time)
+                await message.delete()
+                return
 
-        boss_to_set = "'" + new_boss.lower() + "'"
+        boss_to_set = "'" + str(pokémon.name).lower() + "'"
         new_boss_parameter = f'"boss" = {boss_to_set}'
         parameters.append(new_boss_parameter)
         boss = new_boss.lower()
@@ -532,9 +555,9 @@ async def command_raid_edit(ctx: tanjun.abc.Context, raid_type, raid_id, new_typ
     # EDIT MESSAGE
     embed = (
         hikari.Embed(
-            description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%Y-%m-%d').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
+            description=lang.raid_embed_description.format(raid_id=raid_id, time=f"{datetime.datetime.strptime(str(time), '%H:%M').strftime('%H:%M')} - {gmt}", date=datetime.datetime.strptime(str(date), '%d-%m-%Y').strftime('%d-%m-%Y'), location=location, latitude=latitude, longitude=longitude, raid_type=raid_type)
         )
-            .set_author(name=boss, icon=poke_img)
+            .set_author(name=pokémon.name, icon=poke_img)
             .set_footer(
             text=lang.raid_embed_footer.format(member=await ctx.rest.fetch_member(ctx.guild_id, user_id), attendees=total_attendees),
         )
@@ -621,7 +644,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                 await database.close()
 
                 location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                success, poke_img, pokémon = await pokemon.validate_pokemon_by_name(boss=boss)
 
                 # EDIT MESSAGE
                 embed = (
@@ -680,7 +703,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                 await database.close()
 
                 location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                success, poke_img, pokémon = await pokemon.validate_pokemon_by_name(boss=boss)
 
                 # EDIT MESSAGE
                 embed = (
@@ -739,7 +762,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                 await database.close()
 
                 location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                success, poke_img, pokémon = await pokemon.validate_pokemon_by_name(boss=boss)
 
                 # EDIT MESSAGE
                 embed = (
@@ -798,7 +821,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                 await database.close()
 
                 location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                success, poke_img, pokémon = await pokemon.validate_pokemon_by_name(boss=boss)
 
                 # EDIT MESSAGE
                 embed = (
@@ -850,7 +873,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                 await database.close()
 
                 location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                success, poke_img, pokémon = await pokemon.validate_pokemon_by_name(boss=boss)
 
                 # EDIT MESSAGE
                 embed = (
@@ -902,7 +925,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                 await database.close()
 
                 location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                success, poke_img, pokémon = await pokemon.validate_pokemon_by_name(boss=boss)
 
                 # EDIT MESSAGE
                 embed = (
@@ -954,7 +977,7 @@ async def on_guild_reaction_add(event: hikari.GuildReactionAddEvent):
                 await database.close()
 
                 location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                success, poke_img, pokémon = await pokemon.validate_pokemon_by_name(boss=boss)
 
                 # EDIT MESSAGE
                 embed = (
@@ -1027,7 +1050,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                 await database.close()
 
                 location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                success, poke_img, pokémon = await pokemon.validate_pokemon_by_name(boss=boss)
 
                 # EDIT MESSAGE
                 embed = (
@@ -1085,7 +1108,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                 await database.close()
 
                 location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                success, poke_img, pokémon = await pokemon.validate_pokemon_by_name(boss=boss)
 
                 # EDIT MESSAGE
                 embed = (
@@ -1143,7 +1166,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                 await database.close()
 
                 location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                success, poke_img, pokémon = await pokemon.validate_pokemon_by_name(boss=boss)
 
                 # EDIT MESSAGE
                 embed = (
@@ -1202,7 +1225,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                 await database.close()
 
                 location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                success, poke_img, pokémon = await pokemon.validate_pokemon_by_name(boss=boss)
 
                 # EDIT MESSAGE
                 embed = (
@@ -1254,7 +1277,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                 await database.close()
 
                 location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                success, poke_img, pokémon = await pokemon.validate_pokemon_by_name(boss=boss)
 
                 # EDIT MESSAGE
                 embed = (
@@ -1306,7 +1329,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                 await database.close()
 
                 location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                success, poke_img, pokémon = await pokemon.validate_pokemon_by_name(boss=boss)
 
                 # EDIT MESSAGE
                 embed = (
@@ -1358,7 +1381,7 @@ async def on_guild_reaction_delete(event: hikari.GuildReactionDeleteEvent):
                 await database.close()
 
                 location_exists, latitude, longitude = await validate.__validate_location(guild_id=event.guild_id, location=location)
-                success, poke_img = await pokemon.get_pokemon_img(boss=boss)
+                success, poke_img, pokémon = await pokemon.validate_pokemon_by_name(boss=boss)
 
                 # EDIT MESSAGE
                 embed = (

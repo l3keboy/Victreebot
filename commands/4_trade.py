@@ -20,7 +20,7 @@ import aiohttp
 from io import BytesIO
 # Own Files
 from utils import LoggingHandler
-from utils.functions import get_settings, pokemon
+from utils.functions import get_settings, pokemon, validate
 
 # .ENV AND .ENV VARIABLES
 # Load .env
@@ -43,8 +43,8 @@ trade_component = tanjun.Component().add_slash_command(trade_group)
 
 
 @trade_group.with_command
-@tanjun.with_str_slash_option("pokémon_want", "The Pokémon you want to have.")
-@tanjun.with_str_slash_option("pokémon_have", "The Pokémon you have to offer.")
+@tanjun.with_str_slash_option("pokémon_want", "The name or ID of the Pokémon you want to have.")
+@tanjun.with_str_slash_option("pokémon_have", "The name or ID of the Pokémon you have to offer.")
 @tanjun.as_slash_command("proposal", "Propose a trade to other server users.")
 async def command_trade_proposal(ctx: tanjun.abc.Context, pokémon_have, pokémon_want):
     try:
@@ -54,22 +54,45 @@ async def command_trade_proposal(ctx: tanjun.abc.Context, pokémon_have, pokémo
         LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
         return
 
-    # VALIDATE POKÉMON HAVE
-    success, poke_img_have = await pokemon.get_pokemon_img(boss=pokémon_have)
-    if not success:
-        response = lang.pokemon_not_found.format(pokemon=pokémon_have.lower())
-        message = await ctx.respond(response, ensure_result=True)
-        await asyncio.sleep(auto_delete_time)
-        await message.delete()
-        return
-    # VALIDATE POKÉMON WANT
-    success, poke_img_want = await pokemon.get_pokemon_img(boss=pokémon_want)
-    if not success:
-        response = lang.pokemon_not_found.format(pokemon=pokémon_want.lower())
-        message = await ctx.respond(response, ensure_result=True)
-        await asyncio.sleep(auto_delete_time)
-        await message.delete()
-        return
+    valid_id = await validate.__validate_int(pokémon_have)
+    if valid_id:
+        # VALIDATE POKÉMON
+        success, poke_img_have, pokémon_have = await pokemon.validate_pokemon_by_id(boss=int(pokémon_have))
+        if not success:
+            response = lang.pokemon_not_found.format(pokemon=pokémon_have)
+            message = await ctx.respond(response, ensure_result=True)
+            await asyncio.sleep(auto_delete_time)
+            await message.delete()
+            return
+    else:
+        # VALIDATE POKÉMON
+        success, poke_img_have, pokémon_have = await pokemon.validate_pokemon_by_name(boss=pokémon_have)
+        if not success:
+            response = lang.pokemon_not_found.format(pokemon=pokémon_have.lower())
+            message = await ctx.respond(response, ensure_result=True)
+            await asyncio.sleep(auto_delete_time)
+            await message.delete()
+            return
+
+    valid_id = await validate.__validate_int(pokémon_want)
+    if valid_id:
+        # VALIDATE POKÉMON
+        success, poke_img_want, pokémon_want = await pokemon.validate_pokemon_by_id(boss=int(pokémon_want))
+        if not success:
+            response = lang.pokemon_not_found.format(pokemon=pokémon_want)
+            message = await ctx.respond(response, ensure_result=True)
+            await asyncio.sleep(auto_delete_time)
+            await message.delete()
+            return
+    else:
+        # VALIDATE POKÉMON
+        success, poke_img_want, pokémon_want = await pokemon.validate_pokemon_by_name(boss=pokémon_want)
+        if not success:
+            response = lang.pokemon_not_found.format(pokemon=pokémon_want.lower())
+            message = await ctx.respond(response, ensure_result=True)
+            await asyncio.sleep(auto_delete_time)
+            await message.delete()
+            return
 
     async with aiohttp.ClientSession() as session:
         async with session.get(poke_img_have) as response:
@@ -91,15 +114,15 @@ async def command_trade_proposal(ctx: tanjun.abc.Context, pokémon_have, pokémo
     embed = (
         hikari.Embed(
             title=lang.trade_proposal_embed_title,
-            description=lang.trade_proposal_embed_description.format(pokémon_have=pokémon_have, pokémon_want=pokémon_want)
+            description=lang.trade_proposal_embed_description.format(pokémon_have=pokémon_have.name, pokémon_want=pokémon_want.name)
         )
             .set_footer(
             text=lang.trade_proposal_embed_footer.format(member=ctx.member.display_name),
         )
             .set_thumbnail()
-            .add_field(name=lang.trade_proposal_embed_offering, value=f"{pokémon_have}", inline=True)
+            .add_field(name=lang.trade_proposal_embed_offering, value=f"{pokémon_have.name}", inline=True)
             .add_field(name="<->", value="\u200b", inline=True)
-            .add_field(name=lang.trade_proposal_embed_looking_for, value=f"{pokémon_want}", inline=True)
+            .add_field(name=lang.trade_proposal_embed_looking_for, value=f"{pokémon_want.name}", inline=True)
             .set_image(combined_image_bytes)
         )
 
@@ -114,7 +137,7 @@ async def command_trade_proposal(ctx: tanjun.abc.Context, pokémon_have, pokémo
         LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
 
 @trade_group.with_command
-@tanjun.with_str_slash_option("pokémon_have", "The Pokémon you have to offer.")
+@tanjun.with_str_slash_option("pokémon_have", "The name or ID of the Pokémon you have to offer.")
 @tanjun.as_slash_command("offer", "Offer a Pokémon to trade.")
 async def command_trade_offer(ctx: tanjun.abc.Context, pokémon_have):
     try:
@@ -124,25 +147,36 @@ async def command_trade_offer(ctx: tanjun.abc.Context, pokémon_have):
         LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
         return
 
-    # VALIDATE POKÉMON HAVE
-    success, poke_img_have = await pokemon.get_pokemon_img(boss=pokémon_have)
-    if not success:
-        response = lang.pokemon_not_found.format(pokemon=pokémon_have.lower())
-        message = await ctx.respond(response, ensure_result=True)
-        await asyncio.sleep(auto_delete_time)
-        await message.delete()
-        return
+    valid_id = await validate.__validate_int(pokémon_have)
+    if valid_id:
+        # VALIDATE POKÉMON
+        success, poke_img_have, pokémon_have = await pokemon.validate_pokemon_by_id(boss=int(pokémon_have))
+        if not success:
+            response = lang.pokemon_not_found.format(pokemon=pokémon_have)
+            message = await ctx.respond(response, ensure_result=True)
+            await asyncio.sleep(auto_delete_time)
+            await message.delete()
+            return
+    else:
+        # VALIDATE POKÉMON
+        success, poke_img_have, pokémon_have = await pokemon.validate_pokemon_by_name(boss=pokémon_have)
+        if not success:
+            response = lang.pokemon_not_found.format(pokemon=pokémon_have.lower())
+            message = await ctx.respond(response, ensure_result=True)
+            await asyncio.sleep(auto_delete_time)
+            await message.delete()
+            return
 
     embed = (
         hikari.Embed(
             title=lang.trade_offer_embed_title,
-            description=lang.trade_offer_embed_description.format(pokémon_have=pokémon_have)
+            description=lang.trade_offer_embed_description.format(pokémon_have=pokémon_have.name)
         )
             .set_footer(
             text=lang.trade_offer_embed_footer.format(member=ctx.member.display_name),
         )
             .set_thumbnail()
-            .add_field(name=lang.trade_offer_embed_offering, value=f"{pokémon_have}", inline=True)
+            .add_field(name=lang.trade_offer_embed_offering, value=f"{pokémon_have.name}", inline=True)
             .set_image(poke_img_have)
         )
 
@@ -158,7 +192,7 @@ async def command_trade_offer(ctx: tanjun.abc.Context, pokémon_have):
         LoggingHandler.LoggingHandler().logger_victreebot_logger.error(f"Something went wrong while trying to send to log channel for guild_id: {ctx.guild_id}!")
 
 @trade_group.with_command
-@tanjun.with_str_slash_option("pokémon_want", "The Pokémon you want to have.")
+@tanjun.with_str_slash_option("pokémon_want", "The name or ID of the Pokémon you want to have.")
 @tanjun.as_slash_command("search", "Search for a Pokémon to trade.")
 async def command_trade_offer(ctx: tanjun.abc.Context, pokémon_want):
     try:
@@ -168,25 +202,36 @@ async def command_trade_offer(ctx: tanjun.abc.Context, pokémon_want):
         LoggingHandler.LoggingHandler().logger_victreebot_database.error(f"Type error, something wrong with database (IndexError?). Error: {e}")
         return
 
-    # VALIDATE POKÉMON WANT
-    success, poke_img_want = await pokemon.get_pokemon_img(boss=pokémon_want)
-    if not success:
-        response = lang.pokemon_not_found.format(pokemon=pokémon_want.lower())
-        message = await ctx.respond(response, ensure_result=True)
-        await asyncio.sleep(auto_delete_time)
-        await message.delete()
-        return
+    valid_id = await validate.__validate_int(pokémon_want)
+    if valid_id:
+        # VALIDATE POKÉMON
+        success, poke_img_want, pokémon_want = await pokemon.validate_pokemon_by_id(boss=int(pokémon_want))
+        if not success:
+            response = lang.pokemon_not_found.format(pokemon=pokémon_want)
+            message = await ctx.respond(response, ensure_result=True)
+            await asyncio.sleep(auto_delete_time)
+            await message.delete()
+            return
+    else:
+        # VALIDATE POKÉMON
+        success, poke_img_want, pokémon_want = await pokemon.validate_pokemon_by_name(boss=pokémon_want)
+        if not success:
+            response = lang.pokemon_not_found.format(pokemon=pokémon_want.lower())
+            message = await ctx.respond(response, ensure_result=True)
+            await asyncio.sleep(auto_delete_time)
+            await message.delete()
+            return
 
     embed = (
         hikari.Embed(
             title=lang.trade_search_embed_title,
-            description=lang.trade_search_embed_description.format(pokémon_want=pokémon_want)
+            description=lang.trade_search_embed_description.format(pokémon_want=pokémon_want.name)
         )
             .set_footer(
             text=lang.trade_search_embed_footer.format(member=ctx.member.display_name),
         )
             .set_thumbnail()
-            .add_field(name=lang.trade_search_embed_looking_for, value=f"{pokémon_want}", inline=True)
+            .add_field(name=lang.trade_search_embed_looking_for, value=f"{pokémon_want.name}", inline=True)
             .set_image(poke_img_want)
         )
 

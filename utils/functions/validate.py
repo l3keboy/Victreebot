@@ -125,10 +125,24 @@ async def __validate_date(date):
 # ------------------------------------------------------------------------- #
 # FRIEND_CODES #
 # ------------------------------------------------------------------------- #
+# Validate if the friend code is in the XXXX-XXXX-XXXX format
 async def __validate_friend_code(friend_code):
     friend_code_regex = r"^\d{4}\-\d{4}\-\d{4}$"
     if re.match(friend_code_regex, friend_code):
         return True
     else: 
         LoggingHandler.LoggingHandler().logger_victreebot_validator.error("Invalid friend code format given!")
+        return False
+
+
+# ------------------------------------------------------------------------- #
+# VALIDATE ID #
+# ------------------------------------------------------------------------- #
+# Validate if the ID given is correct (e.g. int)
+async def __validate_int(value):
+    try:
+        int(value)
+        return True
+    except Exception as e:
+        LoggingHandler.LoggingHandler().logger_victreebot_validator.error("Given input was not int!")
         return False
