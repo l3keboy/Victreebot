@@ -1,0 +1,2 @@
+# VictreeBot
+The VictreeBot Discordbot
