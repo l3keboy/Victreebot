@@ -33,7 +33,6 @@ load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 BOT_NAME = os.getenv("BOT_NAME")
 SUPPORT_SERVER_ID = os.getenv("SUPPORT_SERVER_ID")
-GUILD_ID=438415532602032138
 
 _VictreeBot = t.TypeVar("_VictreeBot", bound="Bot")
 

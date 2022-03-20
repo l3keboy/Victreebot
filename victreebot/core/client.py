@@ -30,10 +30,9 @@ class Client(tanjun.Client):
 
     def load_modules(self: _ClientT) -> _ClientT:
         """ Load modules/commands from the ./victreebot/extentions folder """
-        path = Path("../VictreeBot/victreebot/extentions").glob("*.py")
-
-        for file in path:                
-            super().load_modules(file)
+        path = Path("../VictreeBot/victreebot/extentions/loader.py")
+      
+        super().load_modules(path)
 
         logging.getLogger("hikari.tanjun.clients").info("Modules loading complete!")
         return self
