@@ -119,7 +119,7 @@ async def command_log_settings_update_log_channel(ctx: tanjun.abc.Context, chann
 @tanjun.with_bool_slash_option("log_info", "If info requests should be logged (Note! This is for all info commands AND ping!).", default=None)
 @tanjun.with_bool_slash_option("log_errors", "If errors should be logged (e.g. a change or command failed).", default=None)
 @tanjun.as_slash_command("general_events", f"Update {BOT_NAME.capitalize()}'s general events settings.")
-async def command_log_settings_update_general_events(ctx: tanjun.abc.Context, log_errors: bool, log_info: bool, log_settings_changed: bool, log_support: bool, _db: DatabaseHandler = tanjun.injected(type=DatabaseHandler), _bot: BotUtils = tanjun.injected(type=BotUtils)):
+async def command_log_settings_update_general_events(ctx: tanjun.abc.Context, log_errors: bool, log_info: bool, log_settings_changed: bool, _db: DatabaseHandler = tanjun.injected(type=DatabaseHandler), _bot: BotUtils = tanjun.injected(type=BotUtils)):
     language, auto_delete, *none = await _db.get_guild_settings(guild=ctx.get_guild(), settings=["language", "auto_delete"])
     
     # Check if guild exists in database
@@ -145,11 +145,6 @@ async def command_log_settings_update_general_events(ctx: tanjun.abc.Context, lo
     # Handle new log_settings_changed
     if log_settings_changed is not None:
         parameters.append(f'"log_settings_changed" = {log_settings_changed}')
-
-    # Handle new log_support
-    if log_support is not None:
-        parameters.append(f'"log_support" = {log_support}')
-
 
     success = await _db.set_guild_log_setting(guild=ctx.get_guild(), parameters=parameters)
     if not success:
