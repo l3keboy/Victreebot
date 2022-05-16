@@ -6,16 +6,12 @@
 # Written by Luke Hendriks                                                  #
 # ------------------------------------------------------------------------- #
 # IMPORTS
-# Logging
 import logging
-# Own Files
 from .client import Client
-# Hikari
+from utils.VersionHandler import VersionHandler
 import hikari
-# Database and .env
 import os
 from dotenv import load_dotenv
-# Functionality
 import sys
 import typing as t
 import asyncio
@@ -44,7 +40,7 @@ class Bot(hikari.GatewayBot):
             intents=hikari.Intents.ALL,
             banner=None
         )
-        #self.vs = VersionHandler
+        self.vs = VersionHandler
 
     def create_client(self: _VictreeBot) -> None:
         """ Build a tanjun client """
