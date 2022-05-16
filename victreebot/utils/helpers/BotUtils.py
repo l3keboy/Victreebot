@@ -15,7 +15,6 @@ import pytz
 import tanjun
 from dotenv import load_dotenv
 from utils.DatabaseHandler import DatabaseHandler
-from utils.helpers.contants import SUPPORTED_LANGUAGES
 
 load_dotenv()
 BOT_NAME = os.getenv("BOT_NAME")

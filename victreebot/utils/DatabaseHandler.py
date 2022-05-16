@@ -134,8 +134,7 @@ class DatabaseHandler:
                     )
                 except asyncpg.UniqueViolationError:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_guild_log_settings").warning(
-                        f"UniqueViolationError guild_id: {guild.id} already exists in "
-                        "Guild_Logging database table!"
+                        f"UniqueViolationError guild_id: {guild.id} already exists in " "Guild_Logging database table!"
                     )
                 except Exception as e:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_guild_log_settings").error(
@@ -355,10 +354,7 @@ class DatabaseHandler:
                     await self.insert_guild_settings(guild=guild)
                     # Return default values for every requested setting
                     for setting in settings:
-                        if (
-                            setting == "raids_channel_id"
-                            or setting == "moderator_role_id"
-                        ):
+                        if setting == "raids_channel_id" or setting == "moderator_role_id":
                             results.append("None")
                         else:
                             results.append(DB_GUILD_SETTINGS_DEFAUTS.get(setting).strip("'"))

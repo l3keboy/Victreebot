@@ -7,10 +7,12 @@
 # ------------------------------------------------------------------------- #
 # IMPORTS
 # Hikari
-import tanjun
 # Database and .env
 import os
+
+import tanjun
 from dotenv import load_dotenv
+
 # Command Groups
 # Events
 
@@ -26,6 +28,7 @@ bot_component = (
     # COMMANDS
     # EVENTS
 )
+
 
 @tanjun.as_loader
 def load_component(client: tanjun.abc.Client) -> None:

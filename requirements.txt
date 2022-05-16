@@ -5,3 +5,18 @@
 # would be appreciated.                                                     #
 # Written by Luke Hendriks                                                  #
 # ------------------------------------------------------------------------- #
+hikari
+hikari-tanjun
+python-dotenv
+pathlib2
+typing
+asyncio
+pyfiglet
+colorama
+datetime
+git-python
+apscheduler
+nox
+flake8
+black
+isort

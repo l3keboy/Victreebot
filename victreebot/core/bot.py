@@ -7,16 +7,16 @@
 # ------------------------------------------------------------------------- #
 # IMPORTS
 import logging
-from .client import Client
-from utils.VersionHandler import VersionHandler
-import hikari
 import os
-from dotenv import load_dotenv
 import sys
 import typing as t
-import asyncio
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+import hikari
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from dotenv import load_dotenv
+from utils.VersionHandler import VersionHandler
+
+from .client import Client
 
 clear, back_slash = "clear", "/"
 if os.name == "nt":
@@ -29,27 +29,24 @@ SUPPORT_SERVER_ID = os.getenv("SUPPORT_SERVER_ID")
 
 _VictreeBot = t.TypeVar("_VictreeBot", bound="Bot")
 
+
 # ------------------------------------------------------------------------- #
 # BOT CLASS #
 # ------------------------------------------------------------------------- #
 class Bot(hikari.GatewayBot):
     def __init__(self) -> None:
-        """ Initialize hikari.GatewayBot component """
-        super().__init__(
-            token=BOT_TOKEN,
-            intents=hikari.Intents.ALL,
-            banner=None
-        )
+        """Initialize hikari.GatewayBot component"""
+        super().__init__(token=BOT_TOKEN, intents=hikari.Intents.ALL, banner=None)
         self.vs = VersionHandler
 
     def create_client(self: _VictreeBot) -> None:
-        """ Build a tanjun client """
+        """Build a tanjun client"""
         self.client = Client.from_gateway_bot(self, declare_global_commands=True)
         self.client.load_modules()
         self.client.set_auto_defer_after(0)
 
     def run(self) -> None:
-        """ Run the Bot """
+        """Run the Bot"""
         self.create_client()
         self.event_manager.subscribe(hikari.StartingEvent, self.on_starting)
         self.event_manager.subscribe(hikari.StartedEvent, self.on_started)
@@ -60,7 +57,7 @@ class Bot(hikari.GatewayBot):
     def restart(self):
         os.system(clear)
         sys.stdout.flush()
-        os.execv(sys.executable, ['python'] + sys.argv)
+        os.execv(sys.executable, ["python"] + sys.argv)
 
     async def check_for_updates(self):
         logging.getLogger(f"{BOT_NAME.lower()}.update").info("Checking for updates.....")
@@ -72,15 +69,15 @@ class Bot(hikari.GatewayBot):
 
     # EVENT HANDLERS
     async def on_starting(self, event: hikari.StartingEvent):
-        """ Handle the hikari.StartingEvent """
+        """Handle the hikari.StartingEvent"""
         # Check for updates and schedule the updates checker
         await self.check_for_updates()
         scheduler_update = AsyncIOScheduler()
-        scheduler_update.add_job(self.check_for_updates, 'cron', day_of_week='mon-sun', hour=3)
+        scheduler_update.add_job(self.check_for_updates, "cron", day_of_week="mon-sun", hour=3)
         scheduler_update.start()
 
     async def on_started(self, event: hikari.StartedEvent):
-        """ Handle the hikari.StartedEvent """
+        """Handle the hikari.StartedEvent"""
 
     async def on_stopping(self, event: hikari.StoppingEvent):
-        """ Handle the hikari.StoppingEvent """
+        """Handle the hikari.StoppingEvent"""
