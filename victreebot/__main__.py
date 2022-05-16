@@ -9,9 +9,9 @@
 # Logging
 import logging
 # Own Files
-from utils.LoggingHandler import LoggingHandler
-logging.basicConfig(level="INFO")
-logging.setLoggerClass(LoggingHandler)
+# from utils.LoggingHandler import LoggingHandler
+# logging.basicConfig(level="INFO")
+# logging.setLoggerClass(LoggingHandler)
 from core.bot import Bot
 # Database and .env
 import os

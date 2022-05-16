@@ -10,9 +10,6 @@
 import logging
 # Own Files
 from .client import Client
-from utils.VersionHandler import VersionHandler
-from utils.DatabaseHandler import DatabaseHandler
-from utils.helpers.BotUtils import BotUtils
 # Hikari
 import hikari
 # Database and .env
@@ -47,7 +44,7 @@ class Bot(hikari.GatewayBot):
             intents=hikari.Intents.ALL,
             banner=None
         )
-        self.vs = VersionHandler
+        #self.vs = VersionHandler
 
     def create_client(self: _VictreeBot) -> None:
         """ Build a tanjun client """
@@ -85,19 +82,9 @@ class Bot(hikari.GatewayBot):
         scheduler_update = AsyncIOScheduler()
         scheduler_update.add_job(self.check_for_updates, 'cron', day_of_week='mon-sun', hour=3)
         scheduler_update.start()
-        
-        # Init DatabaseHandler, create database pool and inject
-        self.db = DatabaseHandler()
-        await self.db.connect()
-        self.client.set_type_dependency(DatabaseHandler, self.db)
-
-        # Injecy BotUtils
-        self.client.set_type_dependency(BotUtils, BotUtils())
 
     async def on_started(self, event: hikari.StartedEvent):
         """ Handle the hikari.StartedEvent """
 
     async def on_stopping(self, event: hikari.StoppingEvent):
         """ Handle the hikari.StoppingEvent """
-        # Close database pool
-        await self.db.close()

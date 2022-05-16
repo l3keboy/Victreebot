@@ -7,13 +7,11 @@
 # ------------------------------------------------------------------------- #
 # IMPORTS
 # Hikari
-import hikari
 import tanjun
 # Database and .env
 import os
 from dotenv import load_dotenv
 # Command Groups
-from extentions.settings import settings_group, log_settings_group
 # Events
 
 
@@ -26,9 +24,6 @@ BOT_NAME = os.getenv("BOT_NAME")
 bot_component = (
     tanjun.Component()
     # COMMANDS
-    ## Settings
-    .add_command(settings_group)
-    .add_command(log_settings_group)
     # EVENTS
 )
 
