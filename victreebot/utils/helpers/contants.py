@@ -23,13 +23,6 @@ DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS = {
     "log_settings_changed": "True",
 }
 
-DB_USER_DEFAUTS = {
-    "friendcodes": "NULL",
-    "active_locations": "NULL",
-    "stats_raids_created": "0",
-    "stats_raids_participated": "0",
-}
-
 # ------------------------------------------------------------------------- #
 # SETTINGS VALUES #
 # ------------------------------------------------------------------------- #
