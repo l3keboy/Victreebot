@@ -13,6 +13,7 @@ import asyncpg
 import hikari
 from dotenv import load_dotenv
 from utils.helpers.contants import DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS
+from utils.helpers.contants import DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS
 from utils.helpers.contants import DB_GUILD_SETTINGS_DEFAUTS
 from utils.helpers.contants import DB_USER_DETAILS_DEFAULT
 
@@ -124,10 +125,14 @@ class DatabaseHandler:
                 try:
                     await conn.execute(
                         f"""INSERT INTO "Guild_Log_Settings"
-                        (guild_id,{",".join(s for s in DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS.keys())}
+                        (guild_id,
+                        {",".join(s for s in DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS.keys())},
+                        {",".join(s for s in DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS.keys())},
                         VALUES
                         ({guild.id},
-                        {",".join(str(s_value) for s_value in DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS.values())}"""
+                        {",".join(str(s_value) for s_value in DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS.values())},
+                        {",".join(str(s_value) for s_value in DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS.values())},
+                        """
                     )
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_guild_log_settings").info(
                         f"Successfully inserted guild_id: {guild.id} into Guild_Log_Settings database table!"
@@ -403,14 +408,8 @@ class DatabaseHandler:
                         f"Inserting {guild.id} to database with default values and returning default values!"
                     )
                     # The Guild is not insterted in the database table. Insert and return default values
-                    await self.insert_guild(guild)
-                    await self.insert_guild_settings(guild)
-                    await self.insert_guild_log_settings(guild)
                     for setting in settings:
-                        if setting == "raids_channel_id" or settings == "moderator_role_id":
-                            results.append(None)
-                        else:
-                            results.append(DB_GUILD_SETTINGS_DEFAUTS.get(setting).strip("'"))
+                        results.append(None)
                 except Exception as e:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.get_guild_log_settings").error(
                         f"Unexpected error while trying to fetch log settings for guild_id: {guild.id}! Got error: {e}"

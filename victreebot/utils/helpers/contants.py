@@ -22,10 +22,14 @@ DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS = {
     "log_info": "True",
     "log_settings_changed": "True",
 }
+DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS = {
+    "log_profile_edit": "True",
+    "log_profile_view": "True",
+}
 
 DB_USER_DETAILS_DEFAULT = {
-    "friend_codes": "'NULL'",
-    "active_locations": "'NULL'",
+    "friend_codes": "NULL",
+    "active_locations": "NULL",
     "stats_raids_created": "0",
     "stats_raids_participated": "0",
 }

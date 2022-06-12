@@ -47,6 +47,15 @@ profile_edit_embed_description = "Welcome to the profile configurator. Please se
 # ------------------------------------------------------------------------- #
 # view.py #
 # ------------------------------------------------------------------------- #
+profile_no_friend_codes_set = "No friend codes set!"
+profile_no_active_locations_set = "No active locations set!"
 # Response
 # Log response
+log_response_profile_view = "`[{datetime}]` -- **{member}** viewed {target_member} their profile!"
 # Embeds
+profile_view_embed_title = "Profile"
+profile_view_embed_description = "Viewing {member}'s profile"
+profile_view_embed_field_friend_codes = "Friend codes:"
+profile_view_embed_field_active_locations = "Active in:"
+profile_view_embed_field_raids_created = "Created"
+profile_view_embed_field_raids_participated = "Participated in"
