@@ -15,6 +15,8 @@ import hikari
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from dotenv import load_dotenv
 from utils.VersionHandler import VersionHandler
+from utils.DatabaseHandler import DatabaseHandler
+from utils.helpers.BotUtils import BotUtils
 
 from .client import Client
 
@@ -26,6 +28,7 @@ load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 BOT_NAME = os.getenv("BOT_NAME")
 SUPPORT_SERVER_ID = os.getenv("SUPPORT_SERVER_ID")
+GUILD_ID = 953976913968390184
 
 _VictreeBot = t.TypeVar("_VictreeBot", bound="Bot")
 
@@ -41,7 +44,7 @@ class Bot(hikari.GatewayBot):
 
     def create_client(self: _VictreeBot) -> None:
         """Build a tanjun client"""
-        self.client = Client.from_gateway_bot(self, declare_global_commands=True)
+        self.client = Client.from_gateway_bot(self, declare_global_commands=GUILD_ID)
         self.client.load_modules()
         self.client.set_auto_defer_after(0)
 
@@ -76,8 +79,20 @@ class Bot(hikari.GatewayBot):
         scheduler_update.add_job(self.check_for_updates, "cron", day_of_week="mon-sun", hour=3)
         scheduler_update.start()
 
+        # Init DatabaseHandler, create database pool and inject
+        self.db = DatabaseHandler()
+        await self.db.connect()
+        self.client.set_type_dependency(DatabaseHandler, self.db)
+
+        # Inject BotUtils
+        self.client.set_type_dependency(BotUtils, BotUtils())
+
     async def on_started(self, event: hikari.StartedEvent):
         """Handle the hikari.StartedEvent"""
+        # Inject RESTAware bot object
+        self.client.set_type_dependency(Bot, self)
 
     async def on_stopping(self, event: hikari.StoppingEvent):
         """Handle the hikari.StoppingEvent"""
+        # Close database pool
+        await self.db.close()

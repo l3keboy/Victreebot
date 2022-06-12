@@ -14,7 +14,7 @@ import hikari
 from dotenv import load_dotenv
 from utils.helpers.contants import DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS
 from utils.helpers.contants import DB_GUILD_SETTINGS_DEFAUTS
-from utils.helpers.contants import DB_USER_DEFAUTS
+from utils.helpers.contants import DB_USER_DETAILS_DEFAULT
 
 load_dotenv()
 BOT_NAME = os.getenv("BOT_NAME")
@@ -117,29 +117,29 @@ class DatabaseHandler:
                     )
 
     async def insert_guild_log_settings(self, guild: hikari.Guild) -> None:
-        """Insert guild into Guild_Logging database table"""
+        """Insert guild into Guild_Log_Settings database table"""
         async with self._pool.acquire() as conn:
             async with conn.transaction():
-                # Insert guild into "Guild_Logging" database table
+                # Insert guild into "Guild_Log_Settings" database table
                 try:
                     await conn.execute(
-                        f"""INSERT INTO "Guild_Logging"
+                        f"""INSERT INTO "Guild_Log_Settings"
                         (guild_id,{",".join(s for s in DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS.keys())}
                         VALUES
                         ({guild.id},
                         {",".join(str(s_value) for s_value in DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS.values())}"""
                     )
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_guild_log_settings").info(
-                        f"Successfully inserted guild_id: {guild.id} into Guild_Logging database table!"
+                        f"Successfully inserted guild_id: {guild.id} into Guild_Log_Settings database table!"
                     )
                 except asyncpg.UniqueViolationError:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_guild_log_settings").warning(
-                        f"UniqueViolationError guild_id: {guild.id} already exists in " "Guild_Logging database table!"
+                        f"UniqueViolationError guild_id: {guild.id} already exists in " "Guild_Log_Settings database table!"
                     )
                 except Exception as e:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_guild_log_settings").error(
                         f"Unexpected error while trying to insert guild_id: {guild.id} "
-                        f"into Guild_Logging database table! Got error: {e}!"
+                        f"into Guild_Log_Settings database table! Got error: {e}!"
                     )
 
     async def insert_user(self, guild: hikari.Guild, member: hikari.Member) -> None:
@@ -149,8 +149,8 @@ class DatabaseHandler:
                 # Insert user into "Users" database table
                 try:
                     await conn.execute(
-                        f"""INSERT INTO "Users" (guild_id,user_id,{",".join(d for d in DB_USER_DEFAUTS.keys())})
-                        VALUES ({guild.id},{member.id},{",".join(d_value for d_value in DB_USER_DEFAUTS.values())})"""
+                        f"""INSERT INTO "Users" (guild_id,user_id,{",".join(d for d in DB_USER_DETAILS_DEFAULT.keys())})
+                        VALUES ({guild.id},{member.id},{",".join(d_value for d_value in DB_USER_DETAILS_DEFAULT.values())})"""
                     )
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_user").info(
                         f"Successfully inserted combination of guild_id: {guild.id} "
@@ -209,22 +209,22 @@ class DatabaseHandler:
                     )
 
     async def delete_guild_log_settings(self, guild: hikari.Guild) -> None:
-        """Delete guild from Guild_Logging database table"""
+        """Delete guild from Guild_Log_Settings database table"""
         async with self._pool.acquire() as conn:
             async with conn.transaction():
-                # Delete guild from "Guild_Logging" database table
+                # Delete guild from "Guild_Log_Settings" database table
                 try:
                     await conn.execute(
-                        f"""DELETE FROM "Guild_Logging"
+                        f"""DELETE FROM "Guild_Log_Settings"
                         WHERE guild_id = {guild.id}"""
                     )
                     logging.getLogger(f"{BOT_NAME.lower()}.database.delete_guild_log_settings").info(
-                        f"Successfully deleted guild_id: {guild.id} from Guild_Logging database table!"
+                        f"Successfully deleted guild_id: {guild.id} from Guild_Log_Settings database table!"
                     )
                 except Exception as e:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.delete_guild_log_settings").error(
                         f"Unexpected error while trying to delete guild_id: {guild.id} "
-                        f"from Guild_Logging database table! Got error: {e}!"
+                        f"from Guild_Log_Settings database table! Got error: {e}!"
                     )
 
     async def delete_guild_users(self, guild: hikari.Guild) -> None:
@@ -362,7 +362,6 @@ class DatabaseHandler:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.get_guild_settings").error(
                         f"Unexpected error while trying to fetch settings for guild_id: {guild.id}! Got error: {e}"
                     )
-
         return results
 
     async def set_guild_log_setting(self, guild: hikari.Guild, parameters: list) -> bool:
@@ -371,7 +370,7 @@ class DatabaseHandler:
             async with conn.transaction():
                 try:
                     await conn.execute(
-                        f"""UPDATE "Guild_Logging"
+                        f"""UPDATE "Guild_Log_Settings"
                             SET {",".join(change for change in parameters)}
                             WHERE guild_id = {guild.id}"""
                     )
@@ -394,7 +393,7 @@ class DatabaseHandler:
                 try:
                     fetched_settings = await conn.fetch(
                         f"""SELECT {",".join(setting for setting in settings)}
-                            FROM "Guild_Logging" WHERE guild_id = {guild.id}"""
+                            FROM "Guild_Log_Settings" WHERE guild_id = {guild.id}"""
                     )
                     for setting in fetched_settings[0]:
                         results.append(setting)
@@ -416,23 +415,16 @@ class DatabaseHandler:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.get_guild_log_settings").error(
                         f"Unexpected error while trying to fetch log settings for guild_id: {guild.id}! Got error: {e}"
                     )
-
         return results
 
-    async def set_user_detail(self, guild: hikari.Guild, member: hikari.Member, detail: str, value: str | int) -> bool:
+    async def set_user_detail(self, guild: hikari.Guild, member: hikari.Member, parameters: list) -> bool:
         """Set user setting"""
         async with self._pool.acquire() as conn:
             async with conn.transaction():
-                # Set guild setting
-                if isinstance(value, str):
-                    value = "'" + value + "'"
-                if value == "'NULL'":
-                    value = "NULL"
-
                 try:
                     await conn.execute(
                         f"""UPDATE "Users"
-                            SET {detail} = {value}
+                            SET {",".join(change for change in parameters)}
                             WHERE guild_id = {guild.id}
                             AND user_id = {member.id}"""
                     )
@@ -473,11 +465,10 @@ class DatabaseHandler:
                     await self.insert_user(guild=guild, member=member)
                     # Return default values for every requested setting
                     for detail in details:
-                        results.append(DB_USER_DEFAUTS.get(detail).strip("'"))
+                        results.append(DB_USER_DETAILS_DEFAULT.get(detail).strip("'"))
                 except Exception as e:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.get_user_details").error(
                         f"Unexpected error while trying to fetch details for member_id: {member.id} "
                         f"in guild_id: {guild.id}! Got error: {e}"
                     )
-
         return results

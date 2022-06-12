@@ -37,41 +37,39 @@ class BotUtils:
 
     # LOGGING
     async def log_from_ctx(self, ctx: tanjun.abc.SlashContext, db: DatabaseHandler, message: str) -> None:
-        language, module_logging, *none = await db.get_guild_settings(
-            ctx.get_guild(), settings=["language", "module_logging"]
+        language, *none = await db.get_guild_settings(
+            ctx.get_guild(), settings=["language"]
         )
         logs_channel_id, *none = await db.get_guild_log_settings(ctx.get_guild(), settings=["logs_channel_id"])
-        if module_logging:
-            if logs_channel_id is None:
-                return
-            try:
-                log_channel = ctx.cache.get_guild_channel(logs_channel_id) or await ctx.rest.fetch_channel(
-                    logs_channel_id
-                )
-                await log_channel.send(message)
-            except Exception as e:
-                logging.getLogger(f"{BOT_NAME.lower()}.logger.guild_log_channel").error(
-                    "Unexpected error while trying to send log message to log channel for "
-                    f"guild_id: {ctx.guild_id}! Got error: {e}"
-                )
+        if logs_channel_id is None:
+            return
+        try:
+            log_channel = ctx.cache.get_guild_channel(logs_channel_id) or await ctx.rest.fetch_channel(
+                logs_channel_id
+            )
+            await log_channel.send(message)
+        except Exception as e:
+            logging.getLogger(f"{BOT_NAME.lower()}.logger.guild_log_channel").error(
+                "Unexpected error while trying to send log message to log channel for "
+                f"guild_id: {ctx.guild_id}! Got error: {e}"
+            )
 
     async def log_from_event(self, event: hikari.Event, db: DatabaseHandler, message: str) -> None:
         guild = event.app.cache.get_guild(event.guild_id) or await event.app.rest.fetch_guild(event.guild_id)
-        language, module_logging, *none = await db.get_guild_settings(guild, settings=["language", "module_logging"])
+        language, *none = await db.get_guild_settings(guild, settings=["language"])
         logs_channel_id, *none = await db.get_guild_log_settings(guild, settings=["logs_channel_id"])
-        if module_logging:
-            if logs_channel_id is None:
-                return
-            try:
-                log_channel = event.app.cache.get_guild_channel(logs_channel_id) or await event.app.rest.fetch_channel(
-                    logs_channel_id
-                )
-                await log_channel.send(message)
-            except Exception as e:
-                logging.getLogger(f"{BOT_NAME.lower()}.logger.guild_log_channel").error(
-                    "Unexpected error while trying to send log message to log channel for "
-                    f"guild_id: {event.guild_id}! Got error: {e}"
-                )
+        if logs_channel_id is None:
+            return
+        try:
+            log_channel = event.app.cache.get_guild_channel(logs_channel_id) or await event.app.rest.fetch_channel(
+                logs_channel_id
+            )
+            await log_channel.send(message)
+        except Exception as e:
+            logging.getLogger(f"{BOT_NAME.lower()}.logger.guild_log_channel").error(
+                "Unexpected error while trying to send log message to log channel for "
+                f"guild_id: {event.guild_id}! Got error: {e}"
+            )
 
     # EMBEDS
     async def embed_to_user(self, guild: hikari.Guild, title: str, description: str) -> hikari.Embed:

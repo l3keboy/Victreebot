@@ -30,7 +30,7 @@ LOG_LEVEL_COLORS_MESSAGE_SECTION = {
     "CRITICAL": f"{Style.NORMAL}{Fore.RED}",
 }
 LOGGER_COLORS = {
-    "husqy": f"{Style.DIM}{Fore.LIGHTBLUE_EX}",
+    "victreebot": f"{Style.DIM}{Fore.LIGHTBLUE_EX}",
     "hikari": f"{Style.DIM}{Fore.MAGENTA}",
     "apscheduler": f"{Style.BRIGHT}{Fore.LIGHTYELLOW_EX}",
     "lavalink_rs": f"{Style.BRIGHT}{Fore.CYAN}",

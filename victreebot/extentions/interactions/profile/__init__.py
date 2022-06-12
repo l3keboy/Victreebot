@@ -7,27 +7,19 @@
 # ------------------------------------------------------------------------- #
 # IMPORTS
 import os
+
 import tanjun
 from dotenv import load_dotenv
-# EVENTS
-# INTERACTIONS
-from extentions.interactions.profile import profile_group
-
+from extentions.interactions.profile.edit import command_profile_edit
 
 load_dotenv()
 BOT_NAME = os.getenv("BOT_NAME")
 
+
 # ------------------------------------------------------------------------- #
-# INITIALIZE #
+# THE BOTS SUB COMMANDS GROUP (E.G. /{sub_command_group}) #
 # ------------------------------------------------------------------------- #
-bot_component = (
-    tanjun.Component()
-    # EVENTS
-    # INTERACTIONS
-    .add_command(profile_group)
+profile_group = (
+    tanjun.slash_command_group("profile", ".")
+    .add_command(command_profile_edit)
 )
-
-
-@tanjun.as_loader
-def load_component(client: tanjun.abc.Client) -> None:
-    client.add_component(bot_component.copy())
