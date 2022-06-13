@@ -1,0 +1,14 @@
+[flake8]
+count = true
+
+ignore =
+    W503,           # Line break before binary operator
+    W504,           # Line break after binary operator
+
+per-file-ignores =
+    # Ignore: Module level import not at top of file
+    victreebot/__main__.py:      E402
+    # Ignore: Line to long
+    victreebot/languages/*:      E501
+
+max-line-length = 120

@@ -5,18 +5,9 @@
 # would be appreciated.                                                     #
 # Written by Luke Hendriks                                                  #
 # ------------------------------------------------------------------------- #
-hikari
-hikari-tanjun
-python-dotenv
-pathlib2
-typing
-asyncio
-pyfiglet
-colorama
-datetime
-git-python
-apscheduler
-nox
-flake8
-black
-isort
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+force_single_line = true

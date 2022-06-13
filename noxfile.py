@@ -5,18 +5,15 @@
 # would be appreciated.                                                     #
 # Written by Luke Hendriks                                                  #
 # ------------------------------------------------------------------------- #
-hikari
-hikari-tanjun
-python-dotenv
-pathlib2
-typing
-asyncio
-pyfiglet
-colorama
-datetime
-git-python
-apscheduler
-nox
-flake8
-black
-isort
+# IMPORTS
+import os
+import runpy
+import sys
+
+PIPELINES = "pipelines"
+sys.path.append(os.getcwd())
+
+
+for f in os.listdir(PIPELINES):
+    if f.endswith(".nox.py"):
+        runpy.run_path(os.path.join(PIPELINES, f))
