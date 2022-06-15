@@ -214,6 +214,7 @@ async def event_guild_join_setup(
             f"- Created default channels;\n"
             f"\u200b \u200b \u200b `Raids Channel`: {channel_raids.mention} | `Logs Channel`: {channel_logs.mention}\n\n"  # noqa E501
             f"`NOTE: Please make sure the {BOT_NAME.capitalize()} bot role is placed above all other roles to ensure the working of {BOT_NAME.capitalize()}`",  # noqa E501
+            colour=hikari.Colour(0x8bc683)
         )
         .set_footer(
             text=f"Thanks for using {BOT_NAME.capitalize()}! "
