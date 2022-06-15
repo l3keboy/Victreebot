@@ -5,6 +5,10 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ================================================================
 
 ## [Unreleased/Working on]
+
+================================================================
+
+## [0.2.0] - 15-06-2022
 ### [BREAKING]
 ### [NEW]
 - Added location interactions (Gyms and Pokéstops)
@@ -22,8 +26,6 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added avatar to profile view
 ### [Changes]
 - Changed format of internal VictreeBot Logging
-
-================================================================
 
 ## [0.1.0] - 12-06-2022
 ### [NEW]
