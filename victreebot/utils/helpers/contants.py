@@ -16,8 +16,10 @@ DB_GUILD_SETTINGS_DEFAUTS = {
     "gmt": "'GMT+0'",
     "unit_system": "'Metric System'",
     "auto_delete": "5",
+    # "raids_channel_id": "NULL" -> Manual add in DatabaseHandler
 }
 DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS = {
+    # "logs_channel_id": "NULL" -> Manual add in DatabaseHandler
     "log_errors": "True",
     "log_info": "True",
     "log_settings_changed": "True",
@@ -26,12 +28,26 @@ DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS = {
     "log_profile_edit": "True",
     "log_profile_view": "True",
 }
+DB_GUILD_LOG_SETTINGS_LOCATION_EVENTS = {
+    "log_location_add": "True",
+    "log_location_delete": "True",
+    "log_location_edit": "True",
+    "log_location_info": "True",
+    "log_location_list": "True",
+}
 
 DB_USER_DETAILS_DEFAULT = {
     "friend_codes": "NULL",
     "active_locations": "NULL",
     "stats_raids_created": "0",
     "stats_raids_participated": "0",
+}
+DB_LOCATION_DETAILS_DEFAULT = {
+    "type": "NULL",
+    "name": "NULL",
+    "latitude": "NULL",
+    "longitude": "NULL",
+    "description": "NULL",
 }
 
 # ------------------------------------------------------------------------- #

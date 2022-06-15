@@ -5,12 +5,27 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ================================================================
 
 ## [Unreleased/Working on]
-### [BREAKING]
-### [NEW]
-### [Bugfixes]
-### [Changes]
 
 ================================================================
+
+## [0.2.0] - 15-06-2022
+### [BREAKING]
+### [NEW]
+- Added location interactions (Gyms and Pokéstops)
+    - Add location
+    - Delete location
+    - Edit location
+    - List location
+    - Info about location
+- Added different events
+    - guild_join_setup
+    - guild_leave_remove
+    - member_create_add
+    - member_delete_remove
+### [Bugfixes]
+- Added avatar to profile view
+### [Changes]
+- Changed format of internal VictreeBot Logging
 
 ## [0.1.0] - 12-06-2022
 ### [NEW]
