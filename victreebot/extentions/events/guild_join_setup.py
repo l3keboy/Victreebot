@@ -30,6 +30,8 @@ async def event_guild_join_setup(
     bot_aware: Bot = tanjun.injected(type=Bot),
 ):
     guild = await event.app.rest.fetch_guild(event.guild_id)
+    my_user = await event.app.rest.fetch_my_user()
+
     # UPLOAD CUSTOM EMOJI'S
     all_server_emojis = await event.app.rest.fetch_guild_emojis(guild)
     for emoji in all_server_emojis:
@@ -161,15 +163,33 @@ async def event_guild_join_setup(
 
     try:
         if not channel_raids_exists:
+            permission_overwrites = []
+            permission_overwrites.append(
+                hikari.PermissionOverwrite(
+                    id=my_user.id,
+                    type=hikari.PermissionOverwriteType.MEMBER,
+                    allow=hikari.Permissions.MANAGE_CHANNELS | hikari.Permissions.SEND_MESSAGES
+                )
+            )
             channel_raids = await event.app.rest.create_guild_text_channel(
                 guild,
                 name=f"{BOT_NAME.lower()}-raids",
+                permission_overwrites=permission_overwrites,
                 reason=f"{BOT_NAME.capitalize()} event_guild_join_setup Handler -- Setup!",
             )
         if not channel_logs_exists:
+            permission_overwrites = []
+            permission_overwrites.append(
+                hikari.PermissionOverwrite(
+                    id=my_user.id,
+                    type=hikari.PermissionOverwriteType.MEMBER,
+                    allow=hikari.Permissions.MANAGE_CHANNELS | hikari.Permissions.SEND_MESSAGES
+                )
+            )
             channel_logs = await event.app.rest.create_guild_text_channel(
                 guild,
                 name=f"{BOT_NAME.lower()}-logs",
+                permission_overwrites=permission_overwrites,
                 reason=f"{BOT_NAME.capitalize()} event_guild_join_setup Handler -- Setup!",
             )
         logging.getLogger(f"{BOT_NAME.lower()}.events.event_guild_join_setup.create_channels").info(
@@ -200,7 +220,6 @@ async def event_guild_join_setup(
         await db.insert_user(guild, member)
 
     # SEND MESSAGE
-    my_user = await event.app.rest.fetch_my_user()
     embed = (
         hikari.Embed(
             title=f"Welcome to {BOT_NAME.capitalize()}!",
