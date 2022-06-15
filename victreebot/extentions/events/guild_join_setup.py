@@ -168,7 +168,7 @@ async def event_guild_join_setup(
                 hikari.PermissionOverwrite(
                     id=my_user.id,
                     type=hikari.PermissionOverwriteType.MEMBER,
-                    allow=hikari.Permissions.MANAGE_CHANNELS | hikari.Permissions.SEND_MESSAGES
+                    allow=hikari.Permissions.MANAGE_CHANNELS | hikari.Permissions.SEND_MESSAGES | hikari.Permissions.VIEW_CHANNEL
                 )
             )
             channel_raids = await event.app.rest.create_guild_text_channel(
@@ -183,7 +183,7 @@ async def event_guild_join_setup(
                 hikari.PermissionOverwrite(
                     id=my_user.id,
                     type=hikari.PermissionOverwriteType.MEMBER,
-                    allow=hikari.Permissions.MANAGE_CHANNELS | hikari.Permissions.SEND_MESSAGES
+                    allow=hikari.Permissions.MANAGE_CHANNELS | hikari.Permissions.SEND_MESSAGES | hikari.Permissions.VIEW_CHANNEL
                 )
             )
             channel_logs = await event.app.rest.create_guild_text_channel(
