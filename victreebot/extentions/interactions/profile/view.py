@@ -32,12 +32,17 @@ async def command_profile_view(
     bot: BotUtils = tanjun.injected(type=BotUtils),
     bot_aware: Bot = tanjun.injected(type=Bot),
 ):
-    language, auto_delete, gmt, *none = await db.get_guild_settings(
-        guild=ctx.get_guild(), settings=["language", "auto_delete", "gmt"]
+    language, auto_delete, gmt, is_setup, *none = await db.get_guild_settings(
+        guild=ctx.get_guild(), settings=["language", "auto_delete", "gmt", "is_setup"]
     )
     log_errors, log_profile_view, *none = await db.get_guild_log_settings(
         ctx.get_guild(), settings=["log_errors", "log_profile_view"]
     )
+
+    if not is_setup:
+        response = SUPPORTED_LANGUAGES.get(language).response_not_yet_setup.format(bot_name=BOT_NAME.capitalize())
+        await ctx.edit_last_response(response, delete_after=auto_delete)
+        return
 
     auto_delete = 20 if auto_delete < 20 else auto_delete
 

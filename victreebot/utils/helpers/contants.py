@@ -16,10 +16,11 @@ DB_GUILD_SETTINGS_DEFAUTS = {
     "gmt": "'GMT+0'",
     "unit_system": "'Metric System'",
     "auto_delete": "5",
-    # "raids_channel_id": "NULL" -> Manual add in DatabaseHandler
+    "raids_channel_id": "NULL",
+    "is_setup": "false",
 }
 DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS = {
-    # "logs_channel_id": "NULL" -> Manual add in DatabaseHandler
+    "logs_channel_id": "NULL",
     "log_errors": "True",
     "log_info": "True",
     "log_settings_changed": "True",
