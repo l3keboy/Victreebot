@@ -8,8 +8,11 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.2.1] - 15-06-2022
+### [Bugfixes]
+- Fix bot not sending welcome message on join because of missing permissions
+
 ## [0.2.0] - 15-06-2022
-### [BREAKING]
 ### [NEW]
 - Added location interactions (Gyms and Pokéstops)
     - Add location
