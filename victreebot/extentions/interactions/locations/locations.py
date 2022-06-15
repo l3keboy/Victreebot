@@ -240,8 +240,8 @@ async def command_locations(
     bot: BotUtils = tanjun.injected(type=BotUtils),
     bot_aware: Bot = tanjun.injected(type=Bot),
 ):
-    language, auto_delete, gmt, *none = await db.get_guild_settings(
-        guild=ctx.get_guild(), settings=["language", "auto_delete", "gmt"]
+    language, auto_delete, gmt, is_setup, *none = await db.get_guild_settings(
+        guild=ctx.get_guild(), settings=["language", "auto_delete", "gmt", "is_setup"]
     )
     (
         log_errors,
@@ -263,6 +263,11 @@ async def command_locations(
         ],
     )
 
+    if not is_setup:
+        response = SUPPORTED_LANGUAGES.get(language).response_not_yet_setup.format(bot_name=BOT_NAME.capitalize())
+        await ctx.edit_last_response(response, delete_after=auto_delete)
+        return
+        
     timeout = 120
     embed = hikari.Embed(
         title=SUPPORTED_LANGUAGES.get(language).location_embed_title,

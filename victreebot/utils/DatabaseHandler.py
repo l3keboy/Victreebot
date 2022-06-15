@@ -94,17 +94,15 @@ class DatabaseHandler:
                         f"into Guilds database table! Got error: {e}!"
                     )
 
-    async def insert_guild_settings(self, guild: hikari.Guild, raids_channel: hikari.GuildTextChannel) -> None:
+    async def insert_guild_settings(self, guild: hikari.Guild) -> None:
         """Insert guild into Guild_Settings database table"""
         async with self._pool.acquire() as conn:
             async with conn.transaction():
                 # Insert guild into "Guilds_Settings" database table
                 try:
                     await conn.execute(
-                        f"""INSERT INTO "Guild_Settings" (guild_id,raids_channel_id,
-                        {",".join(s for s in DB_GUILD_SETTINGS_DEFAUTS.keys())})
-                        VALUES ({guild.id},{raids_channel.id},
-                        {",".join(s_value for s_value in DB_GUILD_SETTINGS_DEFAUTS.values())})"""
+                        f"""INSERT INTO "Guild_Settings" (guild_id,{",".join(s for s in DB_GUILD_SETTINGS_DEFAUTS.keys())})
+                        VALUES ({guild.id},{",".join(s_value for s_value in DB_GUILD_SETTINGS_DEFAUTS.values())})"""
                     )
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_guild_settings").info(
                         f"Successfully inserted guild_id: {guild.id} into Guild_Settings database table!"
@@ -119,7 +117,7 @@ class DatabaseHandler:
                         f"into Guild_Settings database table! Got error: {e}!"
                     )
 
-    async def insert_guild_log_settings(self, guild: hikari.Guild, logs_channel: hikari.TextableGuildChannel) -> None:
+    async def insert_guild_log_settings(self, guild: hikari.Guild) -> None:
         """Insert guild into Guild_Log_Settings database table"""
         async with self._pool.acquire() as conn:
             async with conn.transaction():
@@ -127,11 +125,11 @@ class DatabaseHandler:
                 try:
                     await conn.execute(
                         f"""INSERT INTO "Guild_Log_Settings"
-                        (guild_id,logs_channel_id,
+                        (guild_id,
                         {",".join(s for s in DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS.keys())},
                         {",".join(s for s in DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS.keys())})
                         VALUES
-                        ({guild.id},{logs_channel.id},
+                        ({guild.id},
                         {",".join(str(s_value) for s_value in DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS.values())},
                         {",".join(str(s_value) for s_value in DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS.values())})
                         """

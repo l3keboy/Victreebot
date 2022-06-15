@@ -24,6 +24,40 @@ add_no_add_timeout = "Add or don't add validation reached a timeout! Returning d
 # INTERACTIONS #
 # ------------------------------------------------------------------------- #
 # ------------------------------------------------------------------------- #
+# setup #
+# ------------------------------------------------------------------------- #
+# ------------------------------------------------------------------------- #
+# setup.py #
+# ------------------------------------------------------------------------- #
+# Responses
+response_already_setup = "{bot_name} is already setup!"
+response_not_yet_setup = "{bot_name} is not yet setup! Please contact the administrator of the server to setup {bot_name}!"
+# Log responses
+# Embeds
+setup_started_embed_title = "{bot_name} setup started!"
+setup_started_embed_description = "Please wait while {bot_name} gets things ready!"
+setup_finished_embed_title = "{bot_name} setup finished!"
+setup_finished_embed_description = "{bot_name} is finished with the setup! Please check {logs_channel_mention} for extra info!"
+
+# ------------------------------------------------------------------------- #
+# reset.py #
+# ------------------------------------------------------------------------- #
+# Responses
+response_reset_timeout_reached = "Reset request reached a timeout! Not resetting!"
+response_reset_cancelled = "Reset cancelled! Not resetting {bot_name}!"
+# Log responses
+log_response_reset_timeout_reached = "`[{datetime}]` -- **{member}** tried to reset {bot_name}, but the timeout was reached!"
+log_response_reset_cancelled = "`[{datetime}]` -- **{member}** tried to reset {bot_name}, but they cancelled the request!"
+# Embeds
+reset_validation_embed_title = "{bot_name} reset requested!"
+reset_validation_embed_description = "Are you sure you want to reset {bot_name}?\n This will reset:\n - {bot_name} emoji's\n - {bot_name} channels\n - {bot_name} roles\n - Removed ongoing raids\n\n This will not reset:\n - {bot_name} language\n - {bot_name} auto_delete\n - {bot_name} GMT\n - {bot_name} Unit System\n - {bot_name} log variables\n - User profiles\n - {bot_name} locations\n"
+reset_started_embed_title = "{bot_name} reset started!"
+reset_started_embed_description = "Please wait while {bot_name} resets all values!"
+reset_finished_embed_title = "{bot_name} is reset!"
+reset_finished_embed_description = "{bot_name} has been reset! You can now use `/setup` again!"
+
+
+# ------------------------------------------------------------------------- #
 # profile #
 # ------------------------------------------------------------------------- #
 # ------------------------------------------------------------------------- #

@@ -44,7 +44,7 @@ class Bot(hikari.GatewayBot):
 
     def create_client(self: _VictreeBot) -> None:
         """Build a tanjun client"""
-        self.client = Client.from_gateway_bot(self, declare_global_commands=True)
+        self.client = Client.from_gateway_bot(self, declare_global_commands=GUILD_ID)
         self.client.load_modules()
         self.client.set_auto_defer_after(0)
 
