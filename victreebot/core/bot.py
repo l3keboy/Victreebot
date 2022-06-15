@@ -14,9 +14,9 @@ import typing as t
 import hikari
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from dotenv import load_dotenv
-from utils.VersionHandler import VersionHandler
 from utils.DatabaseHandler import DatabaseHandler
 from utils.helpers.BotUtils import BotUtils
+from utils.VersionHandler import VersionHandler
 
 from .client import Client
 
@@ -44,7 +44,7 @@ class Bot(hikari.GatewayBot):
 
     def create_client(self: _VictreeBot) -> None:
         """Build a tanjun client"""
-        self.client = Client.from_gateway_bot(self, declare_global_commands=GUILD_ID)
+        self.client = Client.from_gateway_bot(self, declare_global_commands=True)
         self.client.load_modules()
         self.client.set_auto_defer_after(0)
 

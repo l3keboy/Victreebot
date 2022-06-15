@@ -54,7 +54,7 @@ class LoggingHandler(logging.Logger):
         print(
             f"{Style.NORMAL}{Fore.GREEN}{time}{Style.RESET_ALL}"
             f" | {LOG_LEVEL_COLORS_LEVEL_SECTION.get(level_name)}{level_name.center(8)}{Style.RESET_ALL} | "
-            f"{self._get_logger_color(name)}{name:<35}{Style.RESET_ALL}"
+            f"{self._get_logger_color(name)}{name:<60}{Style.RESET_ALL}"
             f" {LOG_LEVEL_COLORS_MESSAGE_SECTION.get(level_name)} » {message}{Style.RESET_ALL}"
         )
 

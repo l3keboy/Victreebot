@@ -94,15 +94,17 @@ class DatabaseHandler:
                         f"into Guilds database table! Got error: {e}!"
                     )
 
-    async def insert_guild_settings(self, guild: hikari.Guild) -> None:
+    async def insert_guild_settings(self, guild: hikari.Guild, raids_channel: hikari.GuildTextChannel) -> None:
         """Insert guild into Guild_Settings database table"""
         async with self._pool.acquire() as conn:
             async with conn.transaction():
                 # Insert guild into "Guilds_Settings" database table
                 try:
                     await conn.execute(
-                        f"""INSERT INTO "Guild_Settings" (guild_id,{",".join(s for s in DB_GUILD_SETTINGS_DEFAUTS.keys())})
-                        VALUES ({guild.id},{",".join(s_value for s_value in DB_GUILD_SETTINGS_DEFAUTS.values())})"""
+                        f"""INSERT INTO "Guild_Settings" (guild_id,raids_channel_id,
+                        {",".join(s for s in DB_GUILD_SETTINGS_DEFAUTS.keys())})
+                        VALUES ({guild.id},{raids_channel.id},
+                        {",".join(s_value for s_value in DB_GUILD_SETTINGS_DEFAUTS.values())})"""
                     )
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_guild_settings").info(
                         f"Successfully inserted guild_id: {guild.id} into Guild_Settings database table!"
@@ -117,7 +119,7 @@ class DatabaseHandler:
                         f"into Guild_Settings database table! Got error: {e}!"
                     )
 
-    async def insert_guild_log_settings(self, guild: hikari.Guild) -> None:
+    async def insert_guild_log_settings(self, guild: hikari.Guild, logs_channel: hikari.TextableGuildChannel) -> None:
         """Insert guild into Guild_Log_Settings database table"""
         async with self._pool.acquire() as conn:
             async with conn.transaction():
@@ -125,13 +127,13 @@ class DatabaseHandler:
                 try:
                     await conn.execute(
                         f"""INSERT INTO "Guild_Log_Settings"
-                        (guild_id,
+                        (guild_id,logs_channel_id,
                         {",".join(s for s in DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS.keys())},
-                        {",".join(s for s in DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS.keys())},
+                        {",".join(s for s in DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS.keys())})
                         VALUES
-                        ({guild.id},
+                        ({guild.id},{logs_channel.id},
                         {",".join(str(s_value) for s_value in DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS.values())},
-                        {",".join(str(s_value) for s_value in DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS.values())},
+                        {",".join(str(s_value) for s_value in DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS.values())})
                         """
                     )
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_guild_log_settings").info(
@@ -139,7 +141,8 @@ class DatabaseHandler:
                     )
                 except asyncpg.UniqueViolationError:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_guild_log_settings").warning(
-                        f"UniqueViolationError guild_id: {guild.id} already exists in " "Guild_Log_Settings database table!"
+                        f"UniqueViolationError guild_id: {guild.id} already exists in "
+                        "Guild_Log_Settings database table!"
                     )
                 except Exception as e:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_guild_log_settings").error(
@@ -147,35 +150,37 @@ class DatabaseHandler:
                         f"into Guild_Log_Settings database table! Got error: {e}!"
                     )
 
-    async def insert_user(self, guild: hikari.Guild, member: hikari.Member) -> None:
+    async def insert_user(self, guild: hikari.Guild, user: hikari.User) -> None:
         """Insert user into Users database table"""
         async with self._pool.acquire() as conn:
             async with conn.transaction():
                 # Insert user into "Users" database table
                 try:
                     await conn.execute(
-                        f"""INSERT INTO "Users" (guild_id,user_id,{",".join(d for d in DB_USER_DETAILS_DEFAULT.keys())})
-                        VALUES ({guild.id},{member.id},{",".join(d_value for d_value in DB_USER_DETAILS_DEFAULT.values())})"""
+                        f"""INSERT INTO "Users" (guild_id,user_id,
+                        {",".join(d for d in DB_USER_DETAILS_DEFAULT.keys())})
+                        VALUES ({guild.id},{user.id},
+                        {",".join(d_value for d_value in DB_USER_DETAILS_DEFAULT.values())})"""
                     )
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_user").info(
                         f"Successfully inserted combination of guild_id: {guild.id} "
-                        f"and user_id: {member.id} into Users database table!"
+                        f"and user_id: {user.id} into Users database table!"
                     )
                 except asyncpg.UniqueViolationError:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_user").warning(
                         f"UniqueViolationError combination of guild_id: {guild.id} and user_id: "
-                        f"{member.id} already exists in Users database table!"
+                        f"{user.id} already exists in Users database table!"
                     )
                 except Exception as e:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_user").error(
-                        f"Unexpected error while trying to insert user_id: {member.id} "
+                        f"Unexpected error while trying to insert user_id: {user.id} "
                         f"into Users database table! Got error: {e}!"
                     )
 
     # ------------------------------------------------------------------------- #
     # Delete methods #
     # ------------------------------------------------------------------------- #
-    async def delete_guild(self, guild: hikari.Guild) -> None:
+    async def delete_guild(self, guild_id: int) -> None:
         """Delete guild from Guilds database table"""
         async with self._pool.acquire() as conn:
             async with conn.transaction():
@@ -183,18 +188,18 @@ class DatabaseHandler:
                 try:
                     await conn.execute(
                         f"""DELETE FROM "Guilds"
-                        WHERE guild_id = {guild.id}"""
+                        WHERE guild_id = {guild_id}"""
                     )
                     logging.getLogger(f"{BOT_NAME.lower()}.database.delete_guild").info(
-                        f"Successfully deleted guild_id: {guild.id} from Guilds database table!"
+                        f"Successfully deleted guild_id: {guild_id} from Guilds database table!"
                     )
                 except Exception:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.delete_guild").error(
-                        f"Unexpected error while trying to delete guild_id: {guild.id} "
+                        f"Unexpected error while trying to delete guild_id: {guild_id} "
                         "from Guilds database table! Got error: {e}!"
                     )
 
-    async def delete_guild_settings(self, guild: hikari.Guild) -> None:
+    async def delete_guild_settings(self, guild_id: int) -> None:
         """Delete guild from Guild_Settings database table"""
         async with self._pool.acquire() as conn:
             async with conn.transaction():
@@ -202,18 +207,18 @@ class DatabaseHandler:
                 try:
                     await conn.execute(
                         f"""DELETE FROM "Guild_Settings"
-                        WHERE guild_id = {guild.id}"""
+                        WHERE guild_id = {guild_id}"""
                     )
                     logging.getLogger(f"{BOT_NAME.lower()}.database.delete_guild_settings").info(
-                        f"Successfully deleted guild_id: {guild.id} from Guild_Settings database table!"
+                        f"Successfully deleted guild_id: {guild_id} from Guild_Settings database table!"
                     )
                 except Exception as e:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.delete_guild_settings").error(
-                        f"Unexpected error while trying to delete guild_id: {guild.id} "
+                        f"Unexpected error while trying to delete guild_id: {guild_id} "
                         f"from Guild_Settings database table! Got error: {e}!"
                     )
 
-    async def delete_guild_log_settings(self, guild: hikari.Guild) -> None:
+    async def delete_guild_log_settings(self, guild_id: int) -> None:
         """Delete guild from Guild_Log_Settings database table"""
         async with self._pool.acquire() as conn:
             async with conn.transaction():
@@ -221,18 +226,18 @@ class DatabaseHandler:
                 try:
                     await conn.execute(
                         f"""DELETE FROM "Guild_Log_Settings"
-                        WHERE guild_id = {guild.id}"""
+                        WHERE guild_id = {guild_id}"""
                     )
                     logging.getLogger(f"{BOT_NAME.lower()}.database.delete_guild_log_settings").info(
-                        f"Successfully deleted guild_id: {guild.id} from Guild_Log_Settings database table!"
+                        f"Successfully deleted guild_id: {guild_id} from Guild_Log_Settings database table!"
                     )
                 except Exception as e:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.delete_guild_log_settings").error(
-                        f"Unexpected error while trying to delete guild_id: {guild.id} "
+                        f"Unexpected error while trying to delete guild_id: {guild_id} "
                         f"from Guild_Log_Settings database table! Got error: {e}!"
                     )
 
-    async def delete_guild_users(self, guild: hikari.Guild) -> None:
+    async def delete_guild_users(self, guild_id: int) -> None:
         """Delete guild entries from Users database table"""
         async with self._pool.acquire() as conn:
             async with conn.transaction():
@@ -240,18 +245,18 @@ class DatabaseHandler:
                 try:
                     await conn.execute(
                         f"""DELETE FROM "Users"
-                        WHERE guild_id = {guild.id}"""
+                        WHERE guild_id = {guild_id}"""
                     )
                     logging.getLogger(f"{BOT_NAME.lower()}.database.delete_guild_users").info(
-                        f"Successfully deleted guild_id: {guild.id} from Users database table!"
+                        f"Successfully deleted guild_id: {guild_id} from Users database table!"
                     )
                 except Exception as e:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.delete_guild_users").error(
-                        f"Unexpected error while trying to delete guild_id: {guild.id} "
+                        f"Unexpected error while trying to delete guild_id: {guild_id} "
                         f"from Users database table! Got error: {e}!"
                     )
 
-    async def delete_user(self, guild: hikari.Guild, member: hikari.Member) -> None:
+    async def delete_user(self, guild_id: int, user_id: int) -> None:
         """Delete user from Users database table"""
         async with self._pool.acquire() as conn:
             async with conn.transaction():
@@ -259,16 +264,36 @@ class DatabaseHandler:
                 try:
                     await conn.execute(
                         f"""DELETE FROM "Users"
-                        WHERE guild_id = {guild.id}
-                        AND user_id = {member.id}"""
+                        WHERE guild_id = {guild_id}
+                        AND user_id = {user_id}"""
                     )
                     logging.getLogger(f"{BOT_NAME.lower()}.database.delete_user").info(
-                        f"Successfully deleted user_id: {member.id} from Users database table!"
+                        f"Successfully deleted user_id: {user_id} from Users database table!"
                     )
                 except Exception as e:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.delete_user").error(
-                        f"Unexpected error while trying to delete user_id: {member.id} "
+                        f"Unexpected error while trying to delete user_id: {user_id} "
                         f"from Users database table! Got error: {e}!"
+                    )
+
+    async def delete_guild_locations(self, guild_id: int) -> None:
+        """Delete Guild locations from Locations database table"""
+        async with self._pool.acquire() as conn:
+            async with conn.transaction():
+                # Delete Guild locations from "Locations" database table
+                try:
+                    await conn.execute(
+                        f"""DELETE FROM "Locations"
+                        WHERE guild_id = {guild_id}
+                        AND type = 'gym' OR type = 'pokéstop'"""
+                    )
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.delete_guild_locations").info(
+                        f"Successfully deleted all locations for guild_id: {guild_id} from Locations database table!"
+                    )
+                except Exception as e:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.delete_guild_locations").error(
+                        f"Unexpected error while trying to delete locations for guild_id: {guild_id} "
+                        f"from Locations database table! Got error: {e}!"
                     )
 
     # ------------------------------------------------------------------------- #
@@ -469,5 +494,116 @@ class DatabaseHandler:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.get_user_details").error(
                         f"Unexpected error while trying to fetch details for member_id: {member.id} "
                         f"in guild_id: {guild.id}! Got error: {e}"
+                    )
+        return results
+
+    # ------------------------------------------------------------------------- #
+    # Location methods #
+    # ------------------------------------------------------------------------- #
+    async def insert_location(
+        self, guild: hikari.Guild, location_type: str, name: str, latitude: float, longitude: float, description: str
+    ) -> bool:
+        """Insert a location"""
+        async with self._pool.acquire() as conn:
+            async with conn.transaction():
+                try:
+                    await conn.execute(
+                        f"""INSERT INTO "Locations" (guild_id, type, name, latitude, longitude, description)
+                            VALUES ({guild.id}, {location_type}, {name}, {latitude}, {longitude}, {description})"""
+                    )
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.insert_location").info(
+                        f"Successfully inserted location for guild_id: {guild.id}!"
+                    )
+                    success = True
+                except asyncpg.UniqueViolationError:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.insert_location").error(
+                        "UniqueViolationError while trying to insert location for "
+                        f"guild_id: {guild.id}! Combination of guild_id, type and "
+                        "name already exists!"
+                    )
+                    success = False
+                except Exception as e:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.insert_location").error(
+                        f"Unexpected error while trying to insert location for guild_id: {guild.id}! Got error: {e}!"
+                    )
+                    success = False
+        return success
+
+    async def edit_location(self, guild: hikari.Guild, location_type: str, name: str, parameters: list) -> bool:
+        """Edit a location"""
+        async with self._pool.acquire() as conn:
+            async with conn.transaction():
+                try:
+                    await conn.execute(
+                        f"""UPDATE "Locations"
+                            SET {",".join(change for change in parameters)}
+                            WHERE guild_id = {guild.id} AND type = {location_type} AND name = {name}"""
+                    )
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.edit_location").info(
+                        f"Successfully edited a location for guild_id: {guild.id}!"
+                    )
+                    success = True
+                except Exception as e:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.edit_location").error(
+                        f"Unexpected error while trying to edit a location for guild_id: {guild.id}! Got error: {e}!"
+                    )
+                    success = False
+        return success
+
+    async def delete_location(self, guild: hikari.Guild, location_type: str, name: str) -> bool:
+        """Delete a location"""
+        async with self._pool.acquire() as conn:
+            async with conn.transaction():
+                try:
+                    await conn.execute(
+                        f"""DELETE FROM "Locations"
+                            WHERE guild_id = {guild.id} AND type = {location_type} AND name = {name}"""
+                    )
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.delete_location").info(
+                        f"Successfully deleted a location for guild_id: {guild.id}!"
+                    )
+                    success = True
+                except Exception as e:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.delete_location").error(
+                        f"Unexpected error while trying to delete a location for guild_id: {guild.id}! Got error: {e}!"
+                    )
+                    success = False
+        return success
+
+    async def get_all_locations(self, guild: hikari.Guild, location_type: str) -> list:
+        """Get all locations"""
+        results = []
+        async with self._pool.acquire() as conn:
+            async with conn.transaction():
+                try:
+                    results = await conn.fetch(
+                        f"""SELECT name, latitude, longitude
+                            FROM "Locations"
+                            WHERE guild_id = {guild.id}
+                            AND type = {location_type}"""
+                    )
+                except Exception as e:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.get_all_locations").error(
+                        f"Unexpected error while trying to fetch all locations for guild_id: {guild.id}! "
+                        f"Got error: {e}"
+                    )
+        return results
+
+    async def get_location_info(self, guild: hikari.Guild, location_type: str, location_name: str) -> list:
+        """Get location info"""
+        results = []
+        async with self._pool.acquire() as conn:
+            async with conn.transaction():
+                try:
+                    results = await conn.fetch(
+                        f"""SELECT latitude, longitude, description
+                            FROM "Locations"
+                            WHERE guild_id = {guild.id}
+                            AND type = {location_type}
+                            AND name = {location_name}"""
+                    )
+                except Exception as e:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.get_location_info").error(
+                        f"Unexpected error while trying to fetch location for guild_id: {guild.id}! " f"Got error: {e}"
                     )
         return results

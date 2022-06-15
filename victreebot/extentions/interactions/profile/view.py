@@ -6,16 +6,15 @@
 # Written by Luke Hendriks                                                  #
 # ------------------------------------------------------------------------- #
 # IMPORTS
-import asyncio
 import os
 
 import hikari
 import tanjun
+from core.bot import Bot
 from dotenv import load_dotenv
 from utils.DatabaseHandler import DatabaseHandler
 from utils.helpers.BotUtils import BotUtils
 from utils.helpers.contants import SUPPORTED_LANGUAGES
-from core.bot import Bot
 
 load_dotenv()
 BOT_NAME = os.getenv("BOT_NAME")
@@ -32,7 +31,6 @@ async def command_profile_view(
     db: DatabaseHandler = tanjun.injected(type=DatabaseHandler),
     bot: BotUtils = tanjun.injected(type=BotUtils),
     bot_aware: Bot = tanjun.injected(type=Bot),
-
 ):
     language, auto_delete, gmt, *none = await db.get_guild_settings(
         guild=ctx.get_guild(), settings=["language", "auto_delete", "gmt"]
@@ -48,7 +46,17 @@ async def command_profile_view(
     if member is not None:
         member = ctx.cache.get_member(ctx.guild_id, member) or await ctx.rest.fetch_member(ctx.guild_id, member)
 
-    current_friend_codes, current_active_locations, stats_raids_created, stats_raids_participated, *none = await db.get_user_details(ctx.get_guild(), member, details=["friend_codes", "active_locations", "stats_raids_created", "stats_raids_participated"])
+    (
+        current_friend_codes,
+        current_active_locations,
+        stats_raids_created,
+        stats_raids_participated,
+        *none,
+    ) = await db.get_user_details(
+        ctx.get_guild(),
+        member,
+        details=["friend_codes", "active_locations", "stats_raids_created", "stats_raids_participated"],
+    )
     if current_friend_codes is not None and current_friend_codes != "NULL":
         current_friend_codes = current_friend_codes.strip("'")
         current_friend_codes_list = current_friend_codes.split(",")
@@ -68,13 +76,30 @@ async def command_profile_view(
             title=SUPPORTED_LANGUAGES.get(language).profile_view_embed_title,
             description=SUPPORTED_LANGUAGES.get(language).profile_view_embed_description.format(member=member),
         )
-        .add_field(name=SUPPORTED_LANGUAGES.get(language).profile_view_embed_field_friend_codes, value=", ".join(f"`{friend_code}`" for friend_code in current_friend_codes_list))
-        .add_field(name=SUPPORTED_LANGUAGES.get(language).profile_view_embed_field_active_locations, value=", ".join(f"`{location}`" for location in current_active_locations_list))
-        .add_field(name=SUPPORTED_LANGUAGES.get(language).profile_view_embed_field_raids_created, value=f"`{stats_raids_created} raids`", inline=True)
-        .add_field(name=SUPPORTED_LANGUAGES.get(language).profile_view_embed_field_raids_participated, value=f"`{stats_raids_participated} raids`", inline=True)
+        .set_thumbnail(member.avatar_url)
+        .add_field(
+            name=SUPPORTED_LANGUAGES.get(language).profile_view_embed_field_friend_codes,
+            value=", ".join(f"`{friend_code}`" for friend_code in current_friend_codes_list),
+        )
+        .add_field(
+            name=SUPPORTED_LANGUAGES.get(language).profile_view_embed_field_active_locations,
+            value=", ".join(f"`{location}`" for location in current_active_locations_list),
+        )
+        .add_field(
+            name=SUPPORTED_LANGUAGES.get(language).profile_view_embed_field_raids_created,
+            value=f"`{stats_raids_created} raids`",
+            inline=True,
+        )
+        .add_field(
+            name=SUPPORTED_LANGUAGES.get(language).profile_view_embed_field_raids_participated,
+            value=f"`{stats_raids_participated} raids`",
+            inline=True,
+        )
     )
 
     await ctx.respond(embed=embed, delete_after=auto_delete)
     if log_profile_view:
-        log_response = SUPPORTED_LANGUAGES.get(language).log_response_profile_view.format(datetime=await bot.get_timestamp_aware(gmt), member=ctx.member, target_member=member)
+        log_response = SUPPORTED_LANGUAGES.get(language).log_response_profile_view.format(
+            datetime=await bot.get_timestamp_aware(gmt), member=ctx.member, target_member=member
+        )
         await bot.log_from_ctx(ctx, db, log_response)
