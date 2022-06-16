@@ -64,22 +64,26 @@ async def command_setup(
     # UPLOAD CUSTOM EMOJI'S
     all_server_emojis = await ctx.rest.fetch_guild_emojis(guild)
     for emoji in all_server_emojis:
-        if emoji.name == "Instinct" or emoji.name == "Mystic" or emoji.name == "Valor":
+        if emoji.name == f"{BOT_NAME.lower()}_instinct" or emoji.name == f"{BOT_NAME.lower()}_mystic" or emoji.name == f"{BOT_NAME.lower()}_valor":
             try:
                 await ctx.rest.delete_emoji(
-                    guild, emoji.id, reason=f"{BOT_NAME.capitalize()} event_guild_join_setup Handler -- Redo setup!"
+                    guild, emoji.id, reason=f"{BOT_NAME.capitalize()} setup Handler -- Setup!"
                 )
-                logging.getLogger(f"{BOT_NAME.lower()}.events.event_guild_join_setup.emojis_upload").info(
-                    f"Deleted emoji with same name ('Instinct', 'Mystic' or 'Valor') for guild_id: {ctx.guild_id}!"
+                logging.getLogger(f"{BOT_NAME.lower()}.setup.emojis_delete").info(
+                    "Deleted emoji with same name "
+                    f"('{BOT_NAME.lower()}-instinct', '{BOT_NAME.lower()}-mystic' or '{BOT_NAME.lower()}-valor') "
+                    f"for guild_id: {ctx.guild_id}!"
                 )
             except hikari.ForbiddenError:
-                logging.getLogger(f"{BOT_NAME.lower()}.events.event_guild_join_setup.emojis_upload").error(
-                    "ForbiddenError while trying to delete emoji with same name ('Instinct', 'Mystic' or 'Valor') "
+                logging.getLogger(f"{BOT_NAME.lower()}.setup.emojis_delete").error(
+                    "ForbiddenError while trying to delete emoji with same name "
+                    f"('{BOT_NAME.lower()}-instinct', '{BOT_NAME.lower()}-mystic' or '{BOT_NAME.lower()}-valor') "
                     f"for guild_id: {ctx.guild_id}!"
                 )
             except Exception as e:
-                logging.getLogger(f"{BOT_NAME.lower()}.events.event_guild_join_setup.emojis_upload").error(
-                    "Unexpected error while trying to delete emoji with same name ('Instinct', 'Mystic' or 'Valor') "
+                logging.getLogger(f"{BOT_NAME.lower()}.setup.emojis_delete").error(
+                    "Unexpected error while trying to delete emoji with same name "
+                    f"('{BOT_NAME.lower()}-instinct', '{BOT_NAME.lower()}-mystic' or '{BOT_NAME.lower()}-valor') "
                     f"for guild_id: {ctx.guild_id}! Got error: {e}"
                 )
 
@@ -88,37 +92,40 @@ async def command_setup(
             instinct_image_bytes = image.read()
             instinct_emoji = await ctx.rest.create_emoji(
                 guild,
-                "Instinct",
+                f"{BOT_NAME.lower()}_instinct",
                 instinct_image_bytes,
-                reason=f"{BOT_NAME.capitalize()} event_guild_join_setup Handler -- Setup!",
+                reason=f"{BOT_NAME.capitalize()} setup Handler -- Setup!",
             )
         with open(Path("./assets/emojis/mystic.png"), "rb") as image:
             mystic_image_bytes = image.read()
             mystic_emoji = await ctx.rest.create_emoji(
                 guild,
-                "Mystic",
+                f"{BOT_NAME.lower()}_mystic",
                 mystic_image_bytes,
-                reason=f"{BOT_NAME.capitalize()} event_guild_join_setup Handler -- Setup!",
+                reason=f"{BOT_NAME.capitalize()} setup Handler -- Setup!",
             )
         with open(Path("./assets/emojis/valor.png"), "rb") as image:
             valor_image_bytes = image.read()
             valor_emoji = await ctx.rest.create_emoji(
                 guild,
-                "Valor",
+                f"{BOT_NAME.lower()}_valor",
                 valor_image_bytes,
-                reason=f"{BOT_NAME.capitalize()} event_guild_join_setup Handler -- Setup!",
+                reason=f"{BOT_NAME.capitalize()} setup Handler -- Setup!",
             )
-        logging.getLogger(f"{BOT_NAME.lower()}.events.event_guild_join_setup.emojis_upload").info(
-            f"Added emoji's ('Instinct', 'Mystic' or 'Valor') to guild_id: {ctx.guild_id}!"
+        logging.getLogger(f"{BOT_NAME.lower()}.setup.emojis_upload").info(
+            f"Added emoji's ('{BOT_NAME.lower()}-instinct', '{BOT_NAME.lower()}-mystic' "
+            f" or '{BOT_NAME.lower()}-valor') to guild_id: {ctx.guild_id}!"
         )
     except hikari.ForbiddenError:
-        logging.getLogger(f"{BOT_NAME.lower()}.events.event_guild_join_setup.emojis_upload").error(
-            "ForbiddenError while trying to add one or more emoji's ('Instinct', 'Mystic' or 'Valor') "
+        logging.getLogger(f"{BOT_NAME.lower()}.setup.emojis_upload").error(
+            "ForbiddenError while trying to add one or more emoji's "
+            f"('{BOT_NAME.lower()}_instinct', '{BOT_NAME.lower()}_mystic' or '{BOT_NAME.lower()}_valor') "
             f"for guild_id: {ctx.guild_id}!"
         )
     except Exception as e:
-        logging.getLogger(f"{BOT_NAME.lower()}.events.event_guild_join_setup.emojis_upload").error(
-            "Unexpected error while trying to add one or more emoji's ('Instinct', 'Mystic' or 'Valor') "
+        logging.getLogger(f"{BOT_NAME.lower()}.setup.emojis_upload").error(
+            "Unexpected error while trying to add one or more emoji's "
+            f"('{BOT_NAME.lower()}_instinct', '{BOT_NAME.lower()}_mystic' or '{BOT_NAME.lower()}_valor') "
             f"for guild_id: {ctx.guild_id}! Got error: {e}"
         )
 
@@ -126,11 +133,11 @@ async def command_setup(
     role_instinct_exists, role_mystic_exists, role_valor_exists, role_moderator_exists = False, False, False, False
     all_server_roles = await ctx.rest.fetch_roles(guild)
     for role in all_server_roles:
-        if role.name == "Instinct":
+        if role.name == f"{BOT_NAME.capitalize()} instinct":
             role_instinct_exists, role_instinct = True, role
-        if role.name == "Mystic":
+        if role.name == f"{BOT_NAME.capitalize()} mystic":
             role_mystic_exists, role_mystic = True, role
-        if role.name == "Valor":
+        if role.name == f"{BOT_NAME.capitalize()} valor":
             role_valor_exists, role_valor = True, role
         if role.name == f"{BOT_NAME.capitalize()} moderator":
             role_moderator_exists, role_moderator = True, role
@@ -139,45 +146,46 @@ async def command_setup(
         if not role_instinct_exists:
             role_instinct = await ctx.rest.create_role(
                 guild,
-                name="Instinct",
+                name=f"{BOT_NAME.capitalize()} instinct",
                 color=hikari.Colour(0xFDFF00),
-                reason=f"{BOT_NAME.capitalize()} event_guild_join_setup Handler -- Setup!",
+                reason=f"{BOT_NAME.capitalize()} setup Handler -- Setup!",
             )
         if not role_mystic_exists:
             role_mystic = await ctx.rest.create_role(
                 guild,
-                name="Mystic",
+                name=f"{BOT_NAME.capitalize()} mystic",
                 color=hikari.Colour(0x2A6CEB),
-                reason=f"{BOT_NAME.capitalize()} event_guild_join_setup Handler -- Setup!",
+                reason=f"{BOT_NAME.capitalize()} setup Handler -- Setup!",
             )
         if not role_valor_exists:
             role_valor = await ctx.rest.create_role(
                 guild,
-                name="Valor",
+                name=f"{BOT_NAME.capitalize()} valor",
                 color=hikari.Colour(0xFF0000),
-                reason=f"{BOT_NAME.capitalize()} event_guild_join_setup Handler -- Setup!",
+                reason=f"{BOT_NAME.capitalize()} setup Handler -- Setup!",
             )
         if not role_moderator_exists:
             role_moderator = await ctx.rest.create_role(
                 guild,
                 name=f"{BOT_NAME.capitalize()} moderator",
                 color=hikari.Colour(0xFFA500),
-                reason=f"{BOT_NAME.capitalize()} event_guild_join_setup Handler -- Setup!",
+                reason=f"{BOT_NAME.capitalize()} setup Handler -- Setup!",
             )
-        logging.getLogger(f"{BOT_NAME.lower()}.events.event_guild_join_setup.create_roles").info(
-            "Created roles ('Instinct', 'Mystic', 'Valor' or "
-            f"'{BOT_NAME.capitalize()} moderator') for guild_id: {ctx.guild_id}!"
+        logging.getLogger(f"{BOT_NAME.lower()}.setup.create_roles").info(
+            f"Created roles ('{BOT_NAME.capitalize()} instinct', '{BOT_NAME.capitalize()} mystic', "
+            f"'{BOT_NAME.capitalize()} valor' or '{BOT_NAME.capitalize()} moderator') "
+            f"for guild_id: {ctx.guild_id}!"
         )
     except hikari.ForbiddenError:
-        logging.getLogger(f"{BOT_NAME.lower()}.events.event_guild_join_setup.create_roles").error(
+        logging.getLogger(f"{BOT_NAME.lower()}.setup.create_roles").error(
             "ForbiddenError while trying to create roles "
-            f"('Instinct', 'Mystic', 'Valor' or '{BOT_NAME.capitalize()} moderator') "
+            f"('{BOT_NAME.capitalize()} instinct', '{BOT_NAME.capitalize()} mystic', '{BOT_NAME.capitalize()} valor' or '{BOT_NAME.capitalize()} moderator') "
             f"for guild_id: {ctx.guild_id}!"
         )
     except Exception as e:
-        logging.getLogger(f"{BOT_NAME.lower()}.events.event_guild_join_setup.create_roles").error(
+        logging.getLogger(f"{BOT_NAME.lower()}.setup.create_roles").error(
             f"Unexpected error while trying to create roles "
-            f"('Instinct', 'Mystic', 'Valor' or '{BOT_NAME.capitalize()} moderator') "
+            f"('{BOT_NAME.capitalize()} instinct', '{BOT_NAME.capitalize()} mystic', '{BOT_NAME.capitalize()} valor' or '{BOT_NAME.capitalize()} moderator') "
             f"for guild_id: {ctx.guild_id}! Got error: {e}"
         )
 
@@ -185,9 +193,9 @@ async def command_setup(
     channel_raids_exists, channel_logs_exists = False, False
     all_server_channels = await ctx.rest.fetch_guild_channels(guild)
     for channel in all_server_channels:
-        if channel.name == f"{BOT_NAME.lower()}-raids":
+        if channel.name == f"{BOT_NAME.capitalize()}-raids":
             channel_raids_exists, channel_raids = True, channel
-        if channel.name == f"{BOT_NAME.lower()}-logs":
+        if channel.name == f"{BOT_NAME.capitalize()}-logs":
             channel_logs_exists, channel_logs = True, channel
 
     try:
@@ -202,9 +210,9 @@ async def command_setup(
             )
             channel_raids = await ctx.rest.create_guild_text_channel(
                 guild,
-                name=f"{BOT_NAME.lower()}-raids",
+                name=f"{BOT_NAME.capitalize()}-raids",
                 permission_overwrites=permission_overwrites,
-                reason=f"{BOT_NAME.capitalize()} event_guild_join_setup Handler -- Setup!",
+                reason=f"{BOT_NAME.capitalize()} setup Handler -- Setup!",
             )
         if not channel_logs_exists:
             permission_overwrites = []
@@ -217,28 +225,38 @@ async def command_setup(
             )
             channel_logs = await ctx.rest.create_guild_text_channel(
                 guild,
-                name=f"{BOT_NAME.lower()}-logs",
+                name=f"{BOT_NAME.capitalize()}-logs",
                 permission_overwrites=permission_overwrites,
-                reason=f"{BOT_NAME.capitalize()} event_guild_join_setup Handler -- Setup!",
+                reason=f"{BOT_NAME.capitalize()} setup Handler -- Setup!",
             )
-        logging.getLogger(f"{BOT_NAME.lower()}.events.event_guild_join_setup.create_channels").info(
+        logging.getLogger(f"{BOT_NAME.lower()}.setup.create_channels").info(
             f"Created channels ('{BOT_NAME.capitalize()}-raids' and "
             f"'{BOT_NAME.capitalize()}-logs') for guild_id: {ctx.guild_id}!"
         )
     except hikari.ForbiddenError:
-        logging.getLogger(f"{BOT_NAME.lower()}.events.event_guild_join_setup.create_channels").error(
+        logging.getLogger(f"{BOT_NAME.lower()}.setup.create_channels").error(
             "ForbiddenError while trying to create channels "
             f"('{BOT_NAME.capitalize()}-raids' and '{BOT_NAME.capitalize()}-logs') "
             f"for guild_id: {ctx.guild_id}!"
         )
     except Exception as e:
-        logging.getLogger(f"{BOT_NAME.lower()}.events.event_guild_join_setup.create_channels").error(
+        logging.getLogger(f"{BOT_NAME.lower()}.setup.create_channels").error(
             "Unexpected error while trying to create channels "
             f"('{BOT_NAME.capitalize()}-raids' and '{BOT_NAME.capitalize()}-logs') "
             f"for guild_id: {ctx.guild_id}! Got error: {e}"
         )
 
-    await db.set_guild_setting(guild, parameters=["is_setup = true", f"raids_channel_id = {channel_raids.id}"])
+    parameters = []
+    parameters.append("is_setup = true")
+    parameters.append(f"raids_channel_id = {channel_raids.id}")
+    parameters.append(f"moderator_role_id = {role_moderator.id}")
+    parameters.append(f"instinct_role_id = {role_instinct.id}")
+    parameters.append(f"mystic_role_id = {role_mystic.id}")
+    parameters.append(f"valor_role_id = {role_valor.id}")
+    parameters.append(f"instinct_emoji_id = {instinct_emoji.id}")
+    parameters.append(f"mystic_emoji_id = {mystic_emoji.id}")
+    parameters.append(f"valor_emoji_id = {valor_emoji.id}")
+    await db.set_guild_setting(guild, parameters=parameters)
     await db.set_guild_log_setting(guild, parameters=[f"logs_channel_id = {channel_logs.id}"])
 
     # SEND MESSAGE
@@ -250,8 +268,8 @@ async def command_setup(
             f"- Created custom emoji's;\n"
             f"\u200b \u200b \u200b `Instinct`: {instinct_emoji} | `Mystic`: {mystic_emoji} | `Valor`: {valor_emoji}\n"
             f"- Created default role's;\n"
-            f"\u200b \u200b \u200b `Instinct`: {role_instinct.mention} | `Mystic`: {role_mystic.mention} | `Valor`: {role_valor.mention}\n"  # noqa E501
-            f"\u200b \u200b \u200b `Moderator`: {role_moderator.mention}\n"
+            f"\u200b \u200b \u200b `Instinct`: {role_instinct.mention} | `Mystic`: {role_mystic.mention}\n"  # noqa E501
+            f"\u200b \u200b \u200b `Valor`: {role_valor.mention} | `Moderator`: {role_moderator.mention}\n"
             f"- Created default channels;\n"
             f"\u200b \u200b \u200b `Raids Channel`: {channel_raids.mention} | `Logs Channel`: {channel_logs.mention}\n\n"  # noqa E501
             f"`NOTE: Please make sure the {BOT_NAME.capitalize()} bot role is placed above all other roles to ensure the working of {BOT_NAME.capitalize()}`",  # noqa E501

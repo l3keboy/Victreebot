@@ -8,6 +8,16 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.2.3] - 16-06-2022
+### [Bugfixes]
+- Fix NotFoundError on reset
+- Changes to Internal logging
+### [Changes]
+- Improved reset and setup commands
+- Changed default role names
+- Changed default emoji names
+- Changes the welcome message format because of name changes
+
 ## [0.2.2] - 16-06-2022
 ### [Bugfixes]
 - Fix for some location interactions not working

@@ -18,6 +18,13 @@ DB_GUILD_SETTINGS_DEFAUTS = {
     "auto_delete": "5",
     "raids_channel_id": "NULL",
     "is_setup": "false",
+    "moderator_role_id": "NULL",
+    "instinct_role_id": "NULL",
+    "mystic_role_id": "NULL",
+    "valor_role_id": "NULL",
+    "instinct_emoji_id": "NULL",
+    "mystic_emoji_id": "NULL",
+    "valor_emoji_id": "NULL",
 }
 DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS = {
     "logs_channel_id": "NULL",

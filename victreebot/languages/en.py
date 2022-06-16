@@ -45,6 +45,7 @@ setup_finished_embed_description = "{bot_name} is finished with the setup! Pleas
 # Responses
 response_reset_timeout_reached = "Reset request reached a timeout! Not resetting!"
 response_reset_cancelled = "Reset cancelled! Not resetting {bot_name}!"
+response_reset_from_channel_not_possible = "You can't reset from this channel!"
 # Log responses
 log_response_reset_timeout_reached = "`[{datetime}]` -- **{member}** tried to reset {bot_name}, but the timeout was reached!"
 log_response_reset_cancelled = "`[{datetime}]` -- **{member}** tried to reset {bot_name}, but they cancelled the request!"
