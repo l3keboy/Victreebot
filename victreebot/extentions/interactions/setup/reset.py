@@ -38,15 +38,20 @@ async def command_reset(
     bot: BotUtils = tanjun.injected(type=BotUtils),
     bot_aware: Bot = tanjun.injected(type=Bot),
 ):
-    language, auto_delete, gmt, is_setup, *none = await db.get_guild_settings(
-        guild=ctx.get_guild(), settings=["language", "auto_delete", "gmt", "is_setup"]
+    language, auto_delete, gmt, is_setup, channel_raids, *none = await db.get_guild_settings(
+        guild=ctx.get_guild(), settings=["language", "auto_delete", "gmt", "is_setup", "raids_channel_id"]
     )
-    log_errors, *none = await db.get_guild_log_settings(
-        ctx.get_guild(), settings=["log_errors"]
+    channel_logs, log_errors, *none = await db.get_guild_log_settings(
+        ctx.get_guild(), settings=["logs_channel_id", "log_errors"]
     )
 
     if not is_setup:
         response = SUPPORTED_LANGUAGES.get(language).response_not_yet_setup.format(bot_name=BOT_NAME.capitalize())
+        await ctx.edit_last_response(response, delete_after=5)
+        return
+
+    if ctx.channel_id == channel_raids or ctx.channel_id == channel_logs:
+        response = SUPPORTED_LANGUAGES.get(language).response_reset_from_channel_not_possible
         await ctx.edit_last_response(response, delete_after=5)
         return
 
@@ -103,46 +108,146 @@ async def command_reset(
             my_user = await ctx.rest.fetch_my_user()
 
             # DELETE CUSTOM EMOJI'S
-            all_server_emojis = await ctx.rest.fetch_guild_emojis(guild)
-            for emoji in all_server_emojis:
-                if emoji.name == "Instinct" or emoji.name == "Mystic" or emoji.name == "Valor":
-                    try:
-                        await ctx.rest.delete_emoji(
-                            guild, emoji.id, reason=f"{BOT_NAME.capitalize()} event_guild_join_setup Handler -- Redo setup!"
-                        )
-                        logging.getLogger(f"{BOT_NAME.lower()}.events.event_guild_join_setup.emojis_upload").info(
-                            f"Deleted emoji with same name ('Instinct', 'Mystic' or 'Valor') for guild_id: {ctx.guild_id}!"
-                        )
-                    except hikari.ForbiddenError:
-                        logging.getLogger(f"{BOT_NAME.lower()}.events.event_guild_join_setup.emojis_upload").error(
-                            "ForbiddenError while trying to delete emoji with same name ('Instinct', 'Mystic' or 'Valor') "
-                            f"for guild_id: {ctx.guild_id}!"
-                        )
-                    except Exception as e:
-                        logging.getLogger(f"{BOT_NAME.lower()}.events.event_guild_join_setup.emojis_upload").error(
-                            "Unexpected error while trying to delete emoji with same name ('Instinct', 'Mystic' or 'Valor') "
-                            f"for guild_id: {ctx.guild_id}! Got error: {e}"
-                        )
+            try:
+                instinct_emoji, *none = await db.get_guild_settings(guild, settings=["instinct_emoji_id"])
+                await ctx.rest.delete_emoji(guild, instinct_emoji, reason=f"{BOT_NAME.capitalize()} reset Handler -- Reset!")
+            except hikari.ForbiddenError:
+                logging.getLogger(f"{BOT_NAME.lower()}.reset.emojis_delete").error(
+                    "ForbiddenError while trying to delete emoji with same name ('Instinct', 'Mystic' or 'Valor') "
+                    f"for guild_id: {ctx.guild_id}!"
+                )
+            except Exception as e:
+                logging.getLogger(f"{BOT_NAME.lower()}.reset.emojis_delete").error(
+                    "Unexpected error while trying to delete instinct emoji "
+                    f"for guild_id: {ctx.guild_id}! Got error: {e}"
+                )
+
+            try:
+                mystic_emoji, *none = await db.get_guild_settings(guild, settings=["mystic_emoji_id"])
+                await ctx.rest.delete_emoji(guild, mystic_emoji, reason=f"{BOT_NAME.capitalize()} reset Handler -- Reset!")
+            except hikari.ForbiddenError:
+                logging.getLogger(f"{BOT_NAME.lower()}.reset.emojis_delete").error(
+                    "ForbiddenError while trying to delete emoji with same name ('Instinct', 'Mystic' or 'Valor') "
+                    f"for guild_id: {ctx.guild_id}!"
+                )
+            except Exception as e:
+                logging.getLogger(f"{BOT_NAME.lower()}.reset.emojis_delete").error(
+                    "Unexpected error while trying to delete mystic emoji "
+                    f"for guild_id: {ctx.guild_id}! Got error: {e}"
+                )
+
+            try:
+                valor_emoji, *none = await db.get_guild_settings(guild, settings=["valor_emoji_id"])
+                await ctx.rest.delete_emoji(guild, valor_emoji, reason=f"{BOT_NAME.capitalize()} reset Handler -- Reset!")
+            except hikari.ForbiddenError:
+                logging.getLogger(f"{BOT_NAME.lower()}.reset.emojis_delete").error(
+                    "ForbiddenError while trying to delete emoji with same name ('Instinct', 'Mystic' or 'Valor') "
+                    f"for guild_id: {ctx.guild_id}!"
+                )
+            except Exception as e:
+                logging.getLogger(f"{BOT_NAME.lower()}.reset.emojis_delete").error(
+                    "Unexpected error while trying to delete valor emoji "
+                    f"for guild_id: {ctx.guild_id}! Got error: {e}"
+                )
 
             # DELETE ROLES
-            all_server_roles = await ctx.rest.fetch_roles(guild)
-            for role in all_server_roles:
-                if role.name == "Instinct":
-                    await ctx.rest.delete_role(guild, role)
-                if role.name == "Mystic":
-                    await ctx.rest.delete_role(guild, role)
-                if role.name == "Valor":
-                    await ctx.rest.delete_role(guild, role)
-                if role.name == f"{BOT_NAME.capitalize()} moderator":
-                    await ctx.rest.delete_role(guild, role)
+            try:
+                instinct_role, *none = await db.get_guild_settings(guild, settings=["instinct_role_id"])
+                await ctx.rest.delete_role(guild, instinct_role)
+            except hikari.ForbiddenError:
+                logging.getLogger(f"{BOT_NAME.lower()}.reset.roles_delete").error(
+                    "ForbiddenError while trying to delete instinct role "
+                    f"for guild_id: {ctx.guild_id}!"
+                )
+            except Exception as e:
+                logging.getLogger(f"{BOT_NAME.lower()}.reset.roles_delete").error(
+                    "Unexpected error while trying to delete instinct role "
+                    f"for guild_id: {ctx.guild_id}! Got error: {e}"
+                )
+
+            try:
+                mystic_role, *none = await db.get_guild_settings(guild, settings=["mystic_role_id"])
+                await ctx.rest.delete_role(guild, mystic_role)
+            except hikari.ForbiddenError:
+                logging.getLogger(f"{BOT_NAME.lower()}.reset.roles_delete").error(
+                    "ForbiddenError while trying to delete mystic role "
+                    f"for guild_id: {ctx.guild_id}!"
+                )
+            except Exception as e:
+                logging.getLogger(f"{BOT_NAME.lower()}.reset.roles_delete").error(
+                    "Unexpected error while trying to delete mystic role "
+                    f"for guild_id: {ctx.guild_id}! Got error: {e}"
+                )
+
+            try:
+                valor_role, *none = await db.get_guild_settings(guild, settings=["valor_role_id"])
+                await ctx.rest.delete_role(guild, valor_role)
+            except hikari.ForbiddenError:
+                logging.getLogger(f"{BOT_NAME.lower()}.reset.roles_delete").error(
+                    "ForbiddenError while trying to delete valor role "
+                    f"for guild_id: {ctx.guild_id}!"
+                )
+            except Exception as e:
+                logging.getLogger(f"{BOT_NAME.lower()}.reset.roles_delete").error(
+                    "Unexpected error while trying to delete valor role "
+                    f"for guild_id: {ctx.guild_id}! Got error: {e}"
+                )
+
+            try:
+                moderator_role, *none = await db.get_guild_settings(guild, settings=["moderator_role_id"])
+                await ctx.rest.delete_role(guild, moderator_role)
+            except hikari.ForbiddenError:
+                logging.getLogger(f"{BOT_NAME.lower()}.reset.roles_delete").error(
+                    "ForbiddenError while trying to delete moderator role "
+                    f"for guild_id: {ctx.guild_id}!"
+                )
+            except Exception as e:
+                logging.getLogger(f"{BOT_NAME.lower()}.reset.roles_delete").error(
+                    "Unexpected error while trying to delete moderator role "
+                    f"for guild_id: {ctx.guild_id}! Got error: {e}"
+                )
 
             # DELETE CHANNELS
-            channel_raids = await db.get_guild_settings(guild, settings=["raids_channel_id"])
-            channel_logs = await db.get_guild_log_settings(guild, settings=["logs_channel_id"])
-            await ctx.rest.delete_channel(channel_raids)
-            await ctx.rest.delete_channel(channel_logs)
+            try:
+                channel_raids, *none = await db.get_guild_settings(guild, settings=["raids_channel_id"])
+                await ctx.rest.delete_channel(channel_raids)
+            except hikari.NotFoundError:
+                logging.getLogger(f"{BOT_NAME.lower()}.reset.channel_delete").error(
+                    "NotFoundError while trying to delete raids channel "
+                    f"for guild_id: {ctx.guild_id}!"
+                )
+            except Exception as e:
+                logging.getLogger(f"{BOT_NAME.lower()}.reset.channel_delete").error(
+                    "Unexpected error while trying to delete raids channel "
+                    f"for guild_id: {ctx.guild_id}! Got error: {e}"
+                )
 
-            await db.set_guild_setting(guild, parameters=["is_setup = false", f"raids_channel_id = NULL"])
+            try:
+                channel_logs, *none = await db.get_guild_log_settings(guild, settings=["logs_channel_id"])
+                await ctx.rest.delete_channel(channel_logs)
+            except hikari.NotFoundError:
+                logging.getLogger(f"{BOT_NAME.lower()}.reset.channel_delete").error(
+                    "NotFoundError while trying to delete logs channel "
+                    f"for guild_id: {ctx.guild_id}!"
+                )
+            except Exception as e:
+                logging.getLogger(f"{BOT_NAME.lower()}.reset.channel_delete").error(
+                    "Unexpected error while trying to delete logs channel "
+                    f"for guild_id: {ctx.guild_id}! Got error: {e}"
+                )
+
+
+            parameters = []
+            parameters.append("is_setup = false")
+            parameters.append(f"raids_channel_id = NULL")
+            parameters.append(f"moderator_role_id = NULL")
+            parameters.append(f"instinct_role_id = NULL")
+            parameters.append(f"mystic_role_id = NULL")
+            parameters.append(f"valor_role_id = NULL")
+            parameters.append(f"instinct_emoji_id = NULL")
+            parameters.append(f"mystic_emoji_id = NULL")
+            parameters.append(f"valor_emoji_id = NULL")
+            await db.set_guild_setting(guild, parameters=parameters)
             await db.set_guild_log_setting(guild, parameters=[f"logs_channel_id = NULL"])
 
             embed_finished = (
