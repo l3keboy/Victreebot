@@ -8,6 +8,13 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.2.2] - 16-06-2022
+### [Bugfixes]
+- Fix for some location interactions not working
+### [Changes]
+- Added permissions check to setup and reset command (manage server permission now needed)
+- Reset commands now deletes channels based on their ID instead of name
+
 ## [0.2.1] - 15-06-2022
 ### [Bugfixes]
 - Fix bot not sending welcome message on join because of missing permissions

@@ -176,16 +176,16 @@ class BotUtils:
             await ctx.edit_last_response(
                 SUPPORTED_LANGUAGES.get(language).enable_disable_timeout, delete_after=auto_delete
             )
-            return enable
+            return event, enable
         else:
             await response_message.delete()
             if event.interaction.custom_id == "enable":
                 enable = True
-                return enable
+                return event, enable
             elif event.interaction.custom_id == "disable":
-                return enable
+                return event, enable
 
-    async def validate_add_or_no_add(self, ctx: tanjun.abc.SlashContext, item: str, db: DatabaseHandler) -> bool:
+    async def validate_add_or_no_add(self, ctx: tanjun.abc.SlashContext, item: str, db: DatabaseHandler) -> Tuple[hikari.InteractionCreateEvent, bool]:
         language, auto_delete, *none = await db.get_guild_settings(
             guild=ctx.get_guild(), settings=["language", "auto_delete"]
         )
@@ -218,11 +218,11 @@ class BotUtils:
             )
         except asyncio.TimeoutError:
             await ctx.edit_last_response(SUPPORTED_LANGUAGES.get(language).add_no_add_timeout, delete_after=auto_delete)
-            return add
+            return event, add
         else:
             await response_message.delete()
             if event.interaction.custom_id == "add":
                 add = True
-                return add
+                return event, add
             elif event.interaction.custom_id == "no_add":
-                return add
+                return event, add

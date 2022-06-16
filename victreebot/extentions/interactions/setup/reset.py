@@ -27,6 +27,10 @@ BOT_INVITE_LINK = os.getenv("BOT_INVITE_LINK")
 # ------------------------------------------------------------------------- #
 # COMMANDS #
 # ------------------------------------------------------------------------- #
+@tanjun.with_author_permission_check(
+    hikari.Permissions.MANAGE_GUILD,
+    error_message="You need the `Manage Guild` permissions to execute this command!",
+)
 @tanjun.as_slash_command("reset", f"Reset {BOT_NAME.capitalize()}")
 async def command_reset(
     ctx: tanjun.abc.SlashContext,
@@ -133,13 +137,10 @@ async def command_reset(
                     await ctx.rest.delete_role(guild, role)
 
             # DELETE CHANNELS
-            all_server_channels = await ctx.rest.fetch_guild_channels(guild)
-            for channel in all_server_channels:
-                if channel.name == f"{BOT_NAME.lower()}-raids":
-                    await ctx.rest.delete_channel(channel)
-                if channel.name == f"{BOT_NAME.lower()}-logs":
-                    await ctx.rest.delete_channel(channel)
-
+            channel_raids = await db.get_guild_settings(guild, settings=["raids_channel_id"])
+            channel_logs = await db.get_guild_log_settings(guild, settings=["logs_channel_id"])
+            await ctx.rest.delete_channel(channel_raids)
+            await ctx.rest.delete_channel(channel_logs)
 
             await db.set_guild_setting(guild, parameters=["is_setup = false", f"raids_channel_id = NULL"])
             await db.set_guild_log_setting(guild, parameters=[f"logs_channel_id = NULL"])
