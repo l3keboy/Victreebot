@@ -191,7 +191,7 @@ async def get_location_latitude_longitude(
             location=location_type.strip("'").capitalize()
         ),
         "location_longitude_latitude_modal",
-        components=[location_longitude_action_row, location_latitude_action_row],
+        components=[location_latitude_action_row, location_longitude_action_row],
     )
 
     try:
@@ -217,8 +217,8 @@ async def get_location_latitude_longitude(
                 event.interaction.components[0][0].value is not None
                 and event.interaction.components[1][0].value is not None
             ):
-                latitude = event.interaction.components[1][0].value
-                longitude = event.interaction.components[0][0].value
+                latitude = event.interaction.components[0][0].value
+                longitude = event.interaction.components[1][0].value
                 valid_latitude, valid_longitude = await bot.validate_latitude_longitude_type(latitude, longitude)
                 if not valid_latitude or not valid_longitude:
                     return None, None
@@ -799,7 +799,7 @@ async def command_locations(
 
                     response = SUPPORTED_LANGUAGES.get(language).response_location_edit_success
                     await ctx.create_followup(response, delete_after=auto_delete, embed=None, components=None)
-                    if log_location_delete:
+                    if log_location_edit:
                         log_response = SUPPORTED_LANGUAGES.get(language).log_response_location_edit_success.format(
                             datetime=await bot.get_timestamp_aware(gmt), member=ctx.member, location_type=location_type
                         )

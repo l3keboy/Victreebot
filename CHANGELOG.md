@@ -5,6 +5,10 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ================================================================
 
 ## [Unreleased/Working on]
+### [Bugfixes]
+- Fix log_locations_edit not being used/working properly
+### [Changes]
+- Changes latitude/longitude questions order
 
 ================================================================
 
