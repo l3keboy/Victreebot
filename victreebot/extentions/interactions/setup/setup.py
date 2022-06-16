@@ -27,6 +27,10 @@ BOT_INVITE_LINK = os.getenv("BOT_INVITE_LINK")
 # ------------------------------------------------------------------------- #
 # COMMANDS #
 # ------------------------------------------------------------------------- #
+@tanjun.with_author_permission_check(
+    hikari.Permissions.MANAGE_GUILD,
+    error_message="You need the `Manage Guild` permissions to execute this command!",
+)
 @tanjun.as_slash_command("setup", f"Setup {BOT_NAME.capitalize()}")
 async def command_setup(
     ctx: tanjun.abc.SlashContext,

@@ -559,13 +559,13 @@ async def command_locations(
                     await bot.log_from_ctx(ctx, db, log_response)
                 return
 
-            add = await bot.validate_add_or_no_add(ctx, "a description", db)
+            event, add = await bot.validate_add_or_no_add(ctx, "a description", db)
             if add:
                 location_description = await get_location_description(ctx, event, location_type, db, bot, bot_aware)
             else:
                 location_description = "NULL"
 
-            add = await bot.validate_add_or_no_add(ctx, "the latitude and longitude", db)
+            event, add = await bot.validate_add_or_no_add(ctx, "the latitude and longitude", db)
             if add:
                 latitude, longitude = await get_location_latitude_longitude(
                     ctx, event, location_type, db, bot, bot_aware
@@ -719,7 +719,7 @@ async def command_locations(
             else:
                 await response_message.delete()
                 if event.interaction.custom_id == "location_description":
-                    add = await bot.validate_add_or_no_add(ctx, "a description", db)
+                    event, add = await bot.validate_add_or_no_add(ctx, "a description", db)
                     if add:
                         location_description = await get_location_description(
                             ctx, event, location_type, db, bot, bot_aware
@@ -757,7 +757,7 @@ async def command_locations(
                         await bot.log_from_ctx(ctx, db, log_response)
 
                 elif event.interaction.custom_id == "location_latitude_longitude":
-                    add = await bot.validate_add_or_no_add(ctx, "the latitude and longitude", db)
+                    event, add = await bot.validate_add_or_no_add(ctx, "the latitude and longitude", db)
                     if add:
                         latitude, longitude = await get_location_latitude_longitude(
                             ctx, event, location_type, db, bot, bot_aware
