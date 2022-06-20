@@ -8,6 +8,11 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.4.2] - 20-06-2022
+### [Bugfixes]
+- Fix for translations
+- Fix for raids not being loaded properly causing issues with adding and removing emoji's
+
 ## [0.4.1] - 20-06-2022
 ### [Bugfixes]
 - Fix for trade message with components not getting deleted
