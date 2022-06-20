@@ -301,3 +301,25 @@ log_response_raid_edit_location_not_found = "`[{datetime}]` -- **{member}** trie
 # Embed
 raid_edit_embed_title = "Raid edit"
 raid_edit_embed_description = "Please select the component of the raid you want to edit."
+
+
+# ------------------------------------------------------------------------- #
+# Settings #
+# ------------------------------------------------------------------------- #
+# ------------------------------------------------------------------------- #
+# settings_update.py #
+# ------------------------------------------------------------------------- #
+# Response
+error_response_settings_update_insert_at_least_1 = "At least one setting change is required!"
+response_settings_update_general_failed = "Something went wrong while trying to update `General Settings`!"
+response_settings_update_general_success = "The `General Settings` are updated!"
+response_settings_update_raid_failed = "Something went wrong while trying to update `Raid Settings`!"
+response_settings_update_raid_success = "The `Raid Settings` are updated!"
+response_settings_update_raid_failed_raids_active = "Can't update `Raid Settings` because there are raids active in this server!"
+# Log response
+log_response_settings_update_general_failed = "`[{datetime}]` -- **{member}** tried to edit `General Settings`, but something went wrong!"
+log_response_settings_update_general_success = "`[{datetime}]` -- **{member}** edited `General Settings`!"
+log_response_settings_update_raid_failed = "`[{datetime}]` -- **{member}** tried to edit `Raid Settings`, but something went wrong!"
+log_response_settings_update_raid_success = "`[{datetime}]` -- **{member}** edited `Raid Settings`!"
+log_response_settings_update_raid_failed_raids_active = "`[{datetime}]` -- **{member}** tried to edit `Raid Settings`, but these are not editable now because there are raids active!"
+# Embeds

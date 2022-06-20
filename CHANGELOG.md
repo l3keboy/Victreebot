@@ -11,6 +11,7 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     - Added raid delete
     - Added raid edit
 - Added bot activities
+- Added the ability to change settings
 ### [Bugfixes]
 - Fix log_locations_edit not being used/working properly
 - Fix for multiple locations with "'" being allowed
