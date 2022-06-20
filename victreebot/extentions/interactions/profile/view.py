@@ -80,7 +80,7 @@ async def command_profile_view(
         hikari.Embed(
             title=SUPPORTED_LANGUAGES.get(language).profile_view_embed_title,
             description=SUPPORTED_LANGUAGES.get(language).profile_view_embed_description.format(member=member),
-            colour=hikari.Colour(0x8bc683),
+            colour=hikari.Colour(0x8BC683),
         )
         .set_thumbnail(member.avatar_url)
         .add_field(

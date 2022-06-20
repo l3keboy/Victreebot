@@ -10,8 +10,12 @@ import os
 
 import tanjun
 from dotenv import load_dotenv
-from extentions.interactions.settings.settings_update import command_settings_update_general
-from extentions.interactions.settings.settings_update import command_settings_update_raid
+from extentions.interactions.settings.settings_update import (
+    command_settings_update_general,
+)
+from extentions.interactions.settings.settings_update import (
+    command_settings_update_raid,
+)
 
 load_dotenv()
 BOT_NAME = os.getenv("BOT_NAME")
@@ -25,7 +29,4 @@ settings_update_group = (
     .add_command(command_settings_update_general)
     .add_command(command_settings_update_raid)
 )
-settings_group = (
-    tanjun.slash_command_group("settings", ".")
-    .add_command(settings_update_group)
-)
+settings_group = tanjun.slash_command_group("settings", ".").add_command(settings_update_group)

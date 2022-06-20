@@ -55,7 +55,9 @@ async def command_raid_delete(
         return
 
     if ctx.author.id != raid.raid_creator_id and ctx.author.id != moderator_role_id:
-        response = SUPPORTED_LANGUAGES.get(language).response_raid_delete_not_creator_or_moderator.format(bot_name=BOT_NAME.capitalize())
+        response = SUPPORTED_LANGUAGES.get(language).response_raid_delete_not_creator_or_moderator.format(
+            bot_name=BOT_NAME.capitalize()
+        )
         await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
         if log_errors:
             log_response = SUPPORTED_LANGUAGES.get(language).log_response_raid_delete_not_creator_or_moderator.format(
@@ -69,11 +71,12 @@ async def command_raid_delete(
     raids_deleted, *none = await db.get_guild_stats(ctx.get_guild(), stats=["raids_deleted"])
     new_raids_deleted = int(raids_deleted) + 1
     await db.set_guild_stats(ctx.get_guild(), parameters=[f"raids_deleted = {new_raids_deleted}"])
-    
+
     response = SUPPORTED_LANGUAGES.get(language).response_raid_delete_success
     await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
     if log_raid_delete:
         log_response = SUPPORTED_LANGUAGES.get(language).log_response_raid_delete_success.format(
-            datetime=await bot.get_timestamp_aware(gmt), member=ctx.member,
+            datetime=await bot.get_timestamp_aware(gmt),
+            member=ctx.member,
         )
         await bot.log_from_ctx(ctx, db, log_response)

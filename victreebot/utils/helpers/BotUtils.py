@@ -10,11 +10,11 @@ import asyncio
 import datetime
 import logging
 import os
-from typing import Tuple
 import re
-import pokebase as pb
+from typing import Tuple
 
 import hikari
+import pokebase as pb
 import pytz
 import tanjun
 from dotenv import load_dotenv
@@ -40,7 +40,9 @@ class BotUtils:
         timezone = pytz.timezone(f"Etc/{gmt_inverted}")
         return datetime.datetime.now().astimezone(timezone)
 
-    async def change_timestamp_format(self, timestamp: str, current_datetime_format: str, wished_datetime_format: str) -> str:
+    async def change_timestamp_format(
+        self, timestamp: str, current_datetime_format: str, wished_datetime_format: str
+    ) -> str:
         timestamp = datetime.datetime.strptime(timestamp, current_datetime_format)
         timestamp = datetime.datetime.strftime(timestamp, wished_datetime_format)
         return timestamp
@@ -192,7 +194,9 @@ class BotUtils:
             elif event.interaction.custom_id == "disable":
                 return event, enable
 
-    async def validate_add_or_no_add(self, ctx: tanjun.abc.SlashContext, item: str, db: DatabaseHandler) -> Tuple[hikari.InteractionCreateEvent, bool]:
+    async def validate_add_or_no_add(
+        self, ctx: tanjun.abc.SlashContext, item: str, db: DatabaseHandler
+    ) -> Tuple[hikari.InteractionCreateEvent, bool]:
         language, auto_delete, *none = await db.get_guild_settings(
             guild=ctx.get_guild(), settings=["language", "auto_delete"]
         )
@@ -238,7 +242,7 @@ class BotUtils:
         friend_code_regex = r"^\d{4}\ \d{4}\ \d{4}$"
         if re.match(friend_code_regex, friend_code):
             return True
-        else: 
+        else:
             logging.getLogger(f"{BOT_NAME.lower()}.validate_friend_code").error(
                 "Friend code check failed! Given friend code is not in the correct format!"
             )
@@ -251,7 +255,7 @@ class BotUtils:
             try:
                 pokemon = pb.pokemon(str(pokemon.lower()))
                 pokemon.id
-                pokemon_image = pb.SpriteResource('pokemon', pokemon.id).url
+                pokemon_image = pb.SpriteResource("pokemon", pokemon.id).url
                 success = True
             except Exception as e:
                 pokemon = None
@@ -262,7 +266,7 @@ class BotUtils:
             try:
                 pokemon = pb.pokemon(int(pokemon))
                 pokemon.id
-                pokemon_image = pb.SpriteResource('pokemon', pokemon.id).url
+                pokemon_image = pb.SpriteResource("pokemon", pokemon.id).url
                 success = True
             except Exception as e:
                 pokemon = None

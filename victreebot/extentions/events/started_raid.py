@@ -12,9 +12,9 @@ import hikari
 import tanjun
 from core.bot import Bot
 from dotenv import load_dotenv
+from extentions.interactions.raids.RaidClass import RaidClass
 from utils.DatabaseHandler import DatabaseHandler
 from utils.helpers.BotUtils import BotUtils
-from extentions.interactions.raids.RaidClass import RaidClass
 
 load_dotenv()
 BOT_NAME = os.getenv("BOT_NAME")
@@ -48,7 +48,7 @@ async def event_started_raid(
         channel_raids_id = result.get("raid_message_channel_id")
         raid_message_id = result.get("raid_message_id")
         raid_creator_id = result.get("raid_creator_id")
-        
+
         instinct_present = result.get("instinct_present")
         if instinct_present is not None:
             instinct_present = instinct_present.split(",")
@@ -66,4 +66,25 @@ async def event_started_raid(
 
         language, auto_delete, *none = await db.get_guild_settings(guild, settings=["language", "auto_delete"])
 
-        RaidClass(raid_id, raid_type, location_type, location_name, raid_takes_place_at, pokemon.name.lower(), guild, end_time, channel_raids_id, raid_message_id, raid_creator_id, bot, bot_aware, language, auto_delete, instinct_present=instinct_present, mystic_present=mystic_present, valor_present=valor_present, remote_present=remote_present, total_attendess=total_attendees)
+        RaidClass(
+            raid_id,
+            raid_type,
+            location_type,
+            location_name,
+            raid_takes_place_at,
+            pokemon.name.lower(),
+            guild,
+            end_time,
+            channel_raids_id,
+            raid_message_id,
+            raid_creator_id,
+            bot,
+            bot_aware,
+            language,
+            auto_delete,
+            instinct_present=instinct_present,
+            mystic_present=mystic_present,
+            valor_present=valor_present,
+            remote_present=remote_present,
+            total_attendess=total_attendees,
+        )

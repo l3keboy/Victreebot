@@ -6,18 +6,17 @@
 # Written by Luke Hendriks                                                  #
 # ------------------------------------------------------------------------- #
 # IMPORTS
-import asyncio
 import os
 
 import hikari
 import tanjun
+from core.bot import Bot
 from dotenv import load_dotenv
 from utils.DatabaseHandler import DatabaseHandler
 from utils.helpers.BotUtils import BotUtils
 from utils.helpers.contants import SUPPORTED_LANGUAGES
 from utils.helpers.contants import SUPPORTED_TIMEZONES
 from utils.helpers.contants import SUPPORTED_UNIT_SYSTEMS
-from core.bot import Bot
 
 load_dotenv()
 BOT_NAME = os.getenv("BOT_NAME")
@@ -72,7 +71,7 @@ async def command_settings_update_general(
     if language is None and gmt is None and unit_system is None and auto_delete is None and moderator_role is None:
         # Send response
         response = SUPPORTED_LANGUAGES.get(language).error_response_settings_update_insert_at_least_1
-        response_message = await ctx.respond(response, ensure_result=True, delete_after=int(auto_delete))
+        await ctx.respond(response, ensure_result=True, delete_after=int(auto_delete))
         if log_errors:
             # Send to log channel
             await bot.log_from_ctx(
@@ -113,7 +112,7 @@ async def command_settings_update_general(
     if not success:
         # Send response
         response = SUPPORTED_LANGUAGES.get(language).response_settings_update_general_failed
-        response_message = await ctx.respond(response, ensure_result=True, delete_after=int(auto_delete))
+        await ctx.respond(response, ensure_result=True, delete_after=int(auto_delete))
         if log_errors:
             # Send to log channel
             await bot.log_from_ctx(
@@ -127,9 +126,7 @@ async def command_settings_update_general(
 
     # Send response
     response = SUPPORTED_LANGUAGES.get(language).response_settings_update_general_success
-    response_message = await ctx.respond(response, ensure_result=True)
-    await asyncio.sleep(int(current_auto_delete))
-    await response_message.delete()
+    await ctx.respond(response, ensure_result=True, delete_after=int(current_auto_delete))
     if log_settings_changed:
         # Send to log channel
         await bot.log_from_ctx(
@@ -147,7 +144,12 @@ async def command_settings_update_general(
 @tanjun.with_author_permission_check(
     hikari.Permissions.MANAGE_GUILD, error_message="You need the `Manage Server` permissions to execute this command!"
 )
-@tanjun.with_int_slash_option("raid_timeout", f"The time {BOT_NAME.capitalize()} waits before deleting a raid after it ended (in seconds!).", min_value=0, default=None)
+@tanjun.with_int_slash_option(
+    "raid_timeout",
+    f"The time {BOT_NAME.capitalize()} waits before deleting a raid after it ended (in seconds!).",
+    min_value=0,
+    default=None,
+)
 @tanjun.with_str_slash_option("valor_emoji", f"The {BOT_NAME.capitalize()} valor emoji.", default=None)
 @tanjun.with_str_slash_option("mystic_emoji", f"The {BOT_NAME.capitalize()} mystic emoji.", default=None)
 @tanjun.with_str_slash_option("instinct_emoji", f"The {BOT_NAME.capitalize()} instinct emoji.", default=None)
@@ -166,7 +168,7 @@ async def command_settings_update_raid(
     raid_timeout: int,
     db: DatabaseHandler = tanjun.injected(type=DatabaseHandler),
     bot: BotUtils = tanjun.injected(type=BotUtils),
-    bot_aware: Bot = tanjun.injected(type=Bot)
+    bot_aware: Bot = tanjun.injected(type=Bot),
 ):
     language, auto_delete, *none = await db.get_guild_settings(
         guild=ctx.get_guild(), settings=["language", "auto_delete"]
@@ -175,10 +177,18 @@ async def command_settings_update_raid(
         ctx.get_guild(), settings=["log_errors", "log_settings_changed"]
     )
 
-    if instinct_role is None and mystic_role is None and valor_role is None and instinct_emoji is None and mystic_emoji is None and valor_emoji is None and raid_timeout is None:
+    if (
+        instinct_role is None
+        and mystic_role is None
+        and valor_role is None
+        and instinct_emoji is None
+        and mystic_emoji is None
+        and valor_emoji is None
+        and raid_timeout is None
+    ):
         # Send response
         response = SUPPORTED_LANGUAGES.get(language).error_response_settings_update_insert_at_least_1
-        response_message = await ctx.respond(response, ensure_result=True, delete_after=int(auto_delete))
+        await ctx.respond(response, ensure_result=True, delete_after=int(auto_delete))
         if log_errors:
             # Send to log channel
             await bot.log_from_ctx(
@@ -190,16 +200,12 @@ async def command_settings_update_raid(
             )
         return
 
-    filtered_raids = [
-        raid
-        for raid in bot_aware.raids.values()
-        if raid is not None and raid.guild == ctx.get_guild()
-    ]
+    filtered_raids = [raid for raid in bot_aware.raids.values() if raid is not None and raid.guild == ctx.get_guild()]
 
     if filtered_raids != []:
         # Send response
         response = SUPPORTED_LANGUAGES.get(language).response_settings_update_raid_failed_raids_active
-        response_message = await ctx.respond(response, ensure_result=True, delete_after=int(auto_delete))
+        await ctx.respond(response, ensure_result=True, delete_after=int(auto_delete))
         if log_errors:
             # Send to log channel
             await bot.log_from_ctx(

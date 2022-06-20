@@ -7,24 +7,24 @@
 # ------------------------------------------------------------------------- #
 # IMPORTS
 import asyncio
-import os
 import datetime
-import uuid
-from dateutil.rrule import * 
-import pytz
+import os
 import time
+import uuid
 
 import hikari
+import pytz
 import tanjun
 from core.bot import Bot
+from dateutil.rrule import *  # noqa F403
 from dotenv import load_dotenv
+from extentions.interactions.locations.locations import get_location_name
+from extentions.interactions.raids.RaidClass import RaidClass
 from utils.DatabaseHandler import DatabaseHandler
 from utils.helpers.BotUtils import BotUtils
 from utils.helpers.contants import SUPPORTED_LANGUAGES
-from utils.helpers.contants import SUPPORTED_RAID_TYPES
 from utils.helpers.contants import SUPPORTED_LOCATION_TYPES
-from extentions.interactions.locations.locations import get_location_name
-from extentions.interactions.raids.RaidClass import RaidClass
+from utils.helpers.contants import SUPPORTED_RAID_TYPES
 
 load_dotenv()
 BOT_NAME = os.getenv("BOT_NAME")
@@ -102,7 +102,7 @@ async def get_boss_name(
                 try:
                     int(boss_name)
                     return int(boss_name)
-                except:
+                except Exception:
                     boss_name = boss_name.replace(" ", "-")
                     return boss_name.lower()
 
@@ -118,7 +118,8 @@ async def command_raid_create(
     bot_aware: Bot = tanjun.injected(type=Bot),
 ):
     language, auto_delete, gmt, is_setup, channel_raids, raid_timeout, *none = await db.get_guild_settings(
-        guild=ctx.get_guild(), settings=["language", "auto_delete", "gmt", "is_setup", "raids_channel_id", "raid_timeout"]
+        guild=ctx.get_guild(),
+        settings=["language", "auto_delete", "gmt", "is_setup", "raids_channel_id", "raid_timeout"],
     )
     log_errors, log_raid_create, *none = await db.get_guild_log_settings(
         ctx.get_guild(), settings=["log_errors", "log_raid_create"]
@@ -132,18 +133,16 @@ async def command_raid_create(
     timeout = 120
 
     # GET RAID TYPE
-    raid_type_action_row = (
-        ctx.rest.build_action_row()
-    )
+    raid_type_action_row = ctx.rest.build_action_row()
     for raid_type in SUPPORTED_RAID_TYPES:
-        raid_type_action_row.add_button(hikari.ButtonStyle.PRIMARY, raid_type.lower()).set_label(raid_type).add_to_container()
+        raid_type_action_row.add_button(hikari.ButtonStyle.PRIMARY, raid_type.lower()).set_label(
+            raid_type
+        ).add_to_container()
 
-    raid_type_embed = (
-        hikari.Embed(
-            title=SUPPORTED_LANGUAGES.get(language).raid_create_embed_title_raid_type,
-            description=SUPPORTED_LANGUAGES.get(language).raid_create_embed_description_raid_type,
-            colour=hikari.Colour(0x8bc683),
-        )
+    raid_type_embed = hikari.Embed(
+        title=SUPPORTED_LANGUAGES.get(language).raid_create_embed_title_raid_type,
+        description=SUPPORTED_LANGUAGES.get(language).raid_create_embed_description_raid_type,
+        colour=hikari.Colour(0x8BC683),
     )
 
     response_message = await ctx.respond(embed=raid_type_embed, components=[raid_type_action_row])
@@ -181,18 +180,16 @@ async def command_raid_create(
             return
 
     # GET LOCATION TYPE
-    location_type_action_row = (
-        ctx.rest.build_action_row()
-    )
+    location_type_action_row = ctx.rest.build_action_row()
     for location_type in SUPPORTED_LOCATION_TYPES:
-        location_type_action_row.add_button(hikari.ButtonStyle.PRIMARY, location_type.lower()).set_label(location_type).add_to_container()
+        location_type_action_row.add_button(hikari.ButtonStyle.PRIMARY, location_type.lower()).set_label(
+            location_type
+        ).add_to_container()
 
-    location_type_embed = (
-        hikari.Embed(
-            title=SUPPORTED_LANGUAGES.get(language).raid_create_embed_title_location_type,
-            description=SUPPORTED_LANGUAGES.get(language).raid_create_embed_description_location_type,
-            colour=hikari.Colour(0x8bc683),
-        )
+    location_type_embed = hikari.Embed(
+        title=SUPPORTED_LANGUAGES.get(language).raid_create_embed_title_location_type,
+        description=SUPPORTED_LANGUAGES.get(language).raid_create_embed_description_location_type,
+        colour=hikari.Colour(0x8BC683),
     )
 
     response_message = await ctx.edit_last_response(embed=location_type_embed, components=[location_type_action_row])
@@ -229,7 +226,9 @@ async def command_raid_create(
         all_locations.append(location.get("name"))
 
     if location_name_awnser.lower() not in all_locations:
-        response = SUPPORTED_LANGUAGES.get(language).response_raid_create_location_not_found.format(location_type=location_type.strip("'"), location_name=location_name_awnser)
+        response = SUPPORTED_LANGUAGES.get(language).response_raid_create_location_not_found.format(
+            location_type=location_type.strip("'"), location_name=location_name_awnser
+        )
         await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
         if log_errors:
             log_response = SUPPORTED_LANGUAGES.get(language).log_response_raid_create_location_not_found.format(
@@ -237,7 +236,7 @@ async def command_raid_create(
             )
             await bot.log_from_ctx(ctx, db, log_response)
         return
-    
+
     results = await db.get_location_info(ctx.get_guild(), location_type, location_name)
     latitude = results[0].get("latitude")
     longitude = results[0].get("longitude")
@@ -249,15 +248,16 @@ async def command_raid_create(
     timezone = pytz.timezone(f"Etc/{gmt_inverted}")
 
     timezone_aware_current_date = datetime.datetime.today().astimezone(timezone).date()
-    days = rrule(DAILY, dtstart=timezone_aware_current_date)
+    days = rrule(DAILY, dtstart=timezone_aware_current_date)  # noqa F405
 
     # GET RAID TIME
-    date_action_row = (
-        ctx.rest.build_action_row()
-        .add_select_menu("date")
-    )
+    date_action_row = ctx.rest.build_action_row().add_select_menu("date")
     for day in days[:24]:
-        date_action_row.add_option(f"{SUPPORTED_LANGUAGES.get(language).weekdays[day.weekday()]} {day.day} {SUPPORTED_LANGUAGES.get(language).months[day.month]}", str(day)).add_to_menu()
+        date_action_row.add_option(
+            f"{SUPPORTED_LANGUAGES.get(language).weekdays[day.weekday()]} {day.day} "
+            f"{SUPPORTED_LANGUAGES.get(language).months[day.month]}",
+            str(day),
+        ).add_to_menu()
     date_action_row = date_action_row.add_to_container()
 
     time_action_row = (
@@ -273,12 +273,10 @@ async def command_raid_create(
         .add_to_container()
     )
 
-    date_embed = (
-        hikari.Embed(
-            title=SUPPORTED_LANGUAGES.get(language).raid_create_embed_title_date,
-            description=SUPPORTED_LANGUAGES.get(language).raid_create_embed_description_date,
-            colour=hikari.Colour(0x8bc683),
-        )
+    date_embed = hikari.Embed(
+        title=SUPPORTED_LANGUAGES.get(language).raid_create_embed_title_date,
+        description=SUPPORTED_LANGUAGES.get(language).raid_create_embed_description_date,
+        colour=hikari.Colour(0x8BC683),
     )
 
     response_message = await ctx.edit_last_response(embed=date_embed, components=[date_action_row])
@@ -335,18 +333,21 @@ async def command_raid_create(
                         response = SUPPORTED_LANGUAGES.get(language).response_raid_create_invalid_time
                         await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
                         if log_errors:
-                            log_response = SUPPORTED_LANGUAGES.get(language).log_response_raid_create_invalid_time.format(
+                            log_response = SUPPORTED_LANGUAGES.get(
+                                language
+                            ).log_response_raid_create_invalid_time.format(
                                 datetime=await bot.get_timestamp_aware(gmt), member=ctx.member
                             )
                             await bot.log_from_ctx(ctx, db, log_response)
                         return
 
-
     raid_date = await bot.change_timestamp_format(raid_date, "%Y-%m-%d %H:%M:%S", "%d/%m/%Y")
     raid_takes_place_at = f"{raid_date} {raid_time}"
 
-    raid_takes_place_at_server_timezone_aware = datetime.datetime.strptime(str(raid_takes_place_at), "%d/%m/%Y %H:%M").replace(tzinfo=timezone)
-    datetime_obj_now_utc = datetime.datetime.now().astimezone(tz=pytz.UTC)    
+    raid_takes_place_at_server_timezone_aware = datetime.datetime.strptime(
+        str(raid_takes_place_at), "%d/%m/%Y %H:%M"
+    ).replace(tzinfo=timezone)
+    datetime_obj_now_utc = datetime.datetime.now().astimezone(tz=pytz.UTC)
     datetime_obj_raid_takes_place_at_utc = raid_takes_place_at_server_timezone_aware.astimezone(tz=pytz.UTC)
 
     if datetime_obj_raid_takes_place_at_utc < datetime_obj_now_utc:
@@ -375,16 +376,22 @@ async def command_raid_create(
                 location=location_name_awnser.capitalize(),
                 latitude=latitude,
                 longitude=longitude,
-            ) if latitude is not None else SUPPORTED_LANGUAGES.get(language).raid_embed_description_without_location_link.format(
+            )
+            if latitude is not None
+            else SUPPORTED_LANGUAGES.get(language).raid_embed_description_without_location_link.format(
                 raid_id=raid_id.strip("'"),
                 raid_type=raid_type.capitalize(),
                 time_date=f"""{raid_takes_place_at.strip("'")} {gmt}""",
                 location=location_name_awnser.capitalize(),
             ),
-            colour=hikari.Colour(0x8bc683),
+            colour=hikari.Colour(0x8BC683),
         )
         .set_author(name=pokemon.name.replace("-", " ").capitalize(), icon=pokemon_image)
-        .set_footer(text=SUPPORTED_LANGUAGES.get(language).raid_embed_footer.format(member=ctx.member.display_name, attendees="0"))
+        .set_footer(
+            text=SUPPORTED_LANGUAGES.get(language).raid_embed_footer.format(
+                member=ctx.member.display_name, attendees="0"
+            )
+        )
         .add_field("Instinct:", value="\u200b", inline=False)
         .add_field("Mystic:", value="\u200b", inline=False)
         .add_field("Valor:", value="\u200b", inline=False)
@@ -393,14 +400,18 @@ async def command_raid_create(
 
     raid_message = await channel_raids.send(embed=embed)
 
-    instinct_emoji_id, mystic_emoji_id, valor_emoji_id, *none = await db.get_guild_settings(ctx.get_guild(), settings=["instinct_emoji_id", "mystic_emoji_id", "valor_emoji_id"])
-    instinct_emoji = ctx.cache.get_emoji(instinct_emoji_id) or await ctx.rest.fetch_emoji(ctx.get_guild(), instinct_emoji_id)
+    instinct_emoji_id, mystic_emoji_id, valor_emoji_id, *none = await db.get_guild_settings(
+        ctx.get_guild(), settings=["instinct_emoji_id", "mystic_emoji_id", "valor_emoji_id"]
+    )
+    instinct_emoji = ctx.cache.get_emoji(instinct_emoji_id) or await ctx.rest.fetch_emoji(
+        ctx.get_guild(), instinct_emoji_id
+    )
     mystic_emoji = ctx.cache.get_emoji(mystic_emoji_id) or await ctx.rest.fetch_emoji(ctx.get_guild(), mystic_emoji_id)
     valor_emoji = ctx.cache.get_emoji(valor_emoji_id) or await ctx.rest.fetch_emoji(ctx.get_guild(), valor_emoji_id)
     one_emoji = "1️⃣"
     two_emoji = "2️⃣"
     three_emoji = "3️⃣"
-    remote_emoji = "🇷"    
+    remote_emoji = "🇷"
     await raid_message.add_reaction(instinct_emoji)
     await raid_message.add_reaction(mystic_emoji)
     await raid_message.add_reaction(valor_emoji)
@@ -409,15 +420,33 @@ async def command_raid_create(
     await raid_message.add_reaction(three_emoji)
     await raid_message.add_reaction(remote_emoji)
 
-    RaidClass(raid_id, raid_type, location_type, location_name, raid_takes_place_at, pokemon.name.lower(), ctx.get_guild(), end_time, channel_raids.id, raid_message.id, ctx.member.id, bot, bot_aware, language, auto_delete)
+    RaidClass(
+        raid_id,
+        raid_type,
+        location_type,
+        location_name,
+        raid_takes_place_at,
+        pokemon.name.lower(),
+        ctx.get_guild(),
+        end_time,
+        channel_raids.id,
+        raid_message.id,
+        ctx.member.id,
+        bot,
+        bot_aware,
+        language,
+        auto_delete,
+    )
 
     raids_created, *none = await db.get_guild_stats(ctx.get_guild(), stats=["raids_created"])
     new_raids_created = int(raids_created) + 1
-    await db.set_guild_stats(ctx.get_guild(), parameters=[f"raids_created = {new_raids_created}"])  
+    await db.set_guild_stats(ctx.get_guild(), parameters=[f"raids_created = {new_raids_created}"])
 
     stats_raids_created, *none = await db.get_user_details(ctx.get_guild(), ctx.member, details=["stats_raids_created"])
     new_stats_raids_created = int(stats_raids_created) + 1
-    await db.set_user_detail(ctx.get_guild(), ctx.member, parameters=[f"stats_raids_created = {new_stats_raids_created}"])   
+    await db.set_user_detail(
+        ctx.get_guild(), ctx.member, parameters=[f"stats_raids_created = {new_stats_raids_created}"]
+    )
 
     response = SUPPORTED_LANGUAGES.get(language).response_raid_create_success
     await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)

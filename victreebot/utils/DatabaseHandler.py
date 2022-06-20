@@ -14,9 +14,11 @@ import hikari
 from dotenv import load_dotenv
 from utils.helpers.contants import DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS
 from utils.helpers.contants import DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS
+from utils.helpers.contants import DB_GUILD_LOG_SETTINGS_RAID_EVENTS
+from utils.helpers.contants import DB_GUILD_LOG_SETTINGS_TRADE_EVENTS
 from utils.helpers.contants import DB_GUILD_SETTINGS_DEFAUTS
-from utils.helpers.contants import DB_USER_DETAILS_DEFAULT
 from utils.helpers.contants import DB_GUILD_STATS_DETAILS_DEFAULT
+from utils.helpers.contants import DB_USER_DETAILS_DEFAULT
 
 load_dotenv()
 BOT_NAME = os.getenv("BOT_NAME")
@@ -128,11 +130,15 @@ class DatabaseHandler:
                         f"""INSERT INTO "Guild_Log_Settings"
                         (guild_id,
                         {",".join(s for s in DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS.keys())},
-                        {",".join(s for s in DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS.keys())})
+                        {",".join(s for s in DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS.keys())},
+                        {",".join(s for s in DB_GUILD_LOG_SETTINGS_RAID_EVENTS.keys())},
+                        {",".join(s for s in DB_GUILD_LOG_SETTINGS_TRADE_EVENTS.keys())})
                         VALUES
                         ({guild.id},
                         {",".join(str(s_value) for s_value in DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS.values())},
-                        {",".join(str(s_value) for s_value in DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS.values())})
+                        {",".join(str(s_value) for s_value in DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS.values())},
+                        {",".join(str(s_value) for s_value in DB_GUILD_LOG_SETTINGS_RAID_EVENTS.values())},
+                        {",".join(str(s_value) for s_value in DB_GUILD_LOG_SETTINGS_TRADE_EVENTS.values())})
                         """
                     )
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_guild_log_settings").info(
@@ -169,8 +175,7 @@ class DatabaseHandler:
                     )
                 except asyncpg.UniqueViolationError:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_guild_stats").warning(
-                        f"UniqueViolationError guild_id: {guild.id} already exists in "
-                        "Guild_Stats database table!"
+                        f"UniqueViolationError guild_id: {guild.id} already exists in " "Guild_Stats database table!"
                     )
                 except Exception as e:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_guild_stats").error(
@@ -560,8 +565,7 @@ class DatabaseHandler:
                     success = True
                 except Exception as e:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.set_guild_stats").error(
-                        "Unexpected error while trying to update stats for "
-                        f"guild_id: {guild.id}! Got error: {e}!"
+                        "Unexpected error while trying to update stats for " f"guild_id: {guild.id}! Got error: {e}!"
                     )
                     success = False
         return success
@@ -593,8 +597,7 @@ class DatabaseHandler:
                         results.append(DB_GUILD_STATS_DETAILS_DEFAULT.get(stat).strip("'"))
                 except Exception as e:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.get_guild_stats").error(
-                        f"Unexpected error while trying to fetch stats for "
-                        f"in guild_id: {guild.id}! Got error: {e}"
+                        f"Unexpected error while trying to fetch stats for " f"in guild_id: {guild.id}! Got error: {e}"
                     )
         return results
 
@@ -713,15 +716,32 @@ class DatabaseHandler:
     # Raid methods #
     # ------------------------------------------------------------------------- #
     async def insert_raid(
-        self, guild: hikari.Guild, raid_id: str, raid_type: str, location_type: str, location_name: str, takes_place_at: str, boss: str, end_time: str, raid_message_channel_id: int, raid_message_id: int, raid_creator_id: int
+        self,
+        guild: hikari.Guild,
+        raid_id: str,
+        raid_type: str,
+        location_type: str,
+        location_name: str,
+        takes_place_at: str,
+        boss: str,
+        end_time: str,
+        raid_message_channel_id: int,
+        raid_message_id: int,
+        raid_creator_id: int,
     ) -> bool:
         """Insert a raid"""
         async with self._pool.acquire() as conn:
             async with conn.transaction():
                 try:
                     await conn.execute(
-                        f"""INSERT INTO "Raids" (guild_id, raid_id, raid_type, location_type, location_name, takes_place_at, boss, end_time, raid_message_channel_id, raid_message_id, raid_creator_id)
-                            VALUES ({guild.id}, {raid_id}, {raid_type}, {location_type}, {location_name}, {takes_place_at}, {boss}, {end_time}, {raid_message_channel_id}, {raid_message_id}, {raid_creator_id})"""
+                        f"""INSERT INTO "Raids"
+                            (guild_id, raid_id, raid_type, location_type,
+                            location_name, takes_place_at, boss, end_time,
+                            raid_message_channel_id, raid_message_id, raid_creator_id)
+                            VALUES
+                            ({guild.id}, {raid_id}, {raid_type}, {location_type},
+                            {location_name}, {takes_place_at}, {boss}, {end_time},
+                            {raid_message_channel_id}, {raid_message_id}, {raid_creator_id})"""
                     )
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_raid").info(
                         f"Successfully inserted raid for guild_id: {guild.id}!"
@@ -785,8 +805,7 @@ class DatabaseHandler:
                         results.append(None)
                 except Exception as e:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.get_raid_details").error(
-                        f"Unexpected error while trying to fetch raid for guild_id: {guild.id}! " 
-                        f"Got error: {e}"
+                        f"Unexpected error while trying to fetch raid for guild_id: {guild.id}! " f"Got error: {e}"
                     )
         return results
 
@@ -814,8 +833,7 @@ class DatabaseHandler:
                         results.append(None)
                 except Exception as e:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.get_raid_details_by_message").error(
-                        f"Unexpected error while trying to fetch raid for guild_id: {guild.id}! " 
-                        f"Got error: {e}"
+                        f"Unexpected error while trying to fetch raid for guild_id: {guild.id}! " f"Got error: {e}"
                     )
         return results
 
@@ -835,8 +853,7 @@ class DatabaseHandler:
                     success = True
                 except Exception as e:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.set_raid_detail").error(
-                        "Unexpected error while trying to update raid for "
-                        f"guild_id: {guild.id}! Got error: {e}!"
+                        "Unexpected error while trying to update raid for " f"guild_id: {guild.id}! Got error: {e}!"
                     )
                     success = False
         return success
@@ -848,12 +865,11 @@ class DatabaseHandler:
             async with conn.transaction():
                 try:
                     results = await conn.fetch(
-                        f"""SELECT *
-                            FROM "Raids" """
+                        """SELECT *
+                           FROM "Raids" """
                     )
                 except Exception as e:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.get_all_raids").error(
-                        f"Unexpected error while trying to fetch all raids! "
-                        f"Got error: {e}"
+                        f"Unexpected error while trying to fetch all raids! " f"Got error: {e}"
                     )
         return results
