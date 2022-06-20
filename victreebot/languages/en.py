@@ -5,6 +5,28 @@
 # would be appreciated.                                                     #
 # Written by Luke Hendriks                                                  #
 # ------------------------------------------------------------------------- #
+monday = "Monday"
+tuesday = "Tuesday"
+wednesday = "Wednesday"
+thursday = "Thursday"
+friday = "Friday"
+saturday = "Saturday"
+sunday = "Sunday"
+weekdays = [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+january = "January"
+february = "February"
+march = "March"
+april = "April"
+may = "May"
+june = "June"
+july = "July"
+august = "August"
+september = "September"
+october = "October"
+november = "November"
+december = "December"
+months = [january, february, march, april, may, june, july, august, september, october, november, december]
+
 validate_enable_or_disable = "Enable or disable {item}"
 validate_enable_or_disable_description = "Do you want to enable or disable {item}?"
 disable = "Disable"
@@ -91,11 +113,13 @@ profile_modal_delete_active_locations_text_input_placeholder = (
 # Response
 response_profile_edit_timeout_reached = "Stopping profile editing, timeout reached!"
 response_profile_edit_success = "Your account has been edited!"
+response_profile_edit_invalid_friend_code_format = "The given friend code is not in the correct format!"
 # Log response
 log_response_profile_edit_timeout_reached = (
     "`[{datetime}]` -- **{member}** tried to edit their profile, but the timeout was reached!"
 )
 log_response_profile_edit = "`[{datetime}]` -- **{member}** edited their profile!"
+log_response_profile_edit_invalid_friend_code_format = "`[{datetime}]` -- **{member}** tried to edit their friend code(s), but the given friend code(s) is not in the correct format!"
 # Embeds
 profile_edit_embed_title = "Profile configuration"
 profile_edit_embed_description = "Welcome to the profile configurator. Please select what action you want to perform."
@@ -198,3 +222,82 @@ location_list_embed_field_locations = "Locations:"
 location_info_embed_title = "Location info"
 location_info_embed_field_coordinates = "Coordinates:"
 location_info_embed_field_google_maps = "Google Maps link:"
+
+
+# ------------------------------------------------------------------------- #
+# Raids #
+# ------------------------------------------------------------------------- #
+# ------------------------------------------------------------------------- #
+# create.py #
+# ------------------------------------------------------------------------- #
+raid_create_modal_time = "Raid time"
+raid_create_modal_time_text_input = "At what time?"
+raid_create_modal_time_text_input_placeholder = "Format: HH:MM"
+boss_name_modal_location_name = "Raid Boss"
+boss_name_modal_text_input_title = "Boss name or ID"
+boss_name_modal_text_input_placeholder = "What is the name or ID of the boss?"
+# Responses
+response_raid_create_timeout_reached = "Stopping Raid creation, timeout was reached!"
+response_raid_create_location_not_found = "The `{location_type}` with the name `{location_name}` does not exist! Please try to create the Raid again!"
+response_raid_create_unknown_boss = "The given boss, `{boss_name}`, is not found! Please try to create the Raid again!"
+response_raid_create_invalid_time = "The given time is not in a valid timeformat!"
+response_raid_create_date_time_already_past = "The given date and time combination is in the past!"
+response_raid_create_success = "The raid is created!"
+# Log responses
+log_response_raid_create_timeout_reached =  "`[{datetime}]` -- **{member}** tried to create a raid, but the timeout was reached!"
+log_response_raid_create_location_not_found = "`[{datetime}]` -- **{member}** tried to create a raid, but the given location does not exist!"
+log_response_raid_create_unknown_boss = "`[{datetime}]` -- **{member}** tried to create a raid, but the given boss is not found!"
+log_response_raid_create_invalid_time = "`[{datetime}]` -- **{member}** tried to create a raid, but the given time is not in the valid format!"
+log_response_raid_create_date_time_already_past = "`[{datetime}]` -- **{member}** tried to create a raid, but the given date and time combination is in the past!"
+log_response_raid_create_success = "`[{datetime}]` -- **{member}** created a raid!"
+# Embed
+raid_create_embed_title_raid_type = "Raid type"
+raid_create_embed_description_raid_type = "Please select the type of the raid."
+raid_create_embed_title_location_type = "Location type"
+raid_create_embed_description_location_type = "Please select the type of the location where the raid takes place."
+raid_create_embed_title_date = "Raid date and time"
+raid_create_embed_description_date = "When does the raid take place? (Note: The format of the dates is: Month/Day!"
+raid_embed_description_with_location_link = "**Raid ID:** {raid_id}\n **Raid type:** {raid_type}\n **Time and date:** {time_date}\n **Location:** [{location}](https://www.google.com/maps/place/{latitude},{longitude})\n"
+raid_embed_description_without_location_link = "**Raid ID:** {raid_id}\n **Raid type:** {raid_type}\n **Time and date:** {time_date}\n **Location:** {location}\n"
+raid_embed_footer = "Raid created by: {member} | Total attendees: {attendees}"
+
+# ------------------------------------------------------------------------- #
+# delete.py #
+# ------------------------------------------------------------------------- #
+# Response
+response_raid_delete_no_raid_found = "I didn't find a raid with that ID!"
+response_raid_delete_not_creator_or_moderator = "You are not allowed to delete this raid! You are not the owner or a {bot_name} moderator!"
+response_raid_delete_success = "The raid is deleted!"
+# Log response
+log_response_raid_delete_no_raid_found = "`[{datetime}]` -- **{member}** tried to delete a raid, but didn't there was no raid with the given ID!"
+log_response_raid_delete_not_creator_or_moderator = "`[{datetime}]` -- **{member}** tried to delete a raid, but they aren't the creator or a {bot_name} moderator!"
+log_response_raid_delete_success = "`[{datetime}]` -- **{member}** deleted a raid!"
+# Embed
+
+# ------------------------------------------------------------------------- #
+# edit.py #
+# ------------------------------------------------------------------------- #
+raid_edit_action_row_edit_raid_type = "Raid type"
+raid_edit_action_row_edit_boss = "Boss"
+raid_edit_action_row_edit_location = "Location"
+raid_edit_action_row_edit_date_time = "Date and time"
+# Response
+response_raid_edit_no_raid_found = "There is no raid with that ID!"
+response_raid_edit_not_creator_or_moderator = "You are not allowed to edit this raid! You are not the owner or a {bot_name} moderator!"
+response_raid_edit_timeout_reached = "Stopping Raid edit, timeout was reached!"
+response_raid_edit_raid_type = "The raid type has been edited!"
+response_raid_edit_raid_type_failed = "Something went wrong while trying to edit the raid type!"
+response_raid_edit_boss_failed = "Something went wrong while trying to edit the boss"
+response_raid_edit_location_not_found = "The `{location_type}` with the name `{location_name}` does not exist! Please try to edit the Raid again!"
+response_raid_edit_location_failed = "Something went wrong while trying to edit the location!"
+response_raid_location_raid_type = "The location is edited!"
+# Log response
+log_response_raid_edit_no_raid_found = "`[{datetime}]` -- **{member}** tried to edit a raid, but didn't there was no raid with the given ID!"
+log_response_raid_edit_not_creator_or_moderator = "`[{datetime}]` -- **{member}** tried to edit a raid, but they aren't the creator or a {bot_name} moderator!"
+log_response_raid_edit_timeout_reached = "`[{datetime}]` -- **{member}** tried to edit a raid, but the timeout was reached!"
+log_response_raid_edit = "`[{datetime}]` -- **{member}** edited a raid!"
+log_response_raid_edit_failed = "`[{datetime}]` -- **{member}** tried to edit a raid, but something went wrong!"
+log_response_raid_edit_location_not_found = "`[{datetime}]` -- **{member}** tried to edit a raid, but the given location does not exist!"
+# Embed
+raid_edit_embed_title = "Raid edit"
+raid_edit_embed_description = "Please select the component of the raid you want to edit."

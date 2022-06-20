@@ -11,6 +11,8 @@ import datetime
 import logging
 import os
 from typing import Tuple
+import re
+import pokebase as pb
 
 import hikari
 import pytz
@@ -37,6 +39,11 @@ class BotUtils:
             gmt_inverted = gmt.replace("+", "-")
         timezone = pytz.timezone(f"Etc/{gmt_inverted}")
         return datetime.datetime.now().astimezone(timezone)
+
+    async def change_timestamp_format(self, timestamp: str, current_datetime_format: str, wished_datetime_format: str) -> str:
+        timestamp = datetime.datetime.strptime(timestamp, current_datetime_format)
+        timestamp = datetime.datetime.strftime(timestamp, wished_datetime_format)
+        return timestamp
 
     # LOGGING
     async def log_from_ctx(self, ctx: tanjun.abc.SlashContext, db: DatabaseHandler, message: str) -> None:
@@ -226,3 +233,52 @@ class BotUtils:
                 return event, add
             elif event.interaction.custom_id == "no_add":
                 return event, add
+
+    async def validate_friend_code(self, friend_code: str) -> bool:
+        friend_code_regex = r"^\d{4}\ \d{4}\ \d{4}$"
+        if re.match(friend_code_regex, friend_code):
+            return True
+        else: 
+            logging.getLogger(f"{BOT_NAME.lower()}.validate_friend_code").error(
+                "Friend code check failed! Given friend code is not in the correct format!"
+            )
+            return False
+
+    async def validate_pokemon(self, pokemon: str | int) -> Tuple[bool, pb.pokemon, str]:
+        success = False
+        pokemon_image = None
+        if isinstance(pokemon, str):
+            try:
+                pokemon = pb.pokemon(str(pokemon.lower()))
+                pokemon.id
+                pokemon_image = pb.SpriteResource('pokemon', pokemon.id).url
+                success = True
+            except Exception as e:
+                pokemon = None
+                logging.getLogger(f"{BOT_NAME.lower()}.validate_pokemon").error(
+                    f"Pokémon validation failed! Given pokémmon is not found! Got error: {e}!"
+                )
+        elif isinstance(pokemon, int):
+            try:
+                pokemon = pb.pokemon(int(pokemon))
+                pokemon.id
+                pokemon_image = pb.SpriteResource('pokemon', pokemon.id).url
+                success = True
+            except Exception as e:
+                pokemon = None
+                logging.getLogger(f"{BOT_NAME.lower()}.validate_pokemon").error(
+                    f"Pokémon validation failed! Given pokémmon is not found! Got error: {e}!"
+                )
+        return success, pokemon, pokemon_image
+
+    async def validate_timestamp_format(self, time: str, time_format: str) -> bool:
+        desired_format = False
+        try:
+            if datetime.datetime.strptime(time, time_format):
+                desired_format = True
+        except ValueError as e:
+            logging.getLogger(f"{BOT_NAME.lower()}.validate_timestamp_format").error(
+                f"Timestamp check failed! Most likely to broad timestamp, f.e. 2:70! Got error: {e}"
+            )
+            desired_format = False
+        return desired_format

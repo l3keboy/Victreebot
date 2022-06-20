@@ -6,9 +6,7 @@
 # Written by Luke Hendriks                                                  #
 # ------------------------------------------------------------------------- #
 # IMPORTS
-import logging
 import os
-from pathlib import Path
 
 import hikari
 import tanjun
@@ -35,6 +33,7 @@ async def event_guild_join_setup(
     await db.insert_guild(guild)
     await db.insert_guild_settings(guild)
     await db.insert_guild_log_settings(guild)
+    await db.insert_guild_stats(guild)
 
     # ADD USERS TO DATABASE
     all_server_members = await event.app.rest.fetch_members(guild)

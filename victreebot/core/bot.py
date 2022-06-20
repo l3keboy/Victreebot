@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 from utils.DatabaseHandler import DatabaseHandler
 from utils.helpers.BotUtils import BotUtils
 from utils.VersionHandler import VersionHandler
+from utils.ActivityHandler import ActivityHandler
 
 from .client import Client
 
@@ -53,7 +54,7 @@ class Bot(hikari.GatewayBot):
         self.create_client()
         self.event_manager.subscribe(hikari.StartingEvent, self.on_starting)
         self.event_manager.subscribe(hikari.StartedEvent, self.on_started)
-        self.event_manager.subscribe(hikari.StoppingEvent, self.on_stopping)
+        self.event_manager.subscribe(hikari.StoppedEvent, self.on_stopped)
         super().run()
 
     # FUNCTIONS
@@ -89,10 +90,15 @@ class Bot(hikari.GatewayBot):
 
     async def on_started(self, event: hikari.StartedEvent):
         """Handle the hikari.StartedEvent"""
+        # Init ActivityHandler, set activity
+        self.ah = ActivityHandler(self)
+        await self.ah._init()
+        await self.ah.change_activity()
+        
         # Inject RESTAware bot object
         self.client.set_type_dependency(Bot, self)
 
-    async def on_stopping(self, event: hikari.StoppingEvent):
+    async def on_stopped(self, event: hikari.StoppedEvent):
         """Handle the hikari.StoppingEvent"""
         # Close database pool
         await self.db.close()

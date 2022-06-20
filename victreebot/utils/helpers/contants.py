@@ -50,12 +50,34 @@ DB_USER_DETAILS_DEFAULT = {
     "stats_raids_created": "0",
     "stats_raids_participated": "0",
 }
+DB_GUILD_STATS_DETAILS_DEFAULT = {
+    "raids_completed": "0",
+    "raids_deleted": "0",
+    "raids_created": "0",
+}
 DB_LOCATION_DETAILS_DEFAULT = {
     "type": "NULL",
     "name": "NULL",
     "latitude": "NULL",
     "longitude": "NULL",
     "description": "NULL",
+}
+DB_RAIDS_DETAILS_DEFAULT = {
+    "raid_id": "NULL",
+    "raid_type": "NULL",
+    "location_type": "NULL",
+    "location_name": "NULL",
+    "takes_place_at": "NULL",
+    "boss": "NULL",
+    "end_time": "NULL",
+    "instinct_present": "NULL",
+    "mystic_present": "NULL",
+    "valor_present": "NULL",
+    "remote_present": "NULL",
+    "total_attendees": "0",
+    "raid_message_channel_id": "NULL",
+    "raid_message_id": "NULL",
+    "raid_creator_id": "NULL",
 }
 
 # ------------------------------------------------------------------------- #
@@ -92,3 +114,5 @@ SUPPORTED_TIMEZONES = [
     "GMT+12",
 ]
 SUPPORTED_UNIT_SYSTEMS = ["Metric System", "Imperial System", "United States Customary Unit System"]
+SUPPORTED_RAID_TYPES = ["Raid", "EX-Raid", "Mega-Raid"]
+SUPPORTED_LOCATION_TYPES = ["Gym", "Pokéstop"]

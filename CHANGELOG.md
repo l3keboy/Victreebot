@@ -5,8 +5,15 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ================================================================
 
 ## [Unreleased/Working on]
+### [NEW]
+- Added raids
+    - Added raid create
+    - Added raid delete
+    - Added raid edit
+- Added bot activities
 ### [Bugfixes]
 - Fix log_locations_edit not being used/working properly
+- Fix for multiple locations with "'" being allowed
 ### [Changes]
 - Changes latitude/longitude questions order
 

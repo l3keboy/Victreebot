@@ -272,6 +272,7 @@ async def command_locations(
     embed = hikari.Embed(
         title=SUPPORTED_LANGUAGES.get(language).location_embed_title,
         description=SUPPORTED_LANGUAGES.get(language).location_embed_description,
+        colour=hikari.Colour(0x8bc683),
     )
 
     action_row_1 = (
@@ -376,6 +377,7 @@ async def command_locations(
                     description=SUPPORTED_LANGUAGES.get(language).location_list_embed_description.format(
                         location_type=location_type.strip("'")
                     ),
+                    colour=hikari.Colour(0x8bc683),
                 ).add_field(
                     name=SUPPORTED_LANGUAGES.get(language).location_list_embed_field_locations,
                     value="\n".join(
@@ -407,6 +409,7 @@ async def command_locations(
                         description=SUPPORTED_LANGUAGES.get(language).location_list_embed_description.format(
                             location_type=location_type.strip("'")
                         ),
+                        colour=hikari.Colour(0x8bc683),
                     ).add_field(
                         name=SUPPORTED_LANGUAGES.get(language).location_list_embed_field_locations,
                         value="\n".join(
@@ -510,6 +513,7 @@ async def command_locations(
                 hikari.Embed(
                     title=SUPPORTED_LANGUAGES.get(language).location_info_embed_title,
                     description=f"""`{location_type.capitalize().strip("'")}:` {location_name.capitalize().strip("'")}\n `Description:` {results[0].get('description') if results[0].get('description') else SUPPORTED_LANGUAGES.get(language).location_no_description_set}""",  # noqa E501
+                    colour=hikari.Colour(0x8bc683),
                 )
                 .add_field(
                     name=SUPPORTED_LANGUAGES.get(language).location_info_embed_field_coordinates,
@@ -534,8 +538,8 @@ async def command_locations(
 
         elif event.interaction.custom_id == "add_gym" or event.interaction.custom_id == "add_pokestop":
             location_type = "gym" if event.interaction.custom_id == "add_gym" else "pokéstop"
-            location_name = await get_location_name(ctx, event, location_type, db, bot, bot_aware)
-            location_name = location_name.replace("'", "''")
+            location_name_awnser = await get_location_name(ctx, event, location_type, db, bot, bot_aware)
+            location_name = location_name_awnser.replace("'", "''")
             location_type = f"'{location_type}'"
 
             all_locations = []
@@ -543,7 +547,7 @@ async def command_locations(
             for location in results:
                 all_locations.append(location.get("name"))
 
-            if location_name.lower() in all_locations:
+            if location_name_awnser.lower() in all_locations:
                 response = SUPPORTED_LANGUAGES.get(language).response_location_add_failed_already_exists.format(
                     location_type=location_type.strip("'")
                 )
@@ -610,8 +614,8 @@ async def command_locations(
 
         elif event.interaction.custom_id == "delete_gym" or event.interaction.custom_id == "delete_pokestop":
             location_type = "gym" if event.interaction.custom_id == "delete_gym" else "pokéstop"
-            location_name = await get_location_name(ctx, event, location_type, db, bot, bot_aware)
-            location_name = location_name.replace("'", "''")
+            location_name_awnser = await get_location_name(ctx, event, location_type, db, bot, bot_aware)
+            location_name = location_name_awnser.replace("'", "''")
 
             location_type = f"'{location_type}'"
 
@@ -620,7 +624,7 @@ async def command_locations(
             for location in results:
                 all_locations.append(location.get("name"))
 
-            if location_name.lower() not in all_locations:
+            if location_name_awnser.lower() not in all_locations:
                 response = SUPPORTED_LANGUAGES.get(language).response_location_delete_failed_no_such_location.format(
                     location_type=location_type.strip("'")
                 )
@@ -659,8 +663,8 @@ async def command_locations(
 
         elif event.interaction.custom_id == "edit_gym" or event.interaction.custom_id == "edit_pokestop":
             location_type = "gym" if event.interaction.custom_id == "edit_gym" else "pokéstop"
-            location_name = await get_location_name(ctx, event, location_type, db, bot, bot_aware)
-            location_name = location_name.replace("'", "''")
+            location_name_awnser = await get_location_name(ctx, event, location_type, db, bot, bot_aware)
+            location_name = location_name_awnser.replace("'", "''")
 
             location_type = f"'{location_type}'"
 
@@ -669,7 +673,7 @@ async def command_locations(
             for location in results:
                 all_locations.append(location.get("name"))
 
-            if location_name.lower() not in all_locations:
+            if location_name_awnser.lower() not in all_locations:
                 response = SUPPORTED_LANGUAGES.get(language).response_location_edit_failed_no_such_location.format(
                     location_type=location_type.strip("'")
                 )

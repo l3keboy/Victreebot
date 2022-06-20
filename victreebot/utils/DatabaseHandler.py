@@ -16,6 +16,7 @@ from utils.helpers.contants import DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS
 from utils.helpers.contants import DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS
 from utils.helpers.contants import DB_GUILD_SETTINGS_DEFAUTS
 from utils.helpers.contants import DB_USER_DETAILS_DEFAULT
+from utils.helpers.contants import DB_GUILD_STATS_DETAILS_DEFAULT
 
 load_dotenv()
 BOT_NAME = os.getenv("BOT_NAME")
@@ -148,6 +149,35 @@ class DatabaseHandler:
                         f"into Guild_Log_Settings database table! Got error: {e}!"
                     )
 
+    async def insert_guild_stats(self, guild: hikari.Guild) -> None:
+        """Insert guild into Guild_Stats database table"""
+        async with self._pool.acquire() as conn:
+            async with conn.transaction():
+                # Insert guild into "Guild_Stats" database table
+                try:
+                    await conn.execute(
+                        f"""INSERT INTO "Guild_Stats"
+                        (guild_id,
+                        {",".join(s for s in DB_GUILD_STATS_DETAILS_DEFAULT.keys())})
+                        VALUES
+                        ({guild.id},
+                        {",".join(str(s_value) for s_value in DB_GUILD_STATS_DETAILS_DEFAULT.values())})
+                        """
+                    )
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.insert_guild_stats").info(
+                        f"Successfully inserted guild_id: {guild.id} into Guild_Stats database table!"
+                    )
+                except asyncpg.UniqueViolationError:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.insert_guild_stats").warning(
+                        f"UniqueViolationError guild_id: {guild.id} already exists in "
+                        "Guild_Stats database table!"
+                    )
+                except Exception as e:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.insert_guild_stats").error(
+                        f"Unexpected error while trying to insert guild_id: {guild.id} "
+                        f"into Guild_Stats database table! Got error: {e}!"
+                    )
+
     async def insert_user(self, guild: hikari.Guild, user: hikari.User) -> None:
         """Insert user into Users database table"""
         async with self._pool.acquire() as conn:
@@ -233,6 +263,25 @@ class DatabaseHandler:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.delete_guild_log_settings").error(
                         f"Unexpected error while trying to delete guild_id: {guild_id} "
                         f"from Guild_Log_Settings database table! Got error: {e}!"
+                    )
+
+    async def delete_guild_stats(self, guild_id: int) -> None:
+        """Delete guild from Guild_Stats database table"""
+        async with self._pool.acquire() as conn:
+            async with conn.transaction():
+                # Delete guild from "Guild_Stats" database table
+                try:
+                    await conn.execute(
+                        f"""DELETE FROM "Guild_Stats"
+                        WHERE guild_id = {guild_id}"""
+                    )
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.delete_guild_stats").info(
+                        f"Successfully deleted guild_id: {guild_id} from Guild_Stats database table!"
+                    )
+                except Exception as e:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.delete_guild_stats").error(
+                        f"Unexpected error while trying to delete guild_id: {guild_id} "
+                        f"from Guild_Stats database table! Got error: {e}!"
                     )
 
     async def delete_guild_users(self, guild_id: int) -> None:
@@ -495,6 +544,60 @@ class DatabaseHandler:
                     )
         return results
 
+    async def set_guild_stats(self, guild: hikari.Guild, parameters: list) -> bool:
+        """Set guild stats"""
+        async with self._pool.acquire() as conn:
+            async with conn.transaction():
+                try:
+                    await conn.execute(
+                        f"""UPDATE "Guild_Stats"
+                            SET {",".join(change for change in parameters)}
+                            WHERE guild_id = {guild.id}"""
+                    )
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.set_guild_stats").info(
+                        f"Successfully updated stats for guild_id: {guild.id}!"
+                    )
+                    success = True
+                except Exception as e:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.set_guild_stats").error(
+                        "Unexpected error while trying to update stats for "
+                        f"guild_id: {guild.id}! Got error: {e}!"
+                    )
+                    success = False
+        return success
+
+    async def get_guild_stats(self, guild: hikari.Guild, stats: list) -> list:
+        """Get stats of a guild"""
+        results = []
+        async with self._pool.acquire() as conn:
+            async with conn.transaction():
+                try:
+                    fetched_details = await conn.fetch(
+                        f"""SELECT
+                            {",".join(stat for stat in stats)}
+                            FROM "Guild_Stats"
+                            WHERE guild_id = {guild.id}"""
+                    )
+                    for detail in fetched_details[0]:
+                        results.append(detail)
+                except IndexError:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.get_guild_stats").warning(
+                        f"ValueError while trying to fetch stats for guild_id: "
+                        f"{guild.id}! Inserting guild_id with default values "
+                        "and returning default values!"
+                    )
+                    # Insert guild to database with default settings
+                    await self.insert_guild_stats(guild=guild)
+                    # Return default values for every requested setting
+                    for stat in stats:
+                        results.append(DB_GUILD_STATS_DETAILS_DEFAULT.get(stat).strip("'"))
+                except Exception as e:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.get_guild_stats").error(
+                        f"Unexpected error while trying to fetch stats for "
+                        f"in guild_id: {guild.id}! Got error: {e}"
+                    )
+        return results
+
     # ------------------------------------------------------------------------- #
     # Location methods #
     # ------------------------------------------------------------------------- #
@@ -594,7 +697,7 @@ class DatabaseHandler:
             async with conn.transaction():
                 try:
                     results = await conn.fetch(
-                        f"""SELECT latitude, longitude, description
+                        f"""SELECT name, latitude, longitude, description
                             FROM "Locations"
                             WHERE guild_id = {guild.id}
                             AND type = {location_type}
@@ -603,5 +706,154 @@ class DatabaseHandler:
                 except Exception as e:
                     logging.getLogger(f"{BOT_NAME.lower()}.database.get_location_info").error(
                         f"Unexpected error while trying to fetch location for guild_id: {guild.id}! " f"Got error: {e}"
+                    )
+        return results
+
+    # ------------------------------------------------------------------------- #
+    # Raid methods #
+    # ------------------------------------------------------------------------- #
+    async def insert_raid(
+        self, guild: hikari.Guild, raid_id: str, raid_type: str, location_type: str, location_name: str, takes_place_at: str, boss: str, end_time: str, raid_message_channel_id: int, raid_message_id: int, raid_creator_id: int
+    ) -> bool:
+        """Insert a raid"""
+        async with self._pool.acquire() as conn:
+            async with conn.transaction():
+                try:
+                    await conn.execute(
+                        f"""INSERT INTO "Raids" (guild_id, raid_id, raid_type, location_type, location_name, takes_place_at, boss, end_time, raid_message_channel_id, raid_message_id, raid_creator_id)
+                            VALUES ({guild.id}, {raid_id}, {raid_type}, {location_type}, {location_name}, {takes_place_at}, {boss}, {end_time}, {raid_message_channel_id}, {raid_message_id}, {raid_creator_id})"""
+                    )
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.insert_raid").info(
+                        f"Successfully inserted raid for guild_id: {guild.id}!"
+                    )
+                    success = True
+                except asyncpg.UniqueViolationError:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.insert_raid").error(
+                        "UniqueViolationError while trying to insert raid for "
+                        f"guild_id: {guild.id}! Combination of guild_id and raid_id "
+                        "already exists!"
+                    )
+                    success = False
+                except Exception as e:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.insert_raid").error(
+                        f"Unexpected error while trying to insert raid for guild_id: {guild.id}! Got error: {e}!"
+                    )
+                    success = False
+        return success
+
+    async def delete_raid(self, raid_id: str, guild: hikari.Guild) -> bool:
+        """Delete a raid"""
+        async with self._pool.acquire() as conn:
+            async with conn.transaction():
+                try:
+                    await conn.execute(
+                        f"""DELETE FROM "Raids"
+                            WHERE guild_id = {guild.id} AND raid_id = {raid_id}"""
+                    )
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.delete_raid").info(
+                        f"Successfully deleted a raid for guild_id: {guild.id}!"
+                    )
+                    success = True
+                except Exception as e:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.delete_raid").error(
+                        f"Unexpected error while trying to delete a raid for guild_id: {guild.id}! Got error: {e}!"
+                    )
+                    success = False
+        return success
+
+    async def get_raid_details(self, raid_id: str, guild: hikari.Guild, details: list) -> list:
+        """Get raid info"""
+        results = []
+        async with self._pool.acquire() as conn:
+            async with conn.transaction():
+                try:
+                    fetched_details = await conn.fetch(
+                        f"""SELECT *
+                            FROM "Raids"
+                            WHERE guild_id = {guild.id}
+                            AND raid_id = {raid_id}"""
+                    )
+                    for detail in fetched_details[0]:
+                        results.append(detail)
+                except IndexError:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.get_raid_details").warning(
+                        f"ValueError while trying to fetch details for raid_id: {raid_id} in guild_id: "
+                        f"{guild.id}! Returning default values!"
+                    )
+                    # Return default values for every requested setting
+                    for detail in details:
+                        results.append(None)
+                except Exception as e:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.get_raid_details").error(
+                        f"Unexpected error while trying to fetch raid for guild_id: {guild.id}! " 
+                        f"Got error: {e}"
+                    )
+        return results
+
+    async def get_raid_details_by_message(self, message: hikari.Message, guild: hikari.Guild, details: list) -> list:
+        """Get raid info"""
+        results = []
+        async with self._pool.acquire() as conn:
+            async with conn.transaction():
+                try:
+                    fetched_details = await conn.fetch(
+                        f"""SELECT {",".join(detail for detail in details)}
+                            FROM "Raids"
+                            WHERE guild_id = {guild.id}
+                            AND raid_message_id = {message.id}"""
+                    )
+                    for detail in fetched_details[0]:
+                        results.append(detail)
+                except IndexError:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.get_raid_details_by_message").warning(
+                        f"ValueError while trying to fetch details for message_id: {message.id} in guild_id: "
+                        f"{guild.id}! Returning default values!"
+                    )
+                    # Return default values for every requested setting
+                    for detail in details:
+                        results.append(None)
+                except Exception as e:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.get_raid_details_by_message").error(
+                        f"Unexpected error while trying to fetch raid for guild_id: {guild.id}! " 
+                        f"Got error: {e}"
+                    )
+        return results
+
+    async def set_raid_detail(self, guild: hikari.Guild, raid_id: str, parameters: list) -> bool:
+        """Set raid detail"""
+        async with self._pool.acquire() as conn:
+            async with conn.transaction():
+                try:
+                    await conn.execute(
+                        f"""UPDATE "Raids"
+                            SET {",".join(change for change in parameters)}
+                            WHERE guild_id = {guild.id} AND raid_id = {raid_id}"""
+                    )
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.set_raid_detail").info(
+                        f"Successfully updated raid for guild_id: {guild.id}!"
+                    )
+                    success = True
+                except Exception as e:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.set_raid_detail").error(
+                        "Unexpected error while trying to update raid for "
+                        f"guild_id: {guild.id}! Got error: {e}!"
+                    )
+                    success = False
+        return success
+
+    async def get_all_raids(self) -> list:
+        """Get all raids"""
+        results = []
+        async with self._pool.acquire() as conn:
+            async with conn.transaction():
+                try:
+                    results = await conn.fetch(
+                        f"""SELECT *
+                            FROM "Raids" """
+                    )
+                except Exception as e:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.get_all_raids").error(
+                        f"Unexpected error while trying to fetch all raids! "
+                        f"Got error: {e}"
                     )
         return results
