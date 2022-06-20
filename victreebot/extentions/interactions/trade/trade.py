@@ -288,6 +288,7 @@ async def command_trade(
             await bot.log_from_ctx(ctx, db, log_response)
         return
     else:
+        await response_message.delete()
         if event.interaction.custom_id == "proposal":
             pokemon_offer, pokemon_search = await get_pokemons_to_trade_proposal(ctx, event, db, bot, bot_aware)
             success, pokemon_offer, pokemon_image_offer = await bot.validate_pokemon(pokemon_offer)
