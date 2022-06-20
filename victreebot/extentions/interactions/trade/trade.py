@@ -419,7 +419,7 @@ async def command_trade(
                 embed=embed,
                 user_mentions=True,
             )
-            if log_trade_proposal:
+            if log_trade_offer:
                 log_response = SUPPORTED_LANGUAGES.get(language).log_response_trade_offer_member_offering.format(
                     datetime=await bot.get_timestamp_aware(gmt), member=ctx.member
                 )
@@ -467,7 +467,7 @@ async def command_trade(
                 embed=embed,
                 user_mentions=True,
             )
-            if log_trade_proposal:
+            if log_trade_search:
                 log_response = SUPPORTED_LANGUAGES.get(language).log_response_trade_search_member_searching.format(
                     datetime=await bot.get_timestamp_aware(gmt), member=ctx.member
                 )
