@@ -5,6 +5,10 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ================================================================
 
 ## [Unreleased/Working on]
+
+================================================================
+
+## [0.3.0] - 20-06-2022
 ### [NEW]
 - Added raids
     - Added raid create
@@ -17,8 +21,6 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fix for multiple locations with "'" being allowed
 ### [Changes]
 - Changes latitude/longitude questions order
-
-================================================================
 
 ## [0.2.3] - 16-06-2022
 ### [Bugfixes]
