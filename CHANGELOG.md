@@ -8,6 +8,10 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.4.1] - 20-06-2022
+### [Bugfixes]
+- Fix for trade message with components not getting deleted
+
 ## [0.4.0] - 20-06-2022
 ### [NEW]
 - Added trading
