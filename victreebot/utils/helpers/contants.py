@@ -49,6 +49,11 @@ DB_GUILD_LOG_SETTINGS_RAID_EVENTS = {
     "log_raid_delete": "True",
     "log_raid_edit": "True",
 }
+DB_GUILD_LOG_SETTINGS_TRADE_EVENTS = {
+    "log_trade_offer": "True",
+    "log_trade_proposal": "True",
+    "log_trade_search": "True",
+}
 
 DB_USER_DETAILS_DEFAULT = {
     "friend_codes": "NULL",

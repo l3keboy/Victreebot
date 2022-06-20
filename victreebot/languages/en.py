@@ -369,3 +369,65 @@ log_response_settings_update_raid_failed = (
 log_response_settings_update_raid_success = "`[{datetime}]` -- **{member}** edited `Raid Settings`!"
 log_response_settings_update_raid_failed_raids_active = "`[{datetime}]` -- **{member}** tried to edit `Raid Settings`, but these are not editable now because there are raids active!"
 # Embeds
+
+
+# ------------------------------------------------------------------------- #
+# Trade #
+# ------------------------------------------------------------------------- #
+# ------------------------------------------------------------------------- #
+# trade.py #
+# ------------------------------------------------------------------------- #
+boss_name_modal_trade = "Trading"
+trade_action_row_proposal = "Make a trade proposal"
+trade_action_row_offer = "Offer a Pokémon"
+trade_action_row_search = "Search for a Pokémon"
+pokemon_offer_name_modal_text_input_title = "Pokémon to offer"
+pokemon_offer_modal_text_input_placeholder = "Which pokémon do you offer to trade?"
+pokemon_search_modal_text_input_title = "Wanted pokémon"
+pokemon_search_modal_text_input_placeholder = "Which pokémon are you looking for?"
+# Response
+response_trade_interactions_timeout_reached = "Stopping trade interaction, timeout reached"
+response_trade_offer_unknown_pokemon_offer = (
+    "The given pokemon to offer, `{boss_name}`, is not found! Please try to create the offer again!"
+)
+response_trade_offer_unknown_pokemon_search = (
+    "The given pokemon to search for, `{boss_name}`, is not found! Please try to create the offer again!"
+)
+response_trade_proposal_member_proposing = "{member} created a trade proposal!"
+response_trade_offer_member_offering = "{member} offered a pokémon!"
+response_trade_search_member_searching = "{member} is searching for a pokémon!"
+# Log response
+log_response_trade_interactions_timeout_reached = (
+    "`[{datetime}]` -- **{member}** tried to trade, but the timeout was reached!"
+)
+log_response_trade_offer_unknown_pokemon_offer = (
+    "`[{datetime}]` -- **{member}** tried to propose a trade, but the given pokémon to offer is not found!"
+)
+log_response_trade_offer_unknown_pokemon_search = (
+    "`[{datetime}]` -- **{member}** tried to propose a trade, but the given pokémon to look for is not found!"
+)
+log_response_trade_proposal_member_proposing = "`[{datetime}]` -- **{member}** created a trade proposal!"
+log_response_trade_offer_member_offering = "`[{datetime}]` -- **{member}** offered a pokémon!"
+log_response_trade_search_member_searching = "`[{datetime}]` -- **{member}** searched for a pokémon!"
+# Embeds
+trade_embed_title = "Trading"
+trade_embed_description = "Welcome to trading! Please select what you want to do."
+trade_proposal_embed_title = "Trading proposal"
+trade_proposal_embed_description = (
+    "Hello everyone!\n\n I am looking for `{pokemon_search}`!\n I have `{pokemon_offer}` to offer!"
+)
+trade_proposal_embed_footer = (
+    "Trade proposed by: {member}. If you have any interest or would like to negotiate, please contact me!"
+)
+trade_proposal_embed_field_offering = "Offering:"
+trade_proposal_embed_field_search = "Searching:"
+trade_offer_embed_title = "Trading offer"
+trade_offer_embed_description = "Hello everyone!\n\n I have `{pokemon_offer}` to offer!"
+trade_offered_embed_footer = (
+    "Trade offered by: {member}. If you have any interest or would like to negotiate, please contact me!"
+)
+trade_search_embed_title = "Trade search"
+trade_search_embed_description = "Hello everyone!\n\n I am looking for `{pokemon_search}`!"
+trade_search_embed_footer = (
+    "Trade search by: {member}. If you have any interest or would like to negotiate, please contact me!"
+)

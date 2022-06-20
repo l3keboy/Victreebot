@@ -14,6 +14,8 @@ import hikari
 from dotenv import load_dotenv
 from utils.helpers.contants import DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS
 from utils.helpers.contants import DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS
+from utils.helpers.contants import DB_GUILD_LOG_SETTINGS_RAID_EVENTS
+from utils.helpers.contants import DB_GUILD_LOG_SETTINGS_TRADE_EVENTS
 from utils.helpers.contants import DB_GUILD_SETTINGS_DEFAUTS
 from utils.helpers.contants import DB_GUILD_STATS_DETAILS_DEFAULT
 from utils.helpers.contants import DB_USER_DETAILS_DEFAULT
@@ -128,11 +130,15 @@ class DatabaseHandler:
                         f"""INSERT INTO "Guild_Log_Settings"
                         (guild_id,
                         {",".join(s for s in DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS.keys())},
-                        {",".join(s for s in DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS.keys())})
+                        {",".join(s for s in DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS.keys())},
+                        {",".join(s for s in DB_GUILD_LOG_SETTINGS_RAID_EVENTS.keys())},
+                        {",".join(s for s in DB_GUILD_LOG_SETTINGS_TRADE_EVENTS.keys())})
                         VALUES
                         ({guild.id},
                         {",".join(str(s_value) for s_value in DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS.values())},
-                        {",".join(str(s_value) for s_value in DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS.values())})
+                        {",".join(str(s_value) for s_value in DB_GUILD_LOG_SETTINGS_PROFILE_EVENTS.values())},
+                        {",".join(str(s_value) for s_value in DB_GUILD_LOG_SETTINGS_RAID_EVENTS.values())},
+                        {",".join(str(s_value) for s_value in DB_GUILD_LOG_SETTINGS_TRADE_EVENTS.values())})
                         """
                     )
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_guild_log_settings").info(

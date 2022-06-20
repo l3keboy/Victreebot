@@ -25,6 +25,7 @@ from extentions.interactions.raids import raid_group
 from extentions.interactions.settings import settings_group
 from extentions.interactions.setup.reset import command_reset
 from extentions.interactions.setup.setup import command_setup
+from extentions.interactions.trade.trade import command_trade
 
 load_dotenv()
 BOT_NAME = os.getenv("BOT_NAME")
@@ -48,6 +49,7 @@ bot_component = (
     .add_command(command_reset)
     .add_command(profile_group)
     .add_command(command_locations)
+    .add_command(command_trade)
     .add_command(raid_group)
     .add_command(settings_group)
 )

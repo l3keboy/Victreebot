@@ -5,6 +5,11 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ================================================================
 
 ## [Unreleased/Working on]
+### [NEW]
+- Added trading
+    - Trade proposal
+    - Trade offer
+    - Trade search
 ### [Bugfixes]
 - Updated constants
 
