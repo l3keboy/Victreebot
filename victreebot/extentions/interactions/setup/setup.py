@@ -7,8 +7,8 @@
 # ------------------------------------------------------------------------- #
 # IMPORTS
 import asyncio
-import os
 import logging
+import os
 from pathlib import Path
 
 import hikari
@@ -23,6 +23,7 @@ load_dotenv()
 BOT_NAME = os.getenv("BOT_NAME")
 SUPPORT_SERVER_LINK = os.getenv("SUPPORT_SERVER_LINK")
 BOT_INVITE_LINK = os.getenv("BOT_INVITE_LINK")
+
 
 # ------------------------------------------------------------------------- #
 # COMMANDS #
@@ -48,14 +49,13 @@ async def command_setup(
         return
 
     gif = Path("../Husqy/assets/loading.gif")
-    embed_started = (
-        hikari.Embed(
-            title=SUPPORTED_LANGUAGES.get(language).setup_started_embed_title.format(bot_name=BOT_NAME.capitalize()),
-            description=SUPPORTED_LANGUAGES.get(language).setup_started_embed_description.format(bot_name=BOT_NAME.capitalize()),
-            colour=hikari.Colour(0x8bc683),
-        )
-        .set_thumbnail(gif)
-    )
+    embed_started = hikari.Embed(
+        title=SUPPORTED_LANGUAGES.get(language).setup_started_embed_title.format(bot_name=BOT_NAME.capitalize()),
+        description=SUPPORTED_LANGUAGES.get(language).setup_started_embed_description.format(
+            bot_name=BOT_NAME.capitalize()
+        ),
+        colour=hikari.Colour(0x8BC683),
+    ).set_thumbnail(gif)
     response_message = await ctx.respond(embed=embed_started)
 
     guild = ctx.get_guild()
@@ -64,11 +64,13 @@ async def command_setup(
     # UPLOAD CUSTOM EMOJI'S
     all_server_emojis = await ctx.rest.fetch_guild_emojis(guild)
     for emoji in all_server_emojis:
-        if emoji.name == f"{BOT_NAME.lower()}_instinct" or emoji.name == f"{BOT_NAME.lower()}_mystic" or emoji.name == f"{BOT_NAME.lower()}_valor":
+        if (
+            emoji.name == f"{BOT_NAME.lower()}_instinct"
+            or emoji.name == f"{BOT_NAME.lower()}_mystic"
+            or emoji.name == f"{BOT_NAME.lower()}_valor"
+        ):
             try:
-                await ctx.rest.delete_emoji(
-                    guild, emoji.id, reason=f"{BOT_NAME.capitalize()} setup Handler -- Setup!"
-                )
+                await ctx.rest.delete_emoji(guild, emoji.id, reason=f"{BOT_NAME.capitalize()} setup Handler -- Setup!")
                 logging.getLogger(f"{BOT_NAME.lower()}.setup.emojis_delete").info(
                     "Deleted emoji with same name "
                     f"('{BOT_NAME.lower()}-instinct', '{BOT_NAME.lower()}-mystic' or '{BOT_NAME.lower()}-valor') "
@@ -179,13 +181,15 @@ async def command_setup(
     except hikari.ForbiddenError:
         logging.getLogger(f"{BOT_NAME.lower()}.setup.create_roles").error(
             "ForbiddenError while trying to create roles "
-            f"('{BOT_NAME.capitalize()} instinct', '{BOT_NAME.capitalize()} mystic', '{BOT_NAME.capitalize()} valor' or '{BOT_NAME.capitalize()} moderator') "
+            f"('{BOT_NAME.capitalize()} instinct', '{BOT_NAME.capitalize()} mystic', "
+            f"'{BOT_NAME.capitalize()} valor' or '{BOT_NAME.capitalize()} moderator') "
             f"for guild_id: {ctx.guild_id}!"
         )
     except Exception as e:
         logging.getLogger(f"{BOT_NAME.lower()}.setup.create_roles").error(
             f"Unexpected error while trying to create roles "
-            f"('{BOT_NAME.capitalize()} instinct', '{BOT_NAME.capitalize()} mystic', '{BOT_NAME.capitalize()} valor' or '{BOT_NAME.capitalize()} moderator') "
+            f"('{BOT_NAME.capitalize()} instinct', '{BOT_NAME.capitalize()} mystic', "
+            f"'{BOT_NAME.capitalize()} valor' or '{BOT_NAME.capitalize()} moderator') "
             f"for guild_id: {ctx.guild_id}! Got error: {e}"
         )
 
@@ -205,7 +209,7 @@ async def command_setup(
                 hikari.PermissionOverwrite(
                     id=my_user.id,
                     type=hikari.PermissionOverwriteType.MEMBER,
-                    allow=hikari.Permissions.MANAGE_CHANNELS | hikari.Permissions.SEND_MESSAGES
+                    allow=hikari.Permissions.MANAGE_CHANNELS | hikari.Permissions.SEND_MESSAGES,
                 )
             )
             channel_raids = await ctx.rest.create_guild_text_channel(
@@ -220,7 +224,7 @@ async def command_setup(
                 hikari.PermissionOverwrite(
                     id=my_user.id,
                     type=hikari.PermissionOverwriteType.MEMBER,
-                    allow=hikari.Permissions.MANAGE_CHANNELS | hikari.Permissions.SEND_MESSAGES
+                    allow=hikari.Permissions.MANAGE_CHANNELS | hikari.Permissions.SEND_MESSAGES,
                 )
             )
             channel_logs = await ctx.rest.create_guild_text_channel(
@@ -273,7 +277,7 @@ async def command_setup(
             f"- Created default channels;\n"
             f"\u200b \u200b \u200b `Raids Channel`: {channel_raids.mention} | `Logs Channel`: {channel_logs.mention}\n\n"  # noqa E501
             f"`NOTE: Please make sure the {BOT_NAME.capitalize()} bot role is placed above all other roles to ensure the working of {BOT_NAME.capitalize()}`",  # noqa E501
-            colour=hikari.Colour(0x8bc683)
+            colour=hikari.Colour(0x8BC683),
         )
         .set_footer(
             text=f"Thanks for using {BOT_NAME.capitalize()}! "
@@ -301,12 +305,12 @@ async def command_setup(
     )
     await channel_logs.send(embed=embed)
 
-    embed_finished = (
-        hikari.Embed(
-            title=SUPPORTED_LANGUAGES.get(language).setup_finished_embed_title.format(bot_name=BOT_NAME.capitalize()),
-            description=SUPPORTED_LANGUAGES.get(language).setup_finished_embed_description.format(bot_name=BOT_NAME.capitalize(), logs_channel_mention=channel_logs.mention),
-            colour=hikari.Colour(0x8bc683),
-        )
+    embed_finished = hikari.Embed(
+        title=SUPPORTED_LANGUAGES.get(language).setup_finished_embed_title.format(bot_name=BOT_NAME.capitalize()),
+        description=SUPPORTED_LANGUAGES.get(language).setup_finished_embed_description.format(
+            bot_name=BOT_NAME.capitalize(), logs_channel_mention=channel_logs.mention
+        ),
+        colour=hikari.Colour(0x8BC683),
     )
     await response_message.delete()
     response_message = await ctx.rest.create_message(ctx.get_channel(), embed=embed_finished)

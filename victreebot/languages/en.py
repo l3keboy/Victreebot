@@ -53,13 +53,17 @@ add_no_add_timeout = "Add or don't add validation reached a timeout! Returning d
 # ------------------------------------------------------------------------- #
 # Responses
 response_already_setup = "{bot_name} is already setup!"
-response_not_yet_setup = "{bot_name} is not yet setup! Please contact the administrator of the server to setup {bot_name}!"
+response_not_yet_setup = (
+    "{bot_name} is not yet setup! Please contact the administrator of the server to setup {bot_name}!"
+)
 # Log responses
 # Embeds
 setup_started_embed_title = "{bot_name} setup started!"
 setup_started_embed_description = "Please wait while {bot_name} gets things ready!"
 setup_finished_embed_title = "{bot_name} setup finished!"
-setup_finished_embed_description = "{bot_name} is finished with the setup! Please check {logs_channel_mention} for extra info!"
+setup_finished_embed_description = (
+    "{bot_name} is finished with the setup! Please check {logs_channel_mention} for extra info!"
+)
 
 # ------------------------------------------------------------------------- #
 # reset.py #
@@ -69,8 +73,12 @@ response_reset_timeout_reached = "Reset request reached a timeout! Not resetting
 response_reset_cancelled = "Reset cancelled! Not resetting {bot_name}!"
 response_reset_from_channel_not_possible = "You can't reset from this channel!"
 # Log responses
-log_response_reset_timeout_reached = "`[{datetime}]` -- **{member}** tried to reset {bot_name}, but the timeout was reached!"
-log_response_reset_cancelled = "`[{datetime}]` -- **{member}** tried to reset {bot_name}, but they cancelled the request!"
+log_response_reset_timeout_reached = (
+    "`[{datetime}]` -- **{member}** tried to reset {bot_name}, but the timeout was reached!"
+)
+log_response_reset_cancelled = (
+    "`[{datetime}]` -- **{member}** tried to reset {bot_name}, but they cancelled the request!"
+)
 # Embeds
 reset_validation_embed_title = "{bot_name} reset requested!"
 reset_validation_embed_description = "Are you sure you want to reset {bot_name}?\n This will reset:\n - {bot_name} emoji's\n - {bot_name} channels\n - {bot_name} roles\n - Removed ongoing raids\n\n This will not reset:\n - {bot_name} language\n - {bot_name} auto_delete\n - {bot_name} GMT\n - {bot_name} Unit System\n - {bot_name} log variables\n - User profiles\n - {bot_name} locations\n"
@@ -238,17 +246,29 @@ boss_name_modal_text_input_title = "Boss name or ID"
 boss_name_modal_text_input_placeholder = "What is the name or ID of the boss?"
 # Responses
 response_raid_create_timeout_reached = "Stopping Raid creation, timeout was reached!"
-response_raid_create_location_not_found = "The `{location_type}` with the name `{location_name}` does not exist! Please try to create the Raid again!"
+response_raid_create_location_not_found = (
+    "The `{location_type}` with the name `{location_name}` does not exist! Please try to create the Raid again!"
+)
 response_raid_create_unknown_boss = "The given boss, `{boss_name}`, is not found! Please try to create the Raid again!"
 response_raid_create_invalid_time = "The given time is not in a valid timeformat!"
 response_raid_create_date_time_already_past = "The given date and time combination is in the past!"
 response_raid_create_success = "The raid is created!"
 # Log responses
-log_response_raid_create_timeout_reached =  "`[{datetime}]` -- **{member}** tried to create a raid, but the timeout was reached!"
-log_response_raid_create_location_not_found = "`[{datetime}]` -- **{member}** tried to create a raid, but the given location does not exist!"
-log_response_raid_create_unknown_boss = "`[{datetime}]` -- **{member}** tried to create a raid, but the given boss is not found!"
-log_response_raid_create_invalid_time = "`[{datetime}]` -- **{member}** tried to create a raid, but the given time is not in the valid format!"
-log_response_raid_create_date_time_already_past = "`[{datetime}]` -- **{member}** tried to create a raid, but the given date and time combination is in the past!"
+log_response_raid_create_timeout_reached = (
+    "`[{datetime}]` -- **{member}** tried to create a raid, but the timeout was reached!"
+)
+log_response_raid_create_location_not_found = (
+    "`[{datetime}]` -- **{member}** tried to create a raid, but the given location does not exist!"
+)
+log_response_raid_create_unknown_boss = (
+    "`[{datetime}]` -- **{member}** tried to create a raid, but the given boss is not found!"
+)
+log_response_raid_create_invalid_time = (
+    "`[{datetime}]` -- **{member}** tried to create a raid, but the given time is not in the valid format!"
+)
+log_response_raid_create_date_time_already_past = (
+    "`[{datetime}]` -- **{member}** tried to create a raid, but the given date and time combination is in the past!"
+)
 log_response_raid_create_success = "`[{datetime}]` -- **{member}** created a raid!"
 # Embed
 raid_create_embed_title_raid_type = "Raid type"
@@ -258,7 +278,9 @@ raid_create_embed_description_location_type = "Please select the type of the loc
 raid_create_embed_title_date = "Raid date and time"
 raid_create_embed_description_date = "When does the raid take place? (Note: The format of the dates is: Month/Day!"
 raid_embed_description_with_location_link = "**Raid ID:** {raid_id}\n **Raid type:** {raid_type}\n **Time and date:** {time_date}\n **Location:** [{location}](https://www.google.com/maps/place/{latitude},{longitude})\n"
-raid_embed_description_without_location_link = "**Raid ID:** {raid_id}\n **Raid type:** {raid_type}\n **Time and date:** {time_date}\n **Location:** {location}\n"
+raid_embed_description_without_location_link = (
+    "**Raid ID:** {raid_id}\n **Raid type:** {raid_type}\n **Time and date:** {time_date}\n **Location:** {location}\n"
+)
 raid_embed_footer = "Raid created by: {member} | Total attendees: {attendees}"
 
 # ------------------------------------------------------------------------- #
@@ -266,11 +288,17 @@ raid_embed_footer = "Raid created by: {member} | Total attendees: {attendees}"
 # ------------------------------------------------------------------------- #
 # Response
 response_raid_delete_no_raid_found = "I didn't find a raid with that ID!"
-response_raid_delete_not_creator_or_moderator = "You are not allowed to delete this raid! You are not the owner or a {bot_name} moderator!"
+response_raid_delete_not_creator_or_moderator = (
+    "You are not allowed to delete this raid! You are not the owner or a {bot_name} moderator!"
+)
 response_raid_delete_success = "The raid is deleted!"
 # Log response
-log_response_raid_delete_no_raid_found = "`[{datetime}]` -- **{member}** tried to delete a raid, but didn't there was no raid with the given ID!"
-log_response_raid_delete_not_creator_or_moderator = "`[{datetime}]` -- **{member}** tried to delete a raid, but they aren't the creator or a {bot_name} moderator!"
+log_response_raid_delete_no_raid_found = (
+    "`[{datetime}]` -- **{member}** tried to delete a raid, but didn't there was no raid with the given ID!"
+)
+log_response_raid_delete_not_creator_or_moderator = (
+    "`[{datetime}]` -- **{member}** tried to delete a raid, but they aren't the creator or a {bot_name} moderator!"
+)
 log_response_raid_delete_success = "`[{datetime}]` -- **{member}** deleted a raid!"
 # Embed
 
@@ -283,21 +311,33 @@ raid_edit_action_row_edit_location = "Location"
 raid_edit_action_row_edit_date_time = "Date and time"
 # Response
 response_raid_edit_no_raid_found = "There is no raid with that ID!"
-response_raid_edit_not_creator_or_moderator = "You are not allowed to edit this raid! You are not the owner or a {bot_name} moderator!"
+response_raid_edit_not_creator_or_moderator = (
+    "You are not allowed to edit this raid! You are not the owner or a {bot_name} moderator!"
+)
 response_raid_edit_timeout_reached = "Stopping Raid edit, timeout was reached!"
 response_raid_edit_raid_type = "The raid type has been edited!"
 response_raid_edit_raid_type_failed = "Something went wrong while trying to edit the raid type!"
 response_raid_edit_boss_failed = "Something went wrong while trying to edit the boss"
-response_raid_edit_location_not_found = "The `{location_type}` with the name `{location_name}` does not exist! Please try to edit the Raid again!"
+response_raid_edit_location_not_found = (
+    "The `{location_type}` with the name `{location_name}` does not exist! Please try to edit the Raid again!"
+)
 response_raid_edit_location_failed = "Something went wrong while trying to edit the location!"
 response_raid_location_raid_type = "The location is edited!"
 # Log response
-log_response_raid_edit_no_raid_found = "`[{datetime}]` -- **{member}** tried to edit a raid, but didn't there was no raid with the given ID!"
-log_response_raid_edit_not_creator_or_moderator = "`[{datetime}]` -- **{member}** tried to edit a raid, but they aren't the creator or a {bot_name} moderator!"
-log_response_raid_edit_timeout_reached = "`[{datetime}]` -- **{member}** tried to edit a raid, but the timeout was reached!"
+log_response_raid_edit_no_raid_found = (
+    "`[{datetime}]` -- **{member}** tried to edit a raid, but didn't there was no raid with the given ID!"
+)
+log_response_raid_edit_not_creator_or_moderator = (
+    "`[{datetime}]` -- **{member}** tried to edit a raid, but they aren't the creator or a {bot_name} moderator!"
+)
+log_response_raid_edit_timeout_reached = (
+    "`[{datetime}]` -- **{member}** tried to edit a raid, but the timeout was reached!"
+)
 log_response_raid_edit = "`[{datetime}]` -- **{member}** edited a raid!"
 log_response_raid_edit_failed = "`[{datetime}]` -- **{member}** tried to edit a raid, but something went wrong!"
-log_response_raid_edit_location_not_found = "`[{datetime}]` -- **{member}** tried to edit a raid, but the given location does not exist!"
+log_response_raid_edit_location_not_found = (
+    "`[{datetime}]` -- **{member}** tried to edit a raid, but the given location does not exist!"
+)
 # Embed
 raid_edit_embed_title = "Raid edit"
 raid_edit_embed_description = "Please select the component of the raid you want to edit."
@@ -315,11 +355,17 @@ response_settings_update_general_failed = "Something went wrong while trying to 
 response_settings_update_general_success = "The `General Settings` are updated!"
 response_settings_update_raid_failed = "Something went wrong while trying to update `Raid Settings`!"
 response_settings_update_raid_success = "The `Raid Settings` are updated!"
-response_settings_update_raid_failed_raids_active = "Can't update `Raid Settings` because there are raids active in this server!"
+response_settings_update_raid_failed_raids_active = (
+    "Can't update `Raid Settings` because there are raids active in this server!"
+)
 # Log response
-log_response_settings_update_general_failed = "`[{datetime}]` -- **{member}** tried to edit `General Settings`, but something went wrong!"
+log_response_settings_update_general_failed = (
+    "`[{datetime}]` -- **{member}** tried to edit `General Settings`, but something went wrong!"
+)
 log_response_settings_update_general_success = "`[{datetime}]` -- **{member}** edited `General Settings`!"
-log_response_settings_update_raid_failed = "`[{datetime}]` -- **{member}** tried to edit `Raid Settings`, but something went wrong!"
+log_response_settings_update_raid_failed = (
+    "`[{datetime}]` -- **{member}** tried to edit `Raid Settings`, but something went wrong!"
+)
 log_response_settings_update_raid_success = "`[{datetime}]` -- **{member}** edited `Raid Settings`!"
 log_response_settings_update_raid_failed_raids_active = "`[{datetime}]` -- **{member}** tried to edit `Raid Settings`, but these are not editable now because there are raids active!"
 # Embeds

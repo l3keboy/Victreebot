@@ -47,7 +47,7 @@ async def command_profile_edit(
     embed = hikari.Embed(
         title=SUPPORTED_LANGUAGES.get(language).profile_edit_embed_title,
         description=SUPPORTED_LANGUAGES.get(language).profile_edit_embed_description,
-        colour=hikari.Colour(0x8bc683),
+        colour=hikari.Colour(0x8BC683),
     )
 
     action_row_1 = (
@@ -148,10 +148,16 @@ async def command_profile_edit(
                             friend_code = friend_code.rstrip()
                             correct_friend_code_format = await bot.validate_friend_code(friend_code)
                             if not correct_friend_code_format:
-                                response = SUPPORTED_LANGUAGES.get(language).response_profile_edit_invalid_friend_code_format
-                                await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
+                                response = SUPPORTED_LANGUAGES.get(
+                                    language
+                                ).response_profile_edit_invalid_friend_code_format
+                                await ctx.edit_last_response(
+                                    response, delete_after=auto_delete, embed=None, components=None
+                                )
                                 if log_errors:
-                                    log_response = SUPPORTED_LANGUAGES.get(language).log_response_profile_edit_invalid_friend_code_format.format(
+                                    log_response = SUPPORTED_LANGUAGES.get(
+                                        language
+                                    ).log_response_profile_edit_invalid_friend_code_format.format(
                                         datetime=await bot.get_timestamp_aware(gmt), member=ctx.member
                                     )
                                     await bot.log_from_ctx(ctx, db, log_response)
@@ -232,10 +238,16 @@ async def command_profile_edit(
                             friend_code = friend_code.rstrip()
                             correct_friend_code_format = await bot.validate_friend_code(friend_code)
                             if not correct_friend_code_format:
-                                response = SUPPORTED_LANGUAGES.get(language).response_profile_edit_invalid_friend_code_format
-                                await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
+                                response = SUPPORTED_LANGUAGES.get(
+                                    language
+                                ).response_profile_edit_invalid_friend_code_format
+                                await ctx.edit_last_response(
+                                    response, delete_after=auto_delete, embed=None, components=None
+                                )
                                 if log_errors:
-                                    log_response = SUPPORTED_LANGUAGES.get(language).log_response_profile_edit_invalid_friend_code_format.format(
+                                    log_response = SUPPORTED_LANGUAGES.get(
+                                        language
+                                    ).log_response_profile_edit_invalid_friend_code_format.format(
                                         datetime=await bot.get_timestamp_aware(gmt), member=ctx.member
                                     )
                                     await bot.log_from_ctx(ctx, db, log_response)

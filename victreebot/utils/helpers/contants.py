@@ -25,6 +25,7 @@ DB_GUILD_SETTINGS_DEFAUTS = {
     "instinct_emoji_id": "NULL",
     "mystic_emoji_id": "NULL",
     "valor_emoji_id": "NULL",
+    "raid_timeout": "900",
 }
 DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS = {
     "logs_channel_id": "NULL",
@@ -42,6 +43,11 @@ DB_GUILD_LOG_SETTINGS_LOCATION_EVENTS = {
     "log_location_edit": "True",
     "log_location_info": "True",
     "log_location_list": "True",
+}
+DB_GUILD_LOG_SETTINGS_RAID_EVENTS = {
+    "log_raid_create": "True",
+    "log_raid_delete": "True",
+    "log_raid_edit": "True",
 }
 
 DB_USER_DETAILS_DEFAULT = {

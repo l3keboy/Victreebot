@@ -7,8 +7,8 @@
 # ------------------------------------------------------------------------- #
 # IMPORTS
 import asyncio
-import os
 import logging
+import os
 from pathlib import Path
 
 import hikari
@@ -23,6 +23,7 @@ load_dotenv()
 BOT_NAME = os.getenv("BOT_NAME")
 SUPPORT_SERVER_LINK = os.getenv("SUPPORT_SERVER_LINK")
 BOT_INVITE_LINK = os.getenv("BOT_INVITE_LINK")
+
 
 # ------------------------------------------------------------------------- #
 # COMMANDS #
@@ -58,7 +59,9 @@ async def command_reset(
     timeout = 120
     embed = hikari.Embed(
         title=SUPPORTED_LANGUAGES.get(language).reset_validation_embed_title.format(bot_name=BOT_NAME.capitalize()),
-        description=SUPPORTED_LANGUAGES.get(language).reset_validation_embed_description.format(bot_name=BOT_NAME.capitalize()),
+        description=SUPPORTED_LANGUAGES.get(language).reset_validation_embed_description.format(
+            bot_name=BOT_NAME.capitalize()
+        ),
     )
 
     action_row_1 = (
@@ -86,7 +89,9 @@ async def command_reset(
         await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
         if log_errors:
             log_response = SUPPORTED_LANGUAGES.get(language).log_response_reset_timeout_reached.format(
-                datetime=await bot.get_timestamp_aware(gmt), member=ctx.member, bot_name=BOT_NAME.capitalize(),
+                datetime=await bot.get_timestamp_aware(gmt),
+                member=ctx.member,
+                bot_name=BOT_NAME.capitalize(),
             )
             await bot.log_from_ctx(ctx, db, log_response)
         return
@@ -94,23 +99,25 @@ async def command_reset(
         await event.interaction.create_initial_response(6)
         if event.interaction.custom_id == "yes":
             gif = Path("../Husqy/assets/loading.gif")
-            embed_started = (
-                hikari.Embed(
-                    title=SUPPORTED_LANGUAGES.get(language).reset_started_embed_title.format(bot_name=BOT_NAME.capitalize()),
-                    description=SUPPORTED_LANGUAGES.get(language).reset_started_embed_description.format(bot_name=BOT_NAME.capitalize()),
-                    colour=hikari.Colour(0x8bc683),
-                )
-                .set_thumbnail(gif)
-            )
+            embed_started = hikari.Embed(
+                title=SUPPORTED_LANGUAGES.get(language).reset_started_embed_title.format(
+                    bot_name=BOT_NAME.capitalize()
+                ),
+                description=SUPPORTED_LANGUAGES.get(language).reset_started_embed_description.format(
+                    bot_name=BOT_NAME.capitalize()
+                ),
+                colour=hikari.Colour(0x8BC683),
+            ).set_thumbnail(gif)
             response_message = await ctx.edit_last_response(embed=embed_started, component=None)
 
             guild = ctx.get_guild()
-            my_user = await ctx.rest.fetch_my_user()
 
             # DELETE CUSTOM EMOJI'S
             try:
                 instinct_emoji, *none = await db.get_guild_settings(guild, settings=["instinct_emoji_id"])
-                await ctx.rest.delete_emoji(guild, instinct_emoji, reason=f"{BOT_NAME.capitalize()} reset Handler -- Reset!")
+                await ctx.rest.delete_emoji(
+                    guild, instinct_emoji, reason=f"{BOT_NAME.capitalize()} reset Handler -- Reset!"
+                )
             except hikari.ForbiddenError:
                 logging.getLogger(f"{BOT_NAME.lower()}.reset.emojis_delete").error(
                     "ForbiddenError while trying to delete emoji with same name ('Instinct', 'Mystic' or 'Valor') "
@@ -124,7 +131,9 @@ async def command_reset(
 
             try:
                 mystic_emoji, *none = await db.get_guild_settings(guild, settings=["mystic_emoji_id"])
-                await ctx.rest.delete_emoji(guild, mystic_emoji, reason=f"{BOT_NAME.capitalize()} reset Handler -- Reset!")
+                await ctx.rest.delete_emoji(
+                    guild, mystic_emoji, reason=f"{BOT_NAME.capitalize()} reset Handler -- Reset!"
+                )
             except hikari.ForbiddenError:
                 logging.getLogger(f"{BOT_NAME.lower()}.reset.emojis_delete").error(
                     "ForbiddenError while trying to delete emoji with same name ('Instinct', 'Mystic' or 'Valor') "
@@ -138,7 +147,9 @@ async def command_reset(
 
             try:
                 valor_emoji, *none = await db.get_guild_settings(guild, settings=["valor_emoji_id"])
-                await ctx.rest.delete_emoji(guild, valor_emoji, reason=f"{BOT_NAME.capitalize()} reset Handler -- Reset!")
+                await ctx.rest.delete_emoji(
+                    guild, valor_emoji, reason=f"{BOT_NAME.capitalize()} reset Handler -- Reset!"
+                )
             except hikari.ForbiddenError:
                 logging.getLogger(f"{BOT_NAME.lower()}.reset.emojis_delete").error(
                     "ForbiddenError while trying to delete emoji with same name ('Instinct', 'Mystic' or 'Valor') "
@@ -156,8 +167,7 @@ async def command_reset(
                 await ctx.rest.delete_role(guild, instinct_role)
             except hikari.ForbiddenError:
                 logging.getLogger(f"{BOT_NAME.lower()}.reset.roles_delete").error(
-                    "ForbiddenError while trying to delete instinct role "
-                    f"for guild_id: {ctx.guild_id}!"
+                    "ForbiddenError while trying to delete instinct role " f"for guild_id: {ctx.guild_id}!"
                 )
             except Exception as e:
                 logging.getLogger(f"{BOT_NAME.lower()}.reset.roles_delete").error(
@@ -170,8 +180,7 @@ async def command_reset(
                 await ctx.rest.delete_role(guild, mystic_role)
             except hikari.ForbiddenError:
                 logging.getLogger(f"{BOT_NAME.lower()}.reset.roles_delete").error(
-                    "ForbiddenError while trying to delete mystic role "
-                    f"for guild_id: {ctx.guild_id}!"
+                    "ForbiddenError while trying to delete mystic role " f"for guild_id: {ctx.guild_id}!"
                 )
             except Exception as e:
                 logging.getLogger(f"{BOT_NAME.lower()}.reset.roles_delete").error(
@@ -184,8 +193,7 @@ async def command_reset(
                 await ctx.rest.delete_role(guild, valor_role)
             except hikari.ForbiddenError:
                 logging.getLogger(f"{BOT_NAME.lower()}.reset.roles_delete").error(
-                    "ForbiddenError while trying to delete valor role "
-                    f"for guild_id: {ctx.guild_id}!"
+                    "ForbiddenError while trying to delete valor role " f"for guild_id: {ctx.guild_id}!"
                 )
             except Exception as e:
                 logging.getLogger(f"{BOT_NAME.lower()}.reset.roles_delete").error(
@@ -198,8 +206,7 @@ async def command_reset(
                 await ctx.rest.delete_role(guild, moderator_role)
             except hikari.ForbiddenError:
                 logging.getLogger(f"{BOT_NAME.lower()}.reset.roles_delete").error(
-                    "ForbiddenError while trying to delete moderator role "
-                    f"for guild_id: {ctx.guild_id}!"
+                    "ForbiddenError while trying to delete moderator role " f"for guild_id: {ctx.guild_id}!"
                 )
             except Exception as e:
                 logging.getLogger(f"{BOT_NAME.lower()}.reset.roles_delete").error(
@@ -213,8 +220,7 @@ async def command_reset(
                 await ctx.rest.delete_channel(channel_raids)
             except hikari.NotFoundError:
                 logging.getLogger(f"{BOT_NAME.lower()}.reset.channel_delete").error(
-                    "NotFoundError while trying to delete raids channel "
-                    f"for guild_id: {ctx.guild_id}!"
+                    "NotFoundError while trying to delete raids channel " f"for guild_id: {ctx.guild_id}!"
                 )
             except Exception as e:
                 logging.getLogger(f"{BOT_NAME.lower()}.reset.channel_delete").error(
@@ -227,8 +233,7 @@ async def command_reset(
                 await ctx.rest.delete_channel(channel_logs)
             except hikari.NotFoundError:
                 logging.getLogger(f"{BOT_NAME.lower()}.reset.channel_delete").error(
-                    "NotFoundError while trying to delete logs channel "
-                    f"for guild_id: {ctx.guild_id}!"
+                    "NotFoundError while trying to delete logs channel " f"for guild_id: {ctx.guild_id}!"
                 )
             except Exception as e:
                 logging.getLogger(f"{BOT_NAME.lower()}.reset.channel_delete").error(
@@ -236,26 +241,27 @@ async def command_reset(
                     f"for guild_id: {ctx.guild_id}! Got error: {e}"
                 )
 
-
             parameters = []
             parameters.append("is_setup = false")
-            parameters.append(f"raids_channel_id = NULL")
-            parameters.append(f"moderator_role_id = NULL")
-            parameters.append(f"instinct_role_id = NULL")
-            parameters.append(f"mystic_role_id = NULL")
-            parameters.append(f"valor_role_id = NULL")
-            parameters.append(f"instinct_emoji_id = NULL")
-            parameters.append(f"mystic_emoji_id = NULL")
-            parameters.append(f"valor_emoji_id = NULL")
+            parameters.append("raids_channel_id = NULL")
+            parameters.append("moderator_role_id = NULL")
+            parameters.append("instinct_role_id = NULL")
+            parameters.append("mystic_role_id = NULL")
+            parameters.append("valor_role_id = NULL")
+            parameters.append("instinct_emoji_id = NULL")
+            parameters.append("mystic_emoji_id = NULL")
+            parameters.append("valor_emoji_id = NULL")
             await db.set_guild_setting(guild, parameters=parameters)
-            await db.set_guild_log_setting(guild, parameters=[f"logs_channel_id = NULL"])
+            await db.set_guild_log_setting(guild, parameters=["logs_channel_id = NULL"])
 
-            embed_finished = (
-                hikari.Embed(
-                    title=SUPPORTED_LANGUAGES.get(language).reset_finished_embed_title.format(bot_name=BOT_NAME.capitalize()),
-                    description=SUPPORTED_LANGUAGES.get(language).reset_finished_embed_description.format(bot_name=BOT_NAME.capitalize()),
-                    colour=hikari.Colour(0x8bc683),
-                )
+            embed_finished = hikari.Embed(
+                title=SUPPORTED_LANGUAGES.get(language).reset_finished_embed_title.format(
+                    bot_name=BOT_NAME.capitalize()
+                ),
+                description=SUPPORTED_LANGUAGES.get(language).reset_finished_embed_description.format(
+                    bot_name=BOT_NAME.capitalize()
+                ),
+                colour=hikari.Colour(0x8BC683),
             )
             await response_message.delete()
             response_message = await ctx.rest.create_message(ctx.get_channel(), embed=embed_finished)
@@ -266,7 +272,9 @@ async def command_reset(
             await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
             if log_errors:
                 log_response = SUPPORTED_LANGUAGES.get(language).log_response_reset_cancelled.format(
-                    datetime=await bot.get_timestamp_aware(gmt), member=ctx.member, bot_name=BOT_NAME.capitalize(),
+                    datetime=await bot.get_timestamp_aware(gmt),
+                    member=ctx.member,
+                    bot_name=BOT_NAME.capitalize(),
                 )
                 await bot.log_from_ctx(ctx, db, log_response)
             return

@@ -14,10 +14,10 @@ import typing as t
 import hikari
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from dotenv import load_dotenv
+from utils.ActivityHandler import ActivityHandler
 from utils.DatabaseHandler import DatabaseHandler
 from utils.helpers.BotUtils import BotUtils
 from utils.VersionHandler import VersionHandler
-from utils.ActivityHandler import ActivityHandler
 
 from .client import Client
 
@@ -94,7 +94,7 @@ class Bot(hikari.GatewayBot):
         self.ah = ActivityHandler(self)
         await self.ah._init()
         await self.ah.change_activity()
-        
+
         # Inject RESTAware bot object
         self.client.set_type_dependency(Bot, self)
 

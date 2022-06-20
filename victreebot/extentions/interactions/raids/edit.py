@@ -13,13 +13,13 @@ import hikari
 import tanjun
 from core.bot import Bot
 from dotenv import load_dotenv
+from extentions.interactions.raids.create import get_boss_name
+from extentions.interactions.raids.create import get_location_name
 from utils.DatabaseHandler import DatabaseHandler
 from utils.helpers.BotUtils import BotUtils
 from utils.helpers.contants import SUPPORTED_LANGUAGES
-from utils.helpers.contants import SUPPORTED_RAID_TYPES
 from utils.helpers.contants import SUPPORTED_LOCATION_TYPES
-from extentions.interactions.raids.create import get_boss_name
-from extentions.interactions.raids.create import get_location_name
+from utils.helpers.contants import SUPPORTED_RAID_TYPES
 
 load_dotenv()
 BOT_NAME = os.getenv("BOT_NAME")
@@ -61,7 +61,9 @@ async def command_raid_edit(
         return
 
     if ctx.author.id != raid.raid_creator_id and ctx.author.id != moderator_role_id:
-        response = SUPPORTED_LANGUAGES.get(language).response_raid_edit_not_creator_or_moderator.format(bot_name=BOT_NAME.capitalize())
+        response = SUPPORTED_LANGUAGES.get(language).response_raid_edit_not_creator_or_moderator.format(
+            bot_name=BOT_NAME.capitalize()
+        )
         await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
         if log_errors:
             log_response = SUPPORTED_LANGUAGES.get(language).log_response_raid_edit_not_creator_or_moderator.format(
@@ -84,12 +86,10 @@ async def command_raid_edit(
         .add_to_container()
     )
 
-    raid_edit_embed = (
-        hikari.Embed(
-            title=SUPPORTED_LANGUAGES.get(language).raid_edit_embed_title,
-            description=SUPPORTED_LANGUAGES.get(language).raid_edit_embed_description,
-            colour=hikari.Colour(0x8bc683),
-        )
+    raid_edit_embed = hikari.Embed(
+        title=SUPPORTED_LANGUAGES.get(language).raid_edit_embed_title,
+        description=SUPPORTED_LANGUAGES.get(language).raid_edit_embed_description,
+        colour=hikari.Colour(0x8BC683),
     )
 
     response_message = await ctx.respond(embed=raid_edit_embed, components=[raid_edit_action_row])
@@ -116,18 +116,16 @@ async def command_raid_edit(
         if event.interaction.custom_id == "edit_raid_type":
             await event.interaction.create_initial_response(6)
             # GET RAID TYPE
-            raid_type_action_row = (
-                ctx.rest.build_action_row()
-            )
+            raid_type_action_row = ctx.rest.build_action_row()
             for raid_type in SUPPORTED_RAID_TYPES:
-                raid_type_action_row.add_button(hikari.ButtonStyle.PRIMARY, raid_type.lower()).set_label(raid_type).add_to_container()
+                raid_type_action_row.add_button(hikari.ButtonStyle.PRIMARY, raid_type.lower()).set_label(
+                    raid_type
+                ).add_to_container()
 
-            raid_type_embed = (
-                hikari.Embed(
-                    title=SUPPORTED_LANGUAGES.get(language).raid_create_embed_title_raid_type,
-                    description=SUPPORTED_LANGUAGES.get(language).raid_create_embed_description_raid_type,
-                    colour=hikari.Colour(0x8bc683),
-                )
+            raid_type_embed = hikari.Embed(
+                title=SUPPORTED_LANGUAGES.get(language).raid_create_embed_title_raid_type,
+                description=SUPPORTED_LANGUAGES.get(language).raid_create_embed_description_raid_type,
+                colour=hikari.Colour(0x8BC683),
             )
 
             response_message = await ctx.edit_last_response(embed=raid_type_embed, components=[raid_type_action_row])
@@ -174,7 +172,9 @@ async def command_raid_edit(
             boss_name = await get_boss_name(ctx, event, db, bot, bot_aware)
             success, pokemon, pokemon_image = await bot.validate_pokemon(boss_name)
             if not success:
-                response = SUPPORTED_LANGUAGES.get(language).response_raid_create_unknown_boss.format(boss_name=boss_name)
+                response = SUPPORTED_LANGUAGES.get(language).response_raid_create_unknown_boss.format(
+                    boss_name=boss_name
+                )
                 await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
                 if log_errors:
                     log_response = SUPPORTED_LANGUAGES.get(language).log_response_raid_create_unknown_boss.format(
@@ -205,21 +205,21 @@ async def command_raid_edit(
         elif event.interaction.custom_id == "edit_location":
             await event.interaction.create_initial_response(6)
             # GET LOCATION TYPE
-            location_type_action_row = (
-                ctx.rest.build_action_row()
-            )
+            location_type_action_row = ctx.rest.build_action_row()
             for location_type in SUPPORTED_LOCATION_TYPES:
-                location_type_action_row.add_button(hikari.ButtonStyle.PRIMARY, location_type.lower()).set_label(location_type).add_to_container()
+                location_type_action_row.add_button(hikari.ButtonStyle.PRIMARY, location_type.lower()).set_label(
+                    location_type
+                ).add_to_container()
 
-            location_type_embed = (
-                hikari.Embed(
-                    title=SUPPORTED_LANGUAGES.get(language).raid_create_embed_title_location_type,
-                    description=SUPPORTED_LANGUAGES.get(language).raid_create_embed_description_location_type,
-                    colour=hikari.Colour(0x8bc683),
-                )
+            location_type_embed = hikari.Embed(
+                title=SUPPORTED_LANGUAGES.get(language).raid_create_embed_title_location_type,
+                description=SUPPORTED_LANGUAGES.get(language).raid_create_embed_description_location_type,
+                colour=hikari.Colour(0x8BC683),
             )
 
-            response_message = await ctx.edit_last_response(embed=location_type_embed, components=[location_type_action_row])
+            response_message = await ctx.edit_last_response(
+                embed=location_type_embed, components=[location_type_action_row]
+            )
 
             try:
                 event = await ctx.client.events.wait_for(
@@ -253,7 +253,9 @@ async def command_raid_edit(
                 all_locations.append(location.get("name"))
 
             if location_name_awnser.lower() not in all_locations:
-                response = SUPPORTED_LANGUAGES.get(language).response_raid_edit_location_not_found.format(location_type=location_type.strip("'"), location_name=location_name_awnser)
+                response = SUPPORTED_LANGUAGES.get(language).response_raid_edit_location_not_found.format(
+                    location_type=location_type.strip("'"), location_name=location_name_awnser
+                )
                 await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
                 if log_errors:
                     log_response = SUPPORTED_LANGUAGES.get(language).log_response_raid_edit_location_not_found.format(

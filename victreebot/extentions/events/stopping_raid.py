@@ -32,7 +32,9 @@ async def event_stopping_raid(
 
             parameters = []
             if raid.instinct_present != []:
-                parameters.append(f"""instinct_present = '{",".join(str(instinct) for instinct in raid.instinct_present)}'""")
+                parameters.append(
+                    f"""instinct_present = '{",".join(str(instinct) for instinct in raid.instinct_present)}'"""
+                )
             if raid.mystic_present != []:
                 parameters.append(f"""mystic_present = '{",".join(str(mystic) for mystic in raid.mystic_present)}'""")
             if raid.valor_present != []:

@@ -1,4 +1,3 @@
-# instinct_present, mystic_present, valor_present, remote_present, total_attendees, *none = await bot_aware.db.get_raid_details(raid_id, guild, ["instinct_present", "mystic_present", "valor_present", "remote_present", "total_attendees"])
 # ------------------------------------------------------------------------- #
 # VictreeBot                                                                #
 #                                                                           #
@@ -14,9 +13,9 @@ import hikari
 import tanjun
 from core.bot import Bot
 from dotenv import load_dotenv
+from extentions.interactions.raids.RaidClass import RaidClass
 from utils.DatabaseHandler import DatabaseHandler
 from utils.helpers.BotUtils import BotUtils
-from extentions.interactions.raids.RaidClass import RaidClass
 
 load_dotenv()
 BOT_NAME = os.getenv("BOT_NAME")
@@ -34,9 +33,13 @@ async def event_raw_reaction_delete_raid(
         return
 
     guild = event.app.cache.get_guild(event.guild_id) or await event.app.rest.fetch_guild(event.guild_id)
-    instinct_emoji_id, mystic_emoji_id, valor_emoji_id, raid_timeout, *none = await db.get_guild_settings(guild, settings=["instinct_emoji_id", "mystic_emoji_id", "valor_emoji_id", "raid_timeout"])
+    instinct_emoji_id, mystic_emoji_id, valor_emoji_id, raid_timeout, *none = await db.get_guild_settings(
+        guild, settings=["instinct_emoji_id", "mystic_emoji_id", "valor_emoji_id", "raid_timeout"]
+    )
 
-    message = event.app.cache.get_message(event.message_id) or await event.app.rest.fetch_message(event.channel_id, event.message_id)
+    message = event.app.cache.get_message(event.message_id) or await event.app.rest.fetch_message(
+        event.channel_id, event.message_id
+    )
     raid_id, *none = await db.get_raid_details_by_message(message, guild, details=["raid_id"])
     raid = bot_aware.raids.get(f"'{raid_id}'")
 

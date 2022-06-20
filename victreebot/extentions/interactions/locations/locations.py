@@ -267,12 +267,12 @@ async def command_locations(
         response = SUPPORTED_LANGUAGES.get(language).response_not_yet_setup.format(bot_name=BOT_NAME.capitalize())
         await ctx.edit_last_response(response, delete_after=auto_delete)
         return
-        
+
     timeout = 120
     embed = hikari.Embed(
         title=SUPPORTED_LANGUAGES.get(language).location_embed_title,
         description=SUPPORTED_LANGUAGES.get(language).location_embed_description,
-        colour=hikari.Colour(0x8bc683),
+        colour=hikari.Colour(0x8BC683),
     )
 
     action_row_1 = (
@@ -377,7 +377,7 @@ async def command_locations(
                     description=SUPPORTED_LANGUAGES.get(language).location_list_embed_description.format(
                         location_type=location_type.strip("'")
                     ),
-                    colour=hikari.Colour(0x8bc683),
+                    colour=hikari.Colour(0x8BC683),
                 ).add_field(
                     name=SUPPORTED_LANGUAGES.get(language).location_list_embed_field_locations,
                     value="\n".join(
@@ -409,7 +409,7 @@ async def command_locations(
                         description=SUPPORTED_LANGUAGES.get(language).location_list_embed_description.format(
                             location_type=location_type.strip("'")
                         ),
-                        colour=hikari.Colour(0x8bc683),
+                        colour=hikari.Colour(0x8BC683),
                     ).add_field(
                         name=SUPPORTED_LANGUAGES.get(language).location_list_embed_field_locations,
                         value="\n".join(
@@ -513,7 +513,7 @@ async def command_locations(
                 hikari.Embed(
                     title=SUPPORTED_LANGUAGES.get(language).location_info_embed_title,
                     description=f"""`{location_type.capitalize().strip("'")}:` {location_name.capitalize().strip("'")}\n `Description:` {results[0].get('description') if results[0].get('description') else SUPPORTED_LANGUAGES.get(language).location_no_description_set}""",  # noqa E501
-                    colour=hikari.Colour(0x8bc683),
+                    colour=hikari.Colour(0x8BC683),
                 )
                 .add_field(
                     name=SUPPORTED_LANGUAGES.get(language).location_info_embed_field_coordinates,

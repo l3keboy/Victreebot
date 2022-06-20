@@ -15,16 +15,16 @@ from extentions.events.guild_join_setup import event_guild_join_setup
 from extentions.events.guild_leave_remove import event_guild_leave_remove
 from extentions.events.member_create_add import event_member_create_add
 from extentions.events.member_delete_remove import event_member_delete_remove
-from extentions.events.stopping_raid import event_stopping_raid
-from extentions.events.started_raid import event_started_raid
 from extentions.events.raw_reaction_add_raid import event_raw_reaction_add_raid
 from extentions.events.raw_reaction_delete_raid import event_raw_reaction_delete_raid
+from extentions.events.started_raid import event_started_raid
+from extentions.events.stopping_raid import event_stopping_raid
 from extentions.interactions.locations.locations import command_locations
 from extentions.interactions.profile import profile_group
-from extentions.interactions.setup.setup import command_setup
-from extentions.interactions.setup.reset import command_reset
 from extentions.interactions.raids import raid_group
 from extentions.interactions.settings import settings_group
+from extentions.interactions.setup.reset import command_reset
+from extentions.interactions.setup.setup import command_setup
 
 load_dotenv()
 BOT_NAME = os.getenv("BOT_NAME")
