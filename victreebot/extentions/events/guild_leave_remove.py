@@ -29,6 +29,7 @@ async def event_guild_leave_remove(
     await db.delete_guild(event.guild_id)
     await db.delete_guild_settings(event.guild_id)
     await db.delete_guild_log_settings(event.guild_id)
+    await db.delete_guild_stats(event.guild_id)
 
     # USERS
     await db.delete_guild_users(event.guild_id)
