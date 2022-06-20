@@ -49,18 +49,43 @@ async def event_started_raid(
         raid_message_id = result.get("raid_message_id")
         raid_creator_id = result.get("raid_creator_id")
 
+        instinct_present_list = []
+        mystic_present_list = []
+        valor_present_list = []
+        remote_present_list = []
+
         instinct_present = result.get("instinct_present")
         if instinct_present is not None:
-            instinct_present = instinct_present.split(",")
+            if instinct_present.isdigit():
+                instinct_present_list.append(int(instinct_present))
+            else:
+                instinct_present = instinct_present.split(",")
+                for instinct in instinct_present:
+                    instinct_present_list.append(int(instinct))
         mystic_present = result.get("mystic_present")
         if mystic_present is not None:
-            mystic_present = mystic_present.split(",")
+            if mystic_present.isdigit():
+                mystic_present_list.append(int(mystic_present))
+            else:
+                mystic_present = mystic_present.split(",")
+                for mystic in mystic_present:
+                    mystic_present_list.append(int(mystic))
         valor_present = result.get("valor_present")
         if valor_present is not None:
-            valor_present = valor_present.split(",")
+            if valor_present.isdigit():
+                valor_present_list.append(int(valor_present))
+            else:
+                valor_present = valor_present.split(",")
+                for valor in valor_present:
+                    valor_present_list.append(int(valor))
         remote_present = result.get("remote_present")
         if remote_present is not None:
-            remote_present = remote_present.split(",")
+            if remote_present.isdigit():
+                remote_present_list.append(int(remote_present))
+            else:
+                remote_present = remote_present.split(",")
+                for remote in remote_present:
+                    remote_present_list.append(int(remote))
 
         total_attendees = result.get("total_attendees")
 
@@ -82,9 +107,9 @@ async def event_started_raid(
             bot_aware,
             language,
             auto_delete,
-            instinct_present=instinct_present,
-            mystic_present=mystic_present,
-            valor_present=valor_present,
-            remote_present=remote_present,
+            instinct_present=instinct_present_list if instinct_present_list != [] else None,
+            mystic_present=mystic_present_list if mystic_present_list != [] else None,
+            valor_present=valor_present_list if valor_present_list != [] else None,
+            remote_present=remote_present_list if remote_present_list != [] else None,
             total_attendess=total_attendees,
         )
