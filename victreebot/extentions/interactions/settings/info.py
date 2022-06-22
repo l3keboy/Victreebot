@@ -183,6 +183,7 @@ async def command_info(
             title=SUPPORTED_LANGUAGES.get(language).info_bot_embed_title.format(
                 bot_name=BOT_NAME.capitalize(), version=version
             ),
+            colour=hikari.Colour(0x8BC683),
         )
         .set_footer(
             text=SUPPORTED_LANGUAGES.get(language).info_bot_embed_footer.format(
