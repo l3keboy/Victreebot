@@ -5,6 +5,10 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ================================================================
 
 ## [Unreleased/Working on]
+### [NEW]
+- Added function to update log settings ( **/settings update logging** )
+- Added info command to view bot info
+- Added pokedex command ( **/pokedex** )
 
 ================================================================
 

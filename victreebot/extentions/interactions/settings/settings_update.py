@@ -61,12 +61,17 @@ async def command_settings_update_general(
     db: DatabaseHandler = tanjun.injected(type=DatabaseHandler),
     bot: BotUtils = tanjun.injected(type=BotUtils),
 ):
-    language, current_auto_delete, *none = await db.get_guild_settings(
-        guild=ctx.get_guild(), settings=["language", "auto_delete"]
+    language, current_auto_delete, is_setup, *none = await db.get_guild_settings(
+        guild=ctx.get_guild(), settings=["language", "auto_delete", "is_setup"]
     )
     log_errors, log_settings_changed, *none = await db.get_guild_log_settings(
         ctx.get_guild(), settings=["log_errors", "log_settings_changed"]
     )
+
+    if not is_setup:
+        response = SUPPORTED_LANGUAGES.get(language).response_not_yet_setup.format(bot_name=BOT_NAME.capitalize())
+        await ctx.edit_last_response(response, delete_after=auto_delete)
+        return
 
     if language is None and gmt is None and unit_system is None and auto_delete is None and moderator_role is None:
         # Send response
