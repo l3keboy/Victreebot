@@ -24,11 +24,8 @@ BOT_NAME = os.getenv("BOT_NAME")
 # COMMANDS #
 # ------------------------------------------------------------------------- #
 # ------------------------------------------------------------------------- #
-# General settings #
+# info #
 # ------------------------------------------------------------------------- #
-@tanjun.with_author_permission_check(
-    hikari.Permissions.MANAGE_GUILD, error_message="You need the `Manage Server` permissions to execute this command!"
-)
 @tanjun.as_slash_command("info", f"Get {BOT_NAME.capitalize()}'s and the servers info.")
 async def command_info(
     ctx: tanjun.abc.SlashContext,
