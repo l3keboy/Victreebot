@@ -8,6 +8,10 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.5.1] - 22-06-2022
+### [Bugfixes]
+- Fix for info command requiring manage server permissions
+
 ## [0.5.0] - 22-06-2022
 ### [NEW]
 - Added function to update log settings ( **/settings update logging** )
