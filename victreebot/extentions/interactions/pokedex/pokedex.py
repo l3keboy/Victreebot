@@ -93,6 +93,7 @@ async def command_pokedex(
     embed = (
         hikari.Embed(
             title=SUPPORTED_LANGUAGES.get(language).pokedex_embed_title.format(pokemon=pokemon_name.capitalize()),
+            colour=hikari.Colour(0x8BC683),
         )
         .set_thumbnail(pokemon_image)
         .add_field(

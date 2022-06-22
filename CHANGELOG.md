@@ -11,6 +11,7 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [0.5.1] - 22-06-2022
 ### [Bugfixes]
 - Fix for info command requiring manage server permissions
+- Fix for info and pokedex embed not being in the right color
 
 ## [0.5.0] - 22-06-2022
 ### [NEW]
