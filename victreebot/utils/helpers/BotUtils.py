@@ -174,6 +174,7 @@ class BotUtils:
         response_message = await ctx.create_followup(embed=embed, component=action_row)
 
         enable = False
+        timeout_cancelled = False
         try:
             event = await ctx.client.events.wait_for(
                 hikari.InteractionCreateEvent,
@@ -185,14 +186,14 @@ class BotUtils:
             await ctx.edit_last_response(
                 SUPPORTED_LANGUAGES.get(language).enable_disable_timeout, delete_after=auto_delete
             )
-            return event, enable
+            return event, enable, timeout_cancelled
         else:
             await response_message.delete()
             if event.interaction.custom_id == "enable":
                 enable = True
-                return event, enable
+                return event, enable, timeout_cancelled
             elif event.interaction.custom_id == "disable":
-                return event, enable
+                return event, enable, timeout_cancelled
 
     async def validate_add_or_no_add(
         self, ctx: tanjun.abc.SlashContext, item: str, db: DatabaseHandler

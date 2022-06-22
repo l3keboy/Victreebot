@@ -30,13 +30,38 @@ months = [january, february, march, april, may, june, july, august, september, o
 validate_enable_or_disable = "Enable or disable {item}"
 validate_enable_or_disable_description = "Do you want to enable or disable {item}?"
 disable = "Disable"
+disabled = "Disabled"
 enable = "Enable"
+enabled = "Enabled"
 enable_disable_timeout = "Enable or disable validation reached a timeout! Returning disable"
 validate_add_or_no_add = "Add {item}"
 validate_add_or_no_add_description = "Do you want to add {item}?"
 no = "No"
 yes = "Yes"
 add_no_add_timeout = "Add or don't add validation reached a timeout! Returning don't add"
+
+error_response_not_enough_permissions_for_channel = "I do not have enough permissions to use this channel!"
+error_response_not_a_text_channel = "The given channel is not a text channel!"
+error_response_invalid_int_found = (
+    "Oops! It looks like that a value or one of the values is not a valid integer/number!"
+)
+
+log_errors = "Errors"
+log_info = "Info requests"
+log_settings_changed = "Changed to settings"
+log_profile_edit = "Profile edits"
+log_profile_view = "Profile views"
+log_location_add = "Location adds"
+log_location_delete = "Location deletions"
+log_location_edit = "Location edits"
+log_location_info = "Location info requests"
+log_location_list = "Location listings"
+log_raid_create = "Raid creations"
+log_raid_edit = "Raid edits"
+log_raid_delete = "Raid deletions"
+log_trade_offer = "Trade offers"
+log_trade_proposal = "Trade proposals"
+log_trade_search = "Trade searches"
 
 # ------------------------------------------------------------------------- #
 # EVENTS #
@@ -87,6 +112,30 @@ reset_started_embed_description = "Please wait while {bot_name} resets all value
 reset_finished_embed_title = "{bot_name} is reset!"
 reset_finished_embed_description = "{bot_name} has been reset! You can now use `/setup` again!"
 
+
+# ------------------------------------------------------------------------- #
+# pokedex #
+# ------------------------------------------------------------------------- #
+# ------------------------------------------------------------------------- #
+# pokedex.py #
+# ------------------------------------------------------------------------- #
+height_metric_system = "meters"
+height_imperial_system = "foot"
+height_usc_system = "inches"
+weight_metric_system = "kilograms"
+weight_imperial_system = "pounds"
+weight_usc_system = "pounds"
+# Response
+response_pokedex_unknown_pokemon = "The pokémon `{boss_name}` does not seem to exist!"
+# Log response
+log_response_pokedex_unknown_pokemon = "`[{datetime}]` -- **{member}** requested information about a pokémon, but the given pokémon does not seem to exist!"
+log_response_pokedex_requested = "`[{datetime}]` -- **{member}** requested the pokédex of a pokémon!"
+# Embeds
+pokedex_embed_title = "Pokédex information about {pokemon}"
+pokedex_embed_name_title = "Pokémon name:"
+pokedex_embed_id_title = "Pokémon ID:"
+pokedex_embed_length_weight_title = "Pokémon height and weight:"
+pokedex_embed_abilities_title = "Abilities:"
 
 # ------------------------------------------------------------------------- #
 # profile #
@@ -347,6 +396,31 @@ raid_edit_embed_description = "Please select the component of the raid you want 
 # Settings #
 # ------------------------------------------------------------------------- #
 # ------------------------------------------------------------------------- #
+# info.py #
+# ------------------------------------------------------------------------- #
+# Response
+# Log response
+log_response_info_requested = "`[{datetime}]` -- **{member}** requested my information!"
+# Embeds
+info_bot_embed_title = "{bot_name} info! {version}"
+info_bot_embed_footer = "Server stats -- Raids completed: {raids_completed} | Raids created: {raids_created} | Raids deleted: {raids_deleted}"
+info_bot_embed_field_title_language = "Language:"
+info_bot_embed_field_title_auto_delete = "Auto delete:"
+info_bot_embed_field_title_unit_system = "Unit system:"
+info_bot_embed_field_title_gmt = "Timezone:"
+info_bot_embed_field_title_timeout = "Raid timeout:"
+info_bot_embed_field_title_instinct_emoji = "Instinct emoji:"
+info_bot_embed_field_title_instinct_role = "Insstinct role:"
+info_bot_embed_field_title_mystic_emoji = "Mystic emoji:"
+info_bot_embed_field_title_mystic_role = "Mystic role:"
+info_bot_embed_field_title_valor_emoji = "Valor emoji:"
+info_bot_embed_field_title_valor_role = "Valor role:"
+info_bot_embed_field_title_raids_channel = "Raids channel:"
+info_bot_embed_field_title_logging_channel = "Logs channel:"
+info_bot_embed_field_title_moderator_role = "Moderator role:"
+info_bot_embed_field_title_logging_events_1 = "Logged events:"
+
+# ------------------------------------------------------------------------- #
 # settings_update.py #
 # ------------------------------------------------------------------------- #
 # Response
@@ -369,6 +443,52 @@ log_response_settings_update_raid_failed = (
 log_response_settings_update_raid_success = "`[{datetime}]` -- **{member}** edited `Raid Settings`!"
 log_response_settings_update_raid_failed_raids_active = "`[{datetime}]` -- **{member}** tried to edit `Raid Settings`, but these are not editable now because there are raids active!"
 # Embeds
+
+# ------------------------------------------------------------------------- #
+# settings_logging_update.py #
+# ------------------------------------------------------------------------- #
+settings_logging_logs_channel = "Logs channel"
+settings_logging_general_events = "General events"
+settings_logging_profile_events = "Profile events"
+settings_logging_location_events = "Location events"
+settings_logging_raid_events = "Raid events"
+settings_logging_trade_events = "Trade events"
+# Response
+error_response_settings_update_logging_events_nothing_to_change = "There are no settings to `{status}`!"
+error_response_settings_update_logging_events_user_input_longer_than_possible_events = (
+    "You gave more values than possible, please try again by re-running the command!"
+)
+response_settings_update_logging_failed_timeout = "Stopping updates to logging settings, timeout reached!"
+response_settings_update_logging_logs_channel_failed = "Something went wrong while trying to update the logs channel!"
+response_settings_update_logging_logs_channel_success = "I have updated the logs channel to {channel}!"
+response_settings_update_logging_events_failed = "Something went wrong while trying to update the `{event}`!"
+response_settings_update_logging_events_success = "The `{event}` are updated!"
+# Log response
+log_response_settings_update_logging_failed_timeout = (
+    "`[{datetime}]` -- **{member}** tried to edit `Logging Settings`, but the timeout was reached!"
+)
+log_response_settings_update_logging_logs_channel_failed_not_enough_privileges = "`[{datetime}]` -- **{member}** tried to edit the logs channel of the `Logging Settings`, but inserted a channel where I don't have enough permissions for!"
+log_response_settings_update_logging_logs_channel_failed_not_a_text_channel = "`[{datetime}]` -- **{member}** tried to edit the logs channel of the `Logging Settings`, but didn't insert a text channel!"
+log_response_settings_update_logging_logs_channel_failed = (
+    "`[{datetime}]` -- **{member}** tried to edit the logs channel of the `Logging Settings`, but something went wrong!"
+)
+log_response_settings_update_logging_logs_channel_success = (
+    "`[{datetime}]` -- **{member}** changed the logs channel to {channel}!"
+)
+log_response_settings_update_logging_events_failed = (
+    "`[{datetime}]` -- **{member}** tried to change the {event}, but something went wrong!"
+)
+log_response_settings_update_logging_events_success = "`[{datetime}]` -- **{member}** changed the {event}!"
+# Embeds
+settings_update_logging_embed_title = "Update logging settings"
+settings_update_logging_embed_description = "Please select what option you want to update."
+settings_update_logging_embed_logs_channel_title = "Update logs channel"
+settings_update_logging_embed_logs_channel_description = (
+    "Please tag the channel which you want to use as the new logs channel or insert its ID."
+)
+settings_update_logging_embed_events_title = "Update events"
+settings_update_logging_embed_events_description = "Please select the events you want to {status}"
+settings_update_logging_embed_field_events = "Events that can be {status}:"
 
 
 # ------------------------------------------------------------------------- #
