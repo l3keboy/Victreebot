@@ -1,11 +1,3 @@
-# ------------------------------------------------------------------------- #
-# Husqy Discord Bot, see https://www.husqy.xyz for more info                #
-#                                                                           #
-# Copyright (C) Husqy - All Rights Reserved                                 #
-# Unauthorized copying of this file, via any medium is strictly prohibited  #
-# Proprietary and confidential                                              #
-# Written by Luke Hendriks <luke@la-online.nl>, July 2021 (C)               #
-# ------------------------------------------------------------------------- #
 # IMPORTS
 import asyncio
 import logging
