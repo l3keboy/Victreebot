@@ -20,3 +20,7 @@ nox
 flake8
 black
 isort
+asyncpg
+pokebase
+pillow
+python-dateutil
