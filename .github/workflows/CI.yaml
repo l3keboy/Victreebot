@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  pull_request:
+
+jobs:
+  check_flake8:
+    strategy:
+      # Allows for matrix sub-jobs to fail without cancelling the rest
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.10"]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install requirements
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run flake8
+        run: |
+          nox -s flake8
+
+  check_format:
+    strategy:
+      # Allows for matrix sub-jobs to fail without cancelling the rest
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.10"]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install requirements
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run format check
+        run: |
+          nox -s check_format
+
+  # Allows us to add this as a required check in Github branch rules, as all the
+  # other jobs are subject to change
+  ci-done:
+    needs: [check_flake8, check_format]
+    if: always()
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Mark status based on past job status
+        env:
+          # All new need jobs need to be added here with the prefix "RESULT_"
+          RESULT_FLAKE8: ${{ needs.check_flake8.result }}
+          RESULT_FORMAT: ${{ needs.check_format.result }}
+        run: |
+          if [ "$(env | grep 'RESULT_')" = "$(env | grep "RESULT_" | grep '=success')" ]; then
+            exit 0
+          else
+            exit 1
+          fi
