@@ -84,7 +84,7 @@ async def command_profile_edit(
     else:
         if event.interaction.custom_id == "add_friend_codes":
             add_friend_code_action_row = (
-                ctx.rest.build_action_row()
+                ctx.rest.build_modal_action_row()
                 .add_text_input(
                     label=SUPPORTED_LANGUAGES.get(language).profile_modal_add_friend_codes_text_input_title,
                     custom_id="friend_codes",
@@ -174,7 +174,7 @@ async def command_profile_edit(
 
         elif event.interaction.custom_id == "delete_friend_codes":
             delete_friend_code_action_row = (
-                ctx.rest.build_action_row()
+                ctx.rest.build_modal_action_row()
                 .add_text_input(
                     label=SUPPORTED_LANGUAGES.get(language).profile_modal_delete_friend_codes_text_input_title,
                     custom_id="friend_codes",
@@ -269,7 +269,7 @@ async def command_profile_edit(
 
         elif event.interaction.custom_id == "add_active_locations":
             add_active_locations_action_row = (
-                ctx.rest.build_action_row()
+                ctx.rest.build_modal_action_row()
                 .add_text_input(
                     label=SUPPORTED_LANGUAGES.get(language).profile_modal_add_active_locations_text_input_title,
                     custom_id="active_locations",
@@ -343,7 +343,7 @@ async def command_profile_edit(
 
         elif event.interaction.custom_id == "delete_active_locations":
             delete_active_locations_action_row = (
-                ctx.rest.build_action_row()
+                ctx.rest.build_modal_action_row()
                 .add_text_input(
                     label=SUPPORTED_LANGUAGES.get(language).profile_modal_delete_active_locations_text_input_title,
                     custom_id="active_locations",

@@ -34,7 +34,7 @@ async def get_location_name(
 
     timeout = 120
     location_name_action_row = (
-        ctx.rest.build_action_row()
+        ctx.rest.build_modal_action_row()
         .add_text_input(
             label=SUPPORTED_LANGUAGES.get(language).location_name_modal_text_input_title.format(
                 location=location_type.strip("'")
@@ -93,7 +93,7 @@ async def get_location_description(
 
     timeout = 120
     location_description_action_row = (
-        ctx.rest.build_action_row()
+        ctx.rest.build_modal_action_row()
         .add_text_input(
             label=SUPPORTED_LANGUAGES.get(language).location_description_modal_text_input_title.format(
                 location=location_type.strip("'")
@@ -155,7 +155,7 @@ async def get_location_latitude_longitude(
 
     timeout = 120
     location_longitude_action_row = (
-        ctx.rest.build_action_row()
+        ctx.rest.build_modal_action_row()
         .add_text_input(
             label=SUPPORTED_LANGUAGES.get(language).location_longitude_modal_text_input_title.format(
                 location=location_type.strip("'")
@@ -167,7 +167,7 @@ async def get_location_latitude_longitude(
         .add_to_container()
     )
     location_latitude_action_row = (
-        ctx.rest.build_action_row()
+        ctx.rest.build_modal_action_row()
         .add_text_input(
             label=SUPPORTED_LANGUAGES.get(language).location_latitude_modal_text_input_title.format(
                 location=location_type.strip("'")

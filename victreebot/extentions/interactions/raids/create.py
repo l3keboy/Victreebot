@@ -55,7 +55,7 @@ async def get_boss_name(
 
     timeout = 120
     boss_name_action_row = (
-        ctx.rest.build_action_row()
+        ctx.rest.build_modal_action_row()
         .add_text_input(
             label=SUPPORTED_LANGUAGES.get(language).boss_name_modal_text_input_title,
             custom_id="boss_name",
@@ -254,7 +254,7 @@ async def command_raid_create(
     date_action_row = date_action_row.add_to_container()
 
     time_action_row = (
-        ctx.rest.build_action_row()
+        ctx.rest.build_modal_action_row()
         .add_text_input(
             label=SUPPORTED_LANGUAGES.get(language).raid_create_modal_time_text_input.format(
                 location=location_type.strip("'")

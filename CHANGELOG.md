@@ -8,6 +8,10 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.5.3] - 02-09-2022
+### [Bugfixes]
+- Fix for modals not working
+
 ## [0.5.2] - 02-09-2022
 ### [Bugfixes]
 - Fix startup
