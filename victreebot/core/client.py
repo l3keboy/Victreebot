@@ -25,7 +25,7 @@ class Client(tanjun.Client):
 
     def load_modules(self: _ClientT) -> _ClientT:
         """Load modules/commands from the ./victreebot/extentions folder"""
-        path = Path("../VictreeBot/victreebot/extentions/loader.py")
+        path = Path("../Victreebot/victreebot/extentions/loader.py")
 
         super().load_modules(path)
 
