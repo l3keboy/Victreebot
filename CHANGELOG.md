@@ -8,6 +8,12 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.5.2] - 02-09-2022
+### [Bugfixes]
+- Fix startup
+- Update requirements.txt
+- Update .gitignore
+
 ## [0.5.1] - 22-06-2022
 ### [Bugfixes]
 - Fix for info command requiring manage server permissions
