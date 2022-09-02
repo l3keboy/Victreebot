@@ -34,7 +34,7 @@ async def get_pokemons_to_trade_proposal(
 
     timeout = 120
     pokemon_offer_name_action_row = (
-        ctx.rest.build_action_row()
+        ctx.rest.build_modal_action_row()
         .add_text_input(
             label=SUPPORTED_LANGUAGES.get(language).pokemon_offer_name_modal_text_input_title,
             custom_id="pokemon_offer_name",
@@ -44,7 +44,7 @@ async def get_pokemons_to_trade_proposal(
         .add_to_container()
     )
     pokemon_search_name_action_row = (
-        ctx.rest.build_action_row()
+        ctx.rest.build_modal_action_row()
         .add_text_input(
             label=SUPPORTED_LANGUAGES.get(language).pokemon_search_modal_text_input_title,
             custom_id="pokemon_search_name",
@@ -113,7 +113,7 @@ async def get_pokemons_to_trade_offer(
 
     timeout = 120
     pokemon_offer_name_action_row = (
-        ctx.rest.build_action_row()
+        ctx.rest.build_modal_action_row()
         .add_text_input(
             label=SUPPORTED_LANGUAGES.get(language).pokemon_offer_name_modal_text_input_title,
             custom_id="pokemon_offer_name",
@@ -173,7 +173,7 @@ async def get_pokemons_to_trade_search(
 
     timeout = 120
     pokemon_search_name_action_row = (
-        ctx.rest.build_action_row()
+        ctx.rest.build_modal_action_row()
         .add_text_input(
             label=SUPPORTED_LANGUAGES.get(language).pokemon_search_modal_text_input_title,
             custom_id="pokemon_search_name",
