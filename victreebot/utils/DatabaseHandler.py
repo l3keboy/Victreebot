@@ -342,6 +342,49 @@ class DatabaseHandler:
                     )
 
     # ------------------------------------------------------------------------- #
+    # Autocomplete methods #
+    # ------------------------------------------------------------------------- #
+    async def get_locations_like(self, guild: hikari.Guild, query: str) -> list[str]:
+        """Get locations like"""
+        async with self._pool.acquire() as conn:
+            async with conn.transaction():
+                try:
+                    fetched_locations = await conn.fetch(
+                        f"""SELECT type, name
+                            FROM "Locations"
+                            WHERE guild_id = {guild.id} AND name LIKE '%{query}%'"""
+                    )
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.get_locations_like").debug(
+                        "Successfully got locations for autocomplete!"
+                    )
+                except Exception as e:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.get_locations_like").error(
+                        f"Unexpected error while trying to fetch location for autocomplete! Got error: {e}"
+                    )
+                    return None
+        return fetched_locations
+
+    async def get_raid_id_like(self, guild: hikari.Guild, query: str) -> list[str]:
+        """Get locations like"""
+        async with self._pool.acquire() as conn:
+            async with conn.transaction():
+                try:
+                    fetched_raid_ids = await conn.fetch(
+                        f"""SELECT raid_id
+                            FROM "Raids"
+                            WHERE guild_id = {guild.id} AND raid_id LIKE '%{query}%'"""
+                    )
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.get_raid_id_like").debug(
+                        "Successfully got raid ID's for autocomplete!"
+                    )
+                except Exception as e:
+                    logging.getLogger(f"{BOT_NAME.lower()}.database.get_raid_id_like").error(
+                        f"Unexpected error while trying to fetch raid ID's for autocomplete! Got error: {e}"
+                    )
+                    return None
+        return fetched_raid_ids
+
+    # ------------------------------------------------------------------------- #
     # Other methods #
     # ------------------------------------------------------------------------- #
     async def active_servers(self) -> int:
@@ -531,7 +574,7 @@ class DatabaseHandler:
                         "and returning default values!"
                     )
                     # Insert guild to database with default settings
-                    await self.insert_user(guild=guild, member=member)
+                    await self.insert_user(guild=guild, user=member)
                     # Return default values for every requested setting
                     for detail in details:
                         results.append(DB_USER_DETAILS_DEFAULT.get(detail).strip("'"))

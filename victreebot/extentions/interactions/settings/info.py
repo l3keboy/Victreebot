@@ -169,7 +169,7 @@ async def command_info(
     if log_trade_search:
         logged_events.append(SUPPORTED_LANGUAGES.get(language).log_trade_search)
 
-    auto_delete = 45 if auto_delete < 45 else auto_delete
+    auto_delete_message = 45 if auto_delete < 45 else auto_delete
 
     embed = (
         hikari.Embed(
@@ -261,7 +261,7 @@ async def command_info(
         )
     )
 
-    await ctx.respond(embed=embed, delete_after=int(auto_delete))
+    await ctx.respond(embed=embed, delete_after=int(auto_delete_message))
     if log_info:
         # Send to log channel
         await bot.log_from_ctx(

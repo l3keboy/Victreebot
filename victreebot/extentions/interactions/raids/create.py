@@ -11,9 +11,10 @@ import tanjun
 from core.bot import Bot
 from dateutil.rrule import *  # noqa F403
 from dotenv import load_dotenv
-from extentions.interactions.locations.locations import get_location_name
 from extentions.interactions.raids.RaidClass import RaidClass
 from utils.DatabaseHandler import DatabaseHandler
+from utils.helpers.autocomplete_callbacks import autocomplete_location
+from utils.helpers.autocomplete_callbacks import autocomplete_pokemon
 from utils.helpers.BotUtils import BotUtils
 from utils.helpers.contants import SUPPORTED_LANGUAGES
 from utils.helpers.contants import SUPPORTED_LOCATION_TYPES
@@ -41,71 +42,16 @@ async def generate_check_id(db: DatabaseHandler):
         return raid_id
 
 
-async def get_boss_name(
-    ctx: tanjun.abc.SlashContext,
-    event: hikari.InteractionCreateEvent,
-    db: DatabaseHandler,
-    bot: BotUtils,
-    bot_aware: Bot,
-) -> str:
-    language, auto_delete, gmt, *none = await db.get_guild_settings(
-        guild=ctx.get_guild(), settings=["language", "auto_delete", "gmt"]
-    )
-    log_errors, *none = await db.get_guild_log_settings(ctx.get_guild(), settings=["log_errors"])
-
-    timeout = 120
-    boss_name_action_row = (
-        ctx.rest.build_modal_action_row()
-        .add_text_input(
-            label=SUPPORTED_LANGUAGES.get(language).boss_name_modal_text_input_title,
-            custom_id="boss_name",
-        )
-        .set_placeholder(SUPPORTED_LANGUAGES.get(language).boss_name_modal_text_input_placeholder)
-        .set_required(True)
-        .add_to_container()
-    )
-
-    await event.interaction.create_modal_response(
-        SUPPORTED_LANGUAGES.get(language).boss_name_modal_location_name,
-        "boss_name_modal",
-        components=[boss_name_action_row],
-    )
-
-    try:
-        event = await ctx.client.events.wait_for(
-            hikari.InteractionCreateEvent,
-            timeout=timeout,
-            predicate=lambda event: isinstance(event.interaction, hikari.ModalInteraction)
-            and event.interaction.user.id == ctx.author.id,
-        )
-    except asyncio.TimeoutError:
-        response = SUPPORTED_LANGUAGES.get(language).response_raid_create_timeout_reached
-        await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
-        if log_errors:
-            log_response = SUPPORTED_LANGUAGES.get(language).log_response_raid_create_timeout_reached.format(
-                datetime=await bot.get_timestamp_aware(gmt), member=ctx.member
-            )
-            await bot.log_from_ctx(ctx, db, log_response)
-        return
-    else:
-        await event.interaction.create_initial_response(6)
-        if event.interaction.custom_id == "boss_name_modal":
-            if event.interaction.components[0][0].value is not None:
-                boss_name = event.interaction.components[0][0].value
-                try:
-                    int(boss_name)
-                    return int(boss_name)
-                except Exception:
-                    boss_name = boss_name.replace(" ", "-")
-                    return boss_name.lower()
-
-
 # ------------------------------------------------------------------------- #
 # COMMANDS #
 # ------------------------------------------------------------------------- #
+@tanjun.with_str_slash_option("location", "The location the raid takes place.", autocomplete=autocomplete_location)
+@tanjun.with_str_slash_option("boss", "The boss to fight.", autocomplete=autocomplete_pokemon)
 @tanjun.as_slash_command("create", "Create a raid.")
 async def command_raid_create(
     ctx: tanjun.abc.SlashContext,
+    location: str,
+    boss: str,
     db: DatabaseHandler = tanjun.injected(type=DatabaseHandler),
     bot: BotUtils = tanjun.injected(type=BotUtils),
     bot_aware: Bot = tanjun.injected(type=Bot),
@@ -158,12 +104,12 @@ async def command_raid_create(
             await bot.log_from_ctx(ctx, db, log_response)
         return
     else:
+        await event.interaction.create_initial_response(6)
         raid_type = event.interaction.custom_id
 
-        boss_name = await get_boss_name(ctx, event, db, bot, bot_aware)
-        success, pokemon, pokemon_image = await bot.validate_pokemon(boss_name)
+        success, pokemon, pokemon_image = await bot.validate_pokemon(boss)
         if not success:
-            response = SUPPORTED_LANGUAGES.get(language).response_raid_create_unknown_boss.format(boss_name=boss_name)
+            response = SUPPORTED_LANGUAGES.get(language).response_raid_create_unknown_boss.format(boss_name=boss)
             await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
             if log_errors:
                 log_response = SUPPORTED_LANGUAGES.get(language).log_response_raid_create_unknown_boss.format(
@@ -172,67 +118,58 @@ async def command_raid_create(
                 await bot.log_from_ctx(ctx, db, log_response)
             return
 
-    # GET LOCATION TYPE
-    location_type_action_row = ctx.rest.build_action_row()
-    for location_type in SUPPORTED_LOCATION_TYPES:
-        location_type_action_row.add_button(hikari.ButtonStyle.PRIMARY, location_type.lower()).set_label(
-            location_type
-        ).add_to_container()
+    location_name = ""
+    location_splitted = location.replace(" ", "").split(",")
+    if len(location_splitted) == 1:
+        location_name = f"'{location_splitted[0]}'"
+        # GET LOCATION TYPE
+        location_type_action_row = ctx.rest.build_action_row()
+        for location_type in SUPPORTED_LOCATION_TYPES:
+            location_type_action_row.add_button(hikari.ButtonStyle.PRIMARY, location_type.lower()).set_label(
+                location_type
+            ).add_to_container()
 
-    location_type_embed = hikari.Embed(
-        title=SUPPORTED_LANGUAGES.get(language).raid_create_embed_title_location_type,
-        description=SUPPORTED_LANGUAGES.get(language).raid_create_embed_description_location_type,
-        colour=hikari.Colour(0x8BC683),
-    )
-
-    response_message = await ctx.edit_last_response(embed=location_type_embed, components=[location_type_action_row])
-
-    try:
-        event = await ctx.client.events.wait_for(
-            hikari.InteractionCreateEvent,
-            timeout=timeout,
-            predicate=lambda event: isinstance(event.interaction, hikari.ComponentInteraction)
-            and event.interaction.user.id == ctx.author.id
-            and event.interaction.message.id == response_message.id,
+        location_type_embed = hikari.Embed(
+            title=SUPPORTED_LANGUAGES.get(language).raid_create_embed_title_location_type,
+            description=SUPPORTED_LANGUAGES.get(language).raid_create_embed_description_location_type,
+            colour=hikari.Colour(0x8BC683),
         )
-    except asyncio.TimeoutError:
-        response = SUPPORTED_LANGUAGES.get(language).response_raid_create_timeout_reached
-        await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
-        if log_errors:
-            log_response = SUPPORTED_LANGUAGES.get(language).log_response_raid_create_timeout_reached.format(
-                datetime=await bot.get_timestamp_aware(gmt), member=ctx.member
+
+        response_message = await ctx.edit_last_response(
+            embed=location_type_embed, components=[location_type_action_row]
+        )
+
+        try:
+            event = await ctx.client.events.wait_for(
+                hikari.InteractionCreateEvent,
+                timeout=timeout,
+                predicate=lambda event: isinstance(event.interaction, hikari.ComponentInteraction)
+                and event.interaction.user.id == ctx.author.id
+                and event.interaction.message.id == response_message.id,
             )
-            await bot.log_from_ctx(ctx, db, log_response)
-        return
+        except asyncio.TimeoutError:
+            response = SUPPORTED_LANGUAGES.get(language).response_raid_create_timeout_reached
+            await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
+            if log_errors:
+                log_response = SUPPORTED_LANGUAGES.get(language).log_response_raid_create_timeout_reached.format(
+                    datetime=await bot.get_timestamp_aware(gmt), member=ctx.member
+                )
+                await bot.log_from_ctx(ctx, db, log_response)
+            return
+        else:
+            await event.interaction.create_initial_response(6)
+            location_type = event.interaction.custom_id
+            location_type = f"'{location_type}'"
     else:
-        location_type = event.interaction.custom_id
-        location_type = f"'{location_type}'"
+        location_name = f"'{location_splitted[1]}'"
+        location_type = f"'{location_splitted[0]}'"
 
-    # GET LOCATION NAME
-    location_name_awnser = await get_location_name(ctx, event, location_type, db, bot, bot_aware)
-    location_name = location_name_awnser.replace("'", "''")
-    location_name = f"'{location_name}'"
-
-    all_locations = []
-    results = await db.get_all_locations(ctx.get_guild(), location_type)
-    for location in results:
-        all_locations.append(location.get("name"))
-
-    if location_name_awnser.lower() not in all_locations:
-        response = SUPPORTED_LANGUAGES.get(language).response_raid_create_location_not_found.format(
-            location_type=location_type.strip("'"), location_name=location_name_awnser
-        )
-        await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
-        if log_errors:
-            log_response = SUPPORTED_LANGUAGES.get(language).log_response_raid_create_location_not_found.format(
-                datetime=await bot.get_timestamp_aware(gmt), member=ctx.member
-            )
-            await bot.log_from_ctx(ctx, db, log_response)
-        return
-
+    latitude = ""
+    longitude = ""
     results = await db.get_location_info(ctx.get_guild(), location_type, location_name)
-    latitude = results[0].get("latitude")
-    longitude = results[0].get("longitude")
+    if results is not None and results != []:
+        latitude = results[0].get("latitude")
+        longitude = results[0].get("longitude")
 
     if "-" in gmt:
         gmt_inverted = gmt.replace("-", "+")
@@ -366,16 +303,16 @@ async def command_raid_create(
                 raid_id=raid_id.strip("'"),
                 raid_type=raid_type.capitalize(),
                 time_date=f"""{raid_takes_place_at.strip("'")} {gmt}""",
-                location=location_name_awnser.capitalize(),
+                location=location_name.capitalize().strip("'"),
                 latitude=latitude,
                 longitude=longitude,
             )
-            if latitude is not None
+            if latitude is not None and latitude != ""
             else SUPPORTED_LANGUAGES.get(language).raid_embed_description_without_location_link.format(
                 raid_id=raid_id.strip("'"),
                 raid_type=raid_type.capitalize(),
                 time_date=f"""{raid_takes_place_at.strip("'")} {gmt}""",
-                location=location_name_awnser.capitalize(),
+                location=location_name.capitalize().strip("'"),
             ),
             colour=hikari.Colour(0x8BC683),
         )

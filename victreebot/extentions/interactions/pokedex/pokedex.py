@@ -6,6 +6,7 @@ import tanjun
 from core.bot import Bot
 from dotenv import load_dotenv
 from utils.DatabaseHandler import DatabaseHandler
+from utils.helpers.autocomplete_callbacks import autocomplete_pokemon
 from utils.helpers.BotUtils import BotUtils
 from utils.helpers.contants import SUPPORTED_LANGUAGES
 
@@ -16,7 +17,9 @@ BOT_NAME = os.getenv("BOT_NAME")
 # ------------------------------------------------------------------------- #
 # COMMANDS #
 # ------------------------------------------------------------------------- #
-@tanjun.with_str_slash_option("boss", "The name or ID of the Pokémon to get details off.")
+@tanjun.with_str_slash_option(
+    "boss", "The name or ID of the Pokémon to get details off.", autocomplete=autocomplete_pokemon
+)
 @tanjun.as_slash_command("pokedex", "Search details of a pokémon")
 async def command_pokedex(
     ctx: tanjun.abc.SlashContext,

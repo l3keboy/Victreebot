@@ -213,9 +213,11 @@ class RaidClass:
         gmt, *none = await self.bot_aware.db.get_guild_settings(guild=self.guild, settings=["gmt"])
 
         results = await self.bot_aware.db.get_location_info(self.guild, self.location_type, self.location_name)
-        latitude = results[0].get("latitude")
-        longitude = results[0].get("longitude")
-        location_name = results[0].get("name")
+        latitude = ""
+        longitude = ""
+        if results is not None and results != []:
+            latitude = results[0].get("latitude")
+            longitude = results[0].get("longitude")
 
         success, pokemon, pokemon_image = await self.bot.validate_pokemon(self.boss.strip("'"))
 
@@ -266,16 +268,16 @@ class RaidClass:
                     raid_id=self.raid_id.strip("'"),
                     raid_type=self.raid_type.strip("'").capitalize(),
                     time_date=f"""{str(self.takes_place_at).strip("'")} {gmt}""",
-                    location=location_name.capitalize(),
+                    location=self.location_name.capitalize().strip("'"),
                     latitude=latitude,
                     longitude=longitude,
                 )
-                if latitude is not None
+                if latitude is not None and latitude != ""
                 else SUPPORTED_LANGUAGES.get(self.language).raid_embed_description_without_location_link.format(
                     raid_id=self.raid_id.strip("'"),
                     raid_type=self.raid_type.strip("'").capitalize(),
                     time_date=f"""{str(self.takes_place_at).strip("'")} {gmt}""",
-                    location=location_name.capitalize(),
+                    location=self.location_name.capitalize().strip("'"),
                 ),
                 colour=hikari.Colour(0x8BC683),
             )
