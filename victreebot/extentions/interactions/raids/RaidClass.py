@@ -26,6 +26,7 @@ class RaidClass:
     location_type: str
     location_name: str
     takes_place_at: datetime.datetime
+    takes_place_at_to_show: str
     boss: str
     guild: hikari.Guild
     end_time: int
@@ -69,6 +70,7 @@ class RaidClass:
             self.raid_message_channel_id,
             self.raid_message_id,
             self.raid_creator_id,
+            self.takes_place_at_to_show
         )
 
         await asyncio.sleep(self.wait_duration)
@@ -90,8 +92,6 @@ class RaidClass:
             self.valor_present.append(member.id) if add else self.valor_present.remove(member.id)
         elif reaction == "remote":
             self.remote_present.append(member.id) if add else self.remote_present.remove(member.id)
-
-        gmt, *none = await self.bot_aware.db.get_guild_settings(guild=self.guild, settings=["gmt"])
 
         results = await self.bot_aware.db.get_location_info(self.guild, self.location_type, self.location_name)
         latitude = results[0].get("latitude")
@@ -159,7 +159,7 @@ class RaidClass:
                 description=SUPPORTED_LANGUAGES.get(self.language).raid_embed_description_with_location_link.format(
                     raid_id=self.raid_id.strip("'"),
                     raid_type=self.raid_type.strip("'").capitalize(),
-                    time_date=f"""{str(self.takes_place_at).strip("'")} {gmt}""",
+                    time_date=f"""{str(self.takes_place_at_to_show).strip("'")}""",
                     location=location_name.capitalize(),
                     latitude=latitude,
                     longitude=longitude,
@@ -168,7 +168,7 @@ class RaidClass:
                 else SUPPORTED_LANGUAGES.get(self.language).raid_embed_description_without_location_link.format(
                     raid_id=self.raid_id.strip("'"),
                     raid_type=self.raid_type.strip("'").capitalize(),
-                    time_date=f"""{str(self.takes_place_at).strip("'")} {gmt}""",
+                    time_date=f"""{str(self.takes_place_at_to_show).strip("'")}""",
                     location=location_name.capitalize(),
                 ),
                 colour=hikari.Colour(0x8BC683),
@@ -209,8 +209,6 @@ class RaidClass:
             success = await self.bot_aware.db.set_raid_detail(self.guild, self.raid_id, parameters=parameters)
             if not success:
                 return False
-
-        gmt, *none = await self.bot_aware.db.get_guild_settings(guild=self.guild, settings=["gmt"])
 
         results = await self.bot_aware.db.get_location_info(self.guild, self.location_type, self.location_name)
         latitude = ""
@@ -267,7 +265,7 @@ class RaidClass:
                 description=SUPPORTED_LANGUAGES.get(self.language).raid_embed_description_with_location_link.format(
                     raid_id=self.raid_id.strip("'"),
                     raid_type=self.raid_type.strip("'").capitalize(),
-                    time_date=f"""{str(self.takes_place_at).strip("'")} {gmt}""",
+                    time_date=f"""{str(self.takes_place_at_to_show).strip("'")}""",
                     location=self.location_name.capitalize().strip("'"),
                     latitude=latitude,
                     longitude=longitude,
@@ -276,7 +274,7 @@ class RaidClass:
                 else SUPPORTED_LANGUAGES.get(self.language).raid_embed_description_without_location_link.format(
                     raid_id=self.raid_id.strip("'"),
                     raid_type=self.raid_type.strip("'").capitalize(),
-                    time_date=f"""{str(self.takes_place_at).strip("'")} {gmt}""",
+                    time_date=f"""{str(self.takes_place_at_to_show).strip("'")}""",
                     location=self.location_name.capitalize().strip("'"),
                 ),
                 colour=hikari.Colour(0x8BC683),
@@ -310,3 +308,4 @@ class RaidClass:
             logging.getLogger(f"{BOT_NAME.lower()}.raid.delete_raid").error(
                 "Unexpected error while trying to delete raid for " f"guild_id: {self.guild.id}! Got error: {e}!"
             )
+        self.task.cancel()

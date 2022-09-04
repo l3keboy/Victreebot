@@ -41,6 +41,7 @@ async def event_started_raid(
         channel_raids_id = result.get("raid_message_channel_id")
         raid_message_id = result.get("raid_message_id")
         raid_creator_id = result.get("raid_creator_id")
+        raid_takes_place_at_to_show = result.get("takes_place_at_to_show")
 
         instinct_present_list = []
         mystic_present_list = []
@@ -90,6 +91,7 @@ async def event_started_raid(
             location_type,
             location_name,
             raid_takes_place_at,
+            raid_takes_place_at_to_show,
             pokemon.name.lower(),
             guild,
             end_time,

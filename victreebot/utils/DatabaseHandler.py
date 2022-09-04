@@ -764,6 +764,7 @@ class DatabaseHandler:
         raid_message_channel_id: int,
         raid_message_id: int,
         raid_creator_id: int,
+        takes_place_at_to_show: str, 
     ) -> bool:
         """Insert a raid"""
         async with self._pool.acquire() as conn:
@@ -773,11 +774,11 @@ class DatabaseHandler:
                         f"""INSERT INTO "Raids"
                             (guild_id, raid_id, raid_type, location_type,
                             location_name, takes_place_at, boss, end_time,
-                            raid_message_channel_id, raid_message_id, raid_creator_id)
+                            raid_message_channel_id, raid_message_id, raid_creator_id, takes_place_at_to_show)
                             VALUES
                             ({guild.id}, {raid_id}, {raid_type}, {location_type},
                             {location_name}, {takes_place_at}, {boss}, {end_time},
-                            {raid_message_channel_id}, {raid_message_id}, {raid_creator_id})"""
+                            {raid_message_channel_id}, {raid_message_id}, {raid_creator_id}, '{takes_place_at_to_show}')"""
                     )
                     logging.getLogger(f"{BOT_NAME.lower()}.database.insert_raid").info(
                         f"Successfully inserted raid for guild_id: {guild.id}!"

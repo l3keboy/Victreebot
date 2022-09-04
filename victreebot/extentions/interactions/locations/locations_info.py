@@ -40,7 +40,7 @@ async def command_locations_info(
         return
 
     location_name = ""
-    location_splitted = location.replace(" ", "").split(",")
+    location_splitted = location.split(",")
     if len(location_splitted) == 1:
         response = SUPPORTED_LANGUAGES.get(language).response_location_info_no_results
         await ctx.create_followup(response, delete_after=auto_delete, embed=None, components=None)
@@ -52,7 +52,8 @@ async def command_locations_info(
             await bot.log_from_ctx(ctx, db, log_response)
         return
     else:
-        location_name = f"'{location_splitted[1]}'"
+        location_name = location_splitted[1].removeprefix(" ")
+        location_name = f"'{location_name}'"
         location_type = f"'{location_splitted[0]}'"
 
         results = await db.get_location_info(ctx.get_guild(), location_type, location_name)

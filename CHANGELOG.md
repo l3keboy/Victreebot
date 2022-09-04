@@ -8,6 +8,15 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.6.1] - 04-09-2022
+### [NEW]
+- Added server setting for extended time format
+### [Bugfixes]
+- Fixed an issue where locations list was not displayed properly
+- Removed EX-Raids from raid create options since this is not being used anymore by Pokemon Go
+- Fixed an issue where the raid location didn't have spaces
+- Fixed an issue where the raid location didn't have a clickable link
+
 ## [0.6.0] - 04-09-2022
 ### [NEW]
 - Implemented autocomplete

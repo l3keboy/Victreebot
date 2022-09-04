@@ -19,6 +19,7 @@ DB_GUILD_SETTINGS_DEFAUTS = {
     "mystic_emoji_id": "NULL",
     "valor_emoji_id": "NULL",
     "raid_timeout": "900",
+    "extended_time_format": "false",
 }
 DB_GUILD_LOG_SETTINGS_GENERAL_EVENTS = {
     "logs_channel_id": "NULL",
@@ -82,6 +83,7 @@ DB_RAIDS_DETAILS_DEFAULT = {
     "raid_message_channel_id": "NULL",
     "raid_message_id": "NULL",
     "raid_creator_id": "NULL",
+    "takes_place_at_to_show": "NULL",
 }
 
 # ------------------------------------------------------------------------- #
@@ -118,5 +120,5 @@ SUPPORTED_TIMEZONES = [
     "GMT+12",
 ]
 SUPPORTED_UNIT_SYSTEMS = ["Metric System", "Imperial System", "United States Customary Unit System"]
-SUPPORTED_RAID_TYPES = ["Raid", "EX-Raid", "Mega-Raid"]
+SUPPORTED_RAID_TYPES = ["Raid", "Mega-Raid"]
 SUPPORTED_LOCATION_TYPES = ["Gym", "Pokéstop"]

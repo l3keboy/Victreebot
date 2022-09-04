@@ -349,7 +349,7 @@ async def command_locations(
                 )
                 await bot.log_from_ctx(ctx, db, log_response)
 
-            if len(all_locations) < 11:
+            if len(all_locations) < 5:
                 auto_delete = 20 if auto_delete < 20 else auto_delete
 
                 known_coordinates = (
@@ -369,7 +369,6 @@ async def command_locations(
                         f"***{location.get('name')}***"
                         + " \n"
                         + f"{known_coordinates.format(google_maps_translation=SUPPORTED_LANGUAGES.get(language).location_google_maps, latitude=location.get('latitude'), longitude=location.get('longitude')) if location.get('latitude') is not None and location.get('longitude') is not None else unknown_coordinates}"  # noqa E501
-                        + "\n"
                         for location in results
                     ),
                     inline=False,
@@ -379,7 +378,7 @@ async def command_locations(
             else:
                 auto_delete = 45 if auto_delete < 45 else auto_delete
 
-                i, start, end, max_length = 1, 0, 10, 10
+                i, start, end, max_length = 1, 0, 5, 5
                 values = []
                 pages = math.ceil(len(results) / max_length)
 
@@ -401,13 +400,12 @@ async def command_locations(
                             f"***{location.get('name')}***"
                             + " \n"
                             + f"{known_coordinates.format(google_maps_translation=SUPPORTED_LANGUAGES.get(language).location_google_maps, latitude=location.get('latitude'), longitude=location.get('longitude')) if location.get('latitude') is not None and location.get('longitude') is not None else unknown_coordinates}"  # noqa E501
-                            + "\n"
-                            for location in results
+                            for location in results[start:end]
                         ),
                         inline=False,
                     )
-                    start += 10
-                    end += 10
+                    start += 5
+                    end += 5
                     i += 1
                     values.append(embed)
 
@@ -428,7 +426,7 @@ async def command_locations(
                     .add_to_container()
                 )
 
-                await ctx.create_followup(values[0], component=button_menu)
+                response_message = await ctx.create_followup(values[0], component=button_menu)
 
                 while True:
                     try:
@@ -463,7 +461,7 @@ async def command_locations(
                         elif event.interaction.custom_id == ">>":
                             index = len(values) - 1
 
-                        await ctx.edit_initial_response(values[index])
+                        await ctx.edit_last_response(values[index])
                         await event.interaction.create_initial_response(
                             hikari.interactions.base_interactions.ResponseType.DEFERRED_MESSAGE_UPDATE, values[index]
                         )
