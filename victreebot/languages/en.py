@@ -199,8 +199,6 @@ profile_view_embed_field_raids_participated = "Participated in"
 # ------------------------------------------------------------------------- #
 location_action_row_list_gym = "List all gym's"
 location_action_row_list_pokestop = "List all pokéstops"
-location_action_row_info_gym = "Get info about a gym"
-location_action_row_info_pokestop = "Get info about a pokéstop"
 location_action_row_add_gym = "Add gym"
 location_action_row_delete_gym = "Delete gym"
 location_action_row_edit_gym = "Edit gym"
@@ -238,7 +236,7 @@ response_location_edit_success = "The location has been edited!"
 response_location_delete_failed_no_such_location = "No `{location_type}` with that name found!"
 response_location_edit_failed_no_such_location = "No `{location_type}` with that name found!"
 response_location_list_no_results = "There are no `{location_type}'s` in this server!"
-response_location_info_no_results = "There is no `{location_type}` with that name!"
+response_location_info_no_results = "There is no location with that name!"
 # Log response
 log_response_location_interactions_timeout_reached = (
     "`[{datetime}]` -- **{member}** tried to interact with locations, but the timeout was reached!"
@@ -259,7 +257,9 @@ log_response_location_delete_failed_no_such_location = "`[{datetime}]` -- **{mem
 log_response_location_edit_failed_no_such_location = "`[{datetime}]` -- **{member}** tried to edit a `{location_type}`, but there was no `{location_type}` with the specified name!"
 log_response_location_list_no_results = "`[{datetime}]` -- **{member}** tried to list `{location_type}'s`, but there are no `{location_type}'s` in this server!"
 log_response_location_list_requested = "`[{datetime}]` -- **{member}** requested the list of `{location_type}'s`!"
-log_response_location_info_no_results = "`[{datetime}]` -- **{member}** requested information about a `{location_type}'s`, but the given name does not exist!"
+log_response_location_info_no_results = (
+    "`[{datetime}]` -- **{member}** requested information about a location, but the given name does not exist!"
+)
 log_response_location_info_requested = (
     "`[{datetime}]` -- **{member}** requested information about a `{location_type}'s`!"
 )
@@ -356,15 +356,10 @@ response_raid_edit_no_raid_found = "There is no raid with that ID!"
 response_raid_edit_not_creator_or_moderator = (
     "You are not allowed to edit this raid! You are not the owner or a {bot_name} moderator!"
 )
+response_raid_edit_unknown_boss = "The given boss, `{boss_name}`, is not found! Please try to edit the Raid again!"
+response_raid_edit = "The raid is edited!"
+response_raid_edit_failed = "Something went wrong while editing the raid!"
 response_raid_edit_timeout_reached = "Stopping Raid edit, timeout was reached!"
-response_raid_edit_raid_type = "The raid type has been edited!"
-response_raid_edit_raid_type_failed = "Something went wrong while trying to edit the raid type!"
-response_raid_edit_boss_failed = "Something went wrong while trying to edit the boss"
-response_raid_edit_location_not_found = (
-    "The `{location_type}` with the name `{location_name}` does not exist! Please try to edit the Raid again!"
-)
-response_raid_edit_location_failed = "Something went wrong while trying to edit the location!"
-response_raid_location_raid_type = "The location is edited!"
 # Log response
 log_response_raid_edit_no_raid_found = (
     "`[{datetime}]` -- **{member}** tried to edit a raid, but didn't there was no raid with the given ID!"
@@ -372,17 +367,20 @@ log_response_raid_edit_no_raid_found = (
 log_response_raid_edit_not_creator_or_moderator = (
     "`[{datetime}]` -- **{member}** tried to edit a raid, but they aren't the creator or a {bot_name} moderator!"
 )
+log_response_raid_edit_unknown_boss = (
+    "`[{datetime}]` -- **{member}** tried to edit a raid, but the new boss isn't found!"
+)
 log_response_raid_edit_timeout_reached = (
     "`[{datetime}]` -- **{member}** tried to edit a raid, but the timeout was reached!"
 )
 log_response_raid_edit = "`[{datetime}]` -- **{member}** edited a raid!"
 log_response_raid_edit_failed = "`[{datetime}]` -- **{member}** tried to edit a raid, but something went wrong!"
-log_response_raid_edit_location_not_found = (
-    "`[{datetime}]` -- **{member}** tried to edit a raid, but the given location does not exist!"
-)
+
 # Embed
 raid_edit_embed_title = "Raid edit"
 raid_edit_embed_description = "Please select the component of the raid you want to edit."
+raid_edit_embed_title_location_type = "Location type"
+raid_edit_embed_description_location_type = "Please select the type of the location where the raid takes place."
 
 
 # ------------------------------------------------------------------------- #
@@ -499,6 +497,9 @@ pokemon_offer_modal_text_input_placeholder = "Which pokémon do you offer to tra
 pokemon_search_modal_text_input_title = "Wanted pokémon"
 pokemon_search_modal_text_input_placeholder = "Which pokémon are you looking for?"
 # Response
+response_trade_insert_at_least_one = "You must insert at least one Pokémon!"
+
+
 response_trade_interactions_timeout_reached = "Stopping trade interaction, timeout reached"
 response_trade_offer_unknown_pokemon_offer = (
     "The given pokemon to offer, `{boss_name}`, is not found! Please try to create the offer again!"
@@ -510,6 +511,9 @@ response_trade_proposal_member_proposing = "{member} created a trade proposal!"
 response_trade_offer_member_offering = "{member} offered a pokémon!"
 response_trade_search_member_searching = "{member} is searching for a pokémon!"
 # Log response
+log_response_trade_insert_at_least_one = "`[{datetime}]` -- **{member}** tried to trade, but didn't insert a Poke!"
+
+
 log_response_trade_interactions_timeout_reached = (
     "`[{datetime}]` -- **{member}** tried to trade, but the timeout was reached!"
 )

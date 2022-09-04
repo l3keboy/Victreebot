@@ -13,6 +13,7 @@ from extentions.events.raw_reaction_delete_raid import event_raw_reaction_delete
 from extentions.events.started_raid import event_started_raid
 from extentions.events.stopping_raid import event_stopping_raid
 from extentions.interactions.locations.locations import command_locations
+from extentions.interactions.locations.locations_info import command_locations_info
 from extentions.interactions.pokedex.pokedex import command_pokedex
 from extentions.interactions.profile import profile_group
 from extentions.interactions.raids import raid_group
@@ -46,6 +47,7 @@ bot_component = (
     .add_command(command_reset)
     .add_command(profile_group)
     .add_command(command_locations)
+    .add_command(command_locations_info)
     .add_command(command_trade)
     .add_command(raid_group)
     .add_command(settings_group)

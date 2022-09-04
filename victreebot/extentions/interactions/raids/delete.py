@@ -5,6 +5,7 @@ import tanjun
 from core.bot import Bot
 from dotenv import load_dotenv
 from utils.DatabaseHandler import DatabaseHandler
+from utils.helpers.autocomplete_callbacks import autocomplete_raid_id
 from utils.helpers.BotUtils import BotUtils
 from utils.helpers.contants import SUPPORTED_LANGUAGES
 
@@ -15,7 +16,7 @@ BOT_NAME = os.getenv("BOT_NAME")
 # ------------------------------------------------------------------------- #
 # COMMANDS #
 # ------------------------------------------------------------------------- #
-@tanjun.with_str_slash_option("raid_id", "The ID of the raid to delete")
+@tanjun.with_str_slash_option("raid_id", "The ID of the raid to delete", autocomplete=autocomplete_raid_id)
 @tanjun.as_slash_command("delete", "Delete a raid.")
 async def command_raid_delete(
     ctx: tanjun.abc.SlashContext,

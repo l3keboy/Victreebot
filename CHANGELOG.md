@@ -8,6 +8,20 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.6.0] - 04-09-2022
+### [NEW]
+- Implemented autocomplete
+- /locations command is now split into /locations and /locations_info
+### [BREAKING]
+- /raid create: command working changed due to implementation of autocomplete (added boss and location parameters which support autocomplete)
+- /raid edit: command working changed due to implementation of autocomplete (raid_id parameter is now autocompleted, added new_boss, new_location and new_raid_type parameters which support autocomplete)
+- /raid delete: command working changed due to implementation of autocomplete (raid_id parameter is now autocompleted)
+- /trade: command working changed due to implementation of autocomplete (now to optional parameters (Tip: combine them to create a proposal))
+- /locations_info: command added with location parameter to support autocomplete
+- /pokedex: boss parameter now supports autocomplete
+### [Bugfixes]
+- Fixed an issue where the info command wouldn't show the correct auto delete time
+
 ## [0.5.3] - 02-09-2022
 ### [Bugfixes]
 - Fix for modals not working
