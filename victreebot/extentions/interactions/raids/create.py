@@ -56,9 +56,26 @@ async def command_raid_create(
     bot: BotUtils = tanjun.injected(type=BotUtils),
     bot_aware: Bot = tanjun.injected(type=Bot),
 ):
-    language, auto_delete, gmt, is_setup, channel_raids, raid_timeout, *none = await db.get_guild_settings(
+    (
+        language,
+        auto_delete,
+        gmt,
+        is_setup,
+        channel_raids,
+        raid_timeout,
+        extended_time_format,
+        *none,
+    ) = await db.get_guild_settings(
         guild=ctx.get_guild(),
-        settings=["language", "auto_delete", "gmt", "is_setup", "raids_channel_id", "raid_timeout"],
+        settings=[
+            "language",
+            "auto_delete",
+            "gmt",
+            "is_setup",
+            "raids_channel_id",
+            "raid_timeout",
+            "extended_time_format",
+        ],
     )
     log_errors, log_raid_create, *none = await db.get_guild_log_settings(
         ctx.get_guild(), settings=["log_errors", "log_raid_create"]
@@ -119,7 +136,7 @@ async def command_raid_create(
             return
 
     location_name = ""
-    location_splitted = location.replace(" ", "").split(",")
+    location_splitted = location.split(",")
     if len(location_splitted) == 1:
         location_name = f"'{location_splitted[0]}'"
         # GET LOCATION TYPE
@@ -161,7 +178,8 @@ async def command_raid_create(
             location_type = event.interaction.custom_id
             location_type = f"'{location_type}'"
     else:
-        location_name = f"'{location_splitted[1]}'"
+        location_name = location_splitted[1].removeprefix(" ")
+        location_name = f"'{location_name}'"
         location_type = f"'{location_splitted[0]}'"
 
     latitude = ""
@@ -274,6 +292,11 @@ async def command_raid_create(
     raid_date = await bot.change_timestamp_format(raid_date, "%Y-%m-%d %H:%M:%S", "%d/%m/%Y")
     raid_takes_place_at = f"{raid_date} {raid_time}"
 
+    if extended_time_format:
+        raid_takes_place_at_to_show = f"{raid_date} {raid_time} {gmt}"
+    else:
+        raid_takes_place_at_to_show = f"{raid_time}"
+
     raid_takes_place_at_server_timezone_aware = datetime.datetime.strptime(
         str(raid_takes_place_at), "%d/%m/%Y %H:%M"
     ).replace(tzinfo=timezone)
@@ -302,7 +325,7 @@ async def command_raid_create(
             description=SUPPORTED_LANGUAGES.get(language).raid_embed_description_with_location_link.format(
                 raid_id=raid_id.strip("'"),
                 raid_type=raid_type.capitalize(),
-                time_date=f"""{raid_takes_place_at.strip("'")} {gmt}""",
+                time_date=f"""{raid_takes_place_at_to_show.strip("'")}""",
                 location=location_name.capitalize().strip("'"),
                 latitude=latitude,
                 longitude=longitude,
@@ -311,7 +334,7 @@ async def command_raid_create(
             else SUPPORTED_LANGUAGES.get(language).raid_embed_description_without_location_link.format(
                 raid_id=raid_id.strip("'"),
                 raid_type=raid_type.capitalize(),
-                time_date=f"""{raid_takes_place_at.strip("'")} {gmt}""",
+                time_date=f"""{raid_takes_place_at_to_show.strip("'")}""",
                 location=location_name.capitalize().strip("'"),
             ),
             colour=hikari.Colour(0x8BC683),
@@ -356,6 +379,7 @@ async def command_raid_create(
         location_type,
         location_name,
         raid_takes_place_at,
+        raid_takes_place_at_to_show,
         pokemon.name.lower(),
         ctx.get_guild(),
         end_time,

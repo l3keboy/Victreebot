@@ -98,7 +98,7 @@ async def command_raid_edit(
     timeout = 120
     if new_location is not None:
         location_name = ""
-        location_splitted = new_location.replace(" ", "").split(",")
+        location_splitted = new_location.split(",")
         if len(location_splitted) == 1:
             location_name = f"'{location_splitted[0]}'"
             # GET LOCATION TYPE
@@ -139,7 +139,8 @@ async def command_raid_edit(
                 location_type = event.interaction.custom_id
                 location_type = f"'{location_type}'"
         else:
-            location_name = f"'{location_splitted[1]}'"
+            location_name = location_splitted[1].removeprefix(" ")
+            location_name = f"'{location_name}'"
             location_type = f"'{location_splitted[0]}'"
 
         latitude = ""

@@ -40,6 +40,7 @@ async def command_info(
         mystic_emoji_id,
         valor_emoji_id,
         raid_timeout,
+        extended_time_format,
         *none,
     ) = await db.get_guild_settings(
         guild=ctx.get_guild(),
@@ -58,6 +59,7 @@ async def command_info(
             "mystic_emoji_id",
             "valor_emoji_id",
             "raid_timeout",
+            "extended_time_format",
         ],
     )
     (
@@ -247,7 +249,12 @@ async def command_info(
         .add_field(
             name=SUPPORTED_LANGUAGES.get(language).info_bot_embed_field_title_raids_channel,
             value=f"{channel_raids.mention}",
-            inline=False,
+            inline=True,
+        )
+        .add_field(
+            name=SUPPORTED_LANGUAGES.get(language).info_bot_embed_field_title_extended_time_format,
+            value=f"`{SUPPORTED_LANGUAGES.get(language).enabled if extended_time_format else SUPPORTED_LANGUAGES.get(language).disabled}`",
+            inline=True,
         )
         .add_field(
             name=SUPPORTED_LANGUAGES.get(language).info_bot_embed_field_title_logging_channel,

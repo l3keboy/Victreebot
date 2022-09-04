@@ -137,11 +137,12 @@ async def command_settings_update_general(
 
 
 # ------------------------------------------------------------------------- #
-# Moderation settings #
+# Raids settings #
 # ------------------------------------------------------------------------- #
 @tanjun.with_author_permission_check(
     hikari.Permissions.MANAGE_GUILD, error_message="You need the `Manage Server` permissions to execute this command!"
 )
+@tanjun.with_bool_slash_option("extended_time_format", f"Do you want to use simple or extended time format?", default=None)
 @tanjun.with_int_slash_option(
     "raid_timeout",
     f"The time {BOT_NAME.capitalize()} waits before deleting a raid after it ended (in seconds!).",
@@ -164,6 +165,7 @@ async def command_settings_update_raid(
     mystic_emoji: str,
     valor_emoji: str,
     raid_timeout: int,
+    extended_time_format: bool,
     db: DatabaseHandler = tanjun.injected(type=DatabaseHandler),
     bot: BotUtils = tanjun.injected(type=BotUtils),
     bot_aware: Bot = tanjun.injected(type=Bot),
@@ -183,6 +185,7 @@ async def command_settings_update_raid(
         and mystic_emoji is None
         and valor_emoji is None
         and raid_timeout is None
+        and extended_time_format is None
     ):
         # Send response
         response = SUPPORTED_LANGUAGES.get(language).error_response_settings_update_insert_at_least_1
@@ -199,7 +202,7 @@ async def command_settings_update_raid(
         return
 
     filtered_raids = [raid for raid in bot_aware.raids.values() if raid is not None and raid.guild == ctx.get_guild()]
-
+    
     if filtered_raids != []:
         # Send response
         response = SUPPORTED_LANGUAGES.get(language).response_settings_update_raid_failed_raids_active
@@ -252,6 +255,10 @@ async def command_settings_update_raid(
     # Handle new raid_timeout
     if raid_timeout is not None:
         parameters.append(f'"raid_timeout" = {raid_timeout}')
+
+    # Handle new extended_time_format
+    if extended_time_format is not None:
+        parameters.append(f'"extended_time_format" = {extended_time_format}')
 
     success = await db.set_guild_setting(guild=ctx.get_guild(), parameters=parameters)
     if not success:
