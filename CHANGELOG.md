@@ -5,6 +5,9 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ================================================================
 
 ## [Unreleased/Working on]
+## [0.6.2] - T.B.D.
+### [Bugfixes]
+- Added bigger thumbnail to raid embed (Issue ID: #84)
 
 ================================================================
 

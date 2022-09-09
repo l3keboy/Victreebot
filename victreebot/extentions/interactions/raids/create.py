@@ -339,6 +339,7 @@ async def command_raid_create(
             ),
             colour=hikari.Colour(0x8BC683),
         )
+        .set_thumbnail(pokemon_image)
         .set_author(name=pokemon.name.replace("-", " ").capitalize(), icon=pokemon_image)
         .set_footer(
             text=SUPPORTED_LANGUAGES.get(language).raid_embed_footer.format(

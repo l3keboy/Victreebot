@@ -70,7 +70,7 @@ class RaidClass:
             self.raid_message_channel_id,
             self.raid_message_id,
             self.raid_creator_id,
-            self.takes_place_at_to_show
+            self.takes_place_at_to_show,
         )
 
         await asyncio.sleep(self.wait_duration)
@@ -173,6 +173,7 @@ class RaidClass:
                 ),
                 colour=hikari.Colour(0x8BC683),
             )
+            .set_thumbnail(pokemon_image)
             .set_author(name=self.boss.strip("'").replace("-", " ").capitalize(), icon=pokemon_image)
             .set_footer(
                 text=SUPPORTED_LANGUAGES.get(self.language).raid_embed_footer.format(
@@ -279,6 +280,7 @@ class RaidClass:
                 ),
                 colour=hikari.Colour(0x8BC683),
             )
+            .set_thumbnail(pokemon_image)
             .set_author(name=self.boss.strip("'").replace("-", " ").capitalize(), icon=pokemon_image)
             .set_footer(
                 text=SUPPORTED_LANGUAGES.get(self.language).raid_embed_footer.format(
