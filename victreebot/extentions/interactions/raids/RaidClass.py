@@ -116,7 +116,12 @@ class RaidClass:
             self.guild, self.raid_creator_id
         ) or await self.bot_aware.rest.fetch_member(self.guild, self.raid_creator_id)
 
-        if self.boss.strip("'") != "egg1" and self.boss.strip("'") != "egg3" and self.boss.strip("'") != "egg5" and self.boss.strip("'") != "eggmega":
+        if (
+            self.boss.strip("'") != "egg1"
+            and self.boss.strip("'") != "egg3"
+            and self.boss.strip("'") != "egg5"
+            and self.boss.strip("'") != "eggmega"
+        ):
             success, pokemon, pokemon_image = await self.bot.validate_pokemon(self.boss.strip("'"))
         else:
             path = Path().resolve()
@@ -230,7 +235,12 @@ class RaidClass:
             latitude = results[0].get("latitude")
             longitude = results[0].get("longitude")
 
-        if self.boss.strip("'") != "egg1" and self.boss.strip("'") != "egg3" and self.boss.strip("'") != "egg5" and self.boss.strip("'") != "eggmega":
+        if (
+            self.boss.strip("'") != "egg1"
+            and self.boss.strip("'") != "egg3"
+            and self.boss.strip("'") != "egg5"
+            and self.boss.strip("'") != "eggmega"
+        ):
             success, pokemon, pokemon_image = await self.bot.validate_pokemon(self.boss.strip("'"))
         else:
             path = Path().resolve()
