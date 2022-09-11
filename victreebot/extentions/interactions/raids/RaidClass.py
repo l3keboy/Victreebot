@@ -5,6 +5,7 @@ import os
 import time
 from dataclasses import dataclass
 from dataclasses import field
+from pathlib import Path
 
 import hikari
 from core.bot import Bot
@@ -70,7 +71,7 @@ class RaidClass:
             self.raid_message_channel_id,
             self.raid_message_id,
             self.raid_creator_id,
-            self.takes_place_at_to_show
+            self.takes_place_at_to_show,
         )
 
         await asyncio.sleep(self.wait_duration)
@@ -115,7 +116,23 @@ class RaidClass:
             self.guild, self.raid_creator_id
         ) or await self.bot_aware.rest.fetch_member(self.guild, self.raid_creator_id)
 
-        success, pokemon, pokemon_image = await self.bot.validate_pokemon(self.boss.strip("'"))
+        if (
+            self.boss.strip("'") != "egg1"
+            and self.boss.strip("'") != "egg3"
+            and self.boss.strip("'") != "egg5"
+            and self.boss.strip("'") != "eggmega"
+        ):
+            success, pokemon, pokemon_image = await self.bot.validate_pokemon(self.boss.strip("'"))
+        else:
+            path = Path().resolve()
+            if self.boss.strip("'") == "egg1":
+                pokemon_image = f"{path}/assets/raidEggs/raid_eggOne.png"
+            elif self.boss.strip("'") == "egg3":
+                pokemon_image = f"{path}/assets/raidEggs/raid_eggThree.png"
+            elif self.boss.strip("'") == "egg5":
+                pokemon_image = f"{path}/assets/raidEggs/raid_eggFive.png"
+            elif self.boss.strip("'") == "eggmega":
+                pokemon_image = f"{path}/assets/raidEggs/raid_eggMega.png"
 
         instinct_members = (
             [
@@ -173,6 +190,7 @@ class RaidClass:
                 ),
                 colour=hikari.Colour(0x8BC683),
             )
+            .set_thumbnail(pokemon_image)
             .set_author(name=self.boss.strip("'").replace("-", " ").capitalize(), icon=pokemon_image)
             .set_footer(
                 text=SUPPORTED_LANGUAGES.get(self.language).raid_embed_footer.format(
@@ -188,7 +206,7 @@ class RaidClass:
         raid_message = self.bot_aware.cache.get_message(
             self.raid_message_id
         ) or await self.bot_aware.rest.fetch_message(self.raid_message_channel_id, self.raid_message_id)
-        await raid_message.edit(embed=embed)
+        await raid_message.edit(embed=embed, replace_attachments=True, attachments=[])
 
     async def update_raid(
         self, new_type: str = None, new_boss: str = None, new_location: str = None, new_location_type: str = None
@@ -217,7 +235,23 @@ class RaidClass:
             latitude = results[0].get("latitude")
             longitude = results[0].get("longitude")
 
-        success, pokemon, pokemon_image = await self.bot.validate_pokemon(self.boss.strip("'"))
+        if (
+            self.boss.strip("'") != "egg1"
+            and self.boss.strip("'") != "egg3"
+            and self.boss.strip("'") != "egg5"
+            and self.boss.strip("'") != "eggmega"
+        ):
+            success, pokemon, pokemon_image = await self.bot.validate_pokemon(self.boss.strip("'"))
+        else:
+            path = Path().resolve()
+            if self.boss.strip("'") == "egg1":
+                pokemon_image = f"{path}/assets/raidEggs/raid_eggOne.png"
+            elif self.boss.strip("'") == "egg3":
+                pokemon_image = f"{path}/assets/raidEggs/raid_eggThree.png"
+            elif self.boss.strip("'") == "egg5":
+                pokemon_image = f"{path}/assets/raidEggs/raid_eggFive.png"
+            elif self.boss.strip("'") == "eggmega":
+                pokemon_image = f"{path}/assets/raidEggs/raid_eggMega.png"
 
         raid_creator = self.bot_aware.cache.get_member(
             self.guild, self.raid_creator_id
@@ -279,6 +313,7 @@ class RaidClass:
                 ),
                 colour=hikari.Colour(0x8BC683),
             )
+            .set_thumbnail(pokemon_image)
             .set_author(name=self.boss.strip("'").replace("-", " ").capitalize(), icon=pokemon_image)
             .set_footer(
                 text=SUPPORTED_LANGUAGES.get(self.language).raid_embed_footer.format(
@@ -294,7 +329,7 @@ class RaidClass:
         raid_message = self.bot_aware.cache.get_message(
             self.raid_message_id
         ) or await self.bot_aware.rest.fetch_message(self.raid_message_channel_id, self.raid_message_id)
-        await raid_message.edit(embed=embed)
+        await raid_message.edit(embed=embed, replace_attachments=True, attachments=[])
         return True
 
     async def delete_raid(self) -> None:

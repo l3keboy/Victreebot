@@ -32,6 +32,7 @@ validate_add_or_no_add_description = "Do you want to add {item}?"
 no = "No"
 yes = "Yes"
 add_no_add_timeout = "Add or don't add validation reached a timeout! Returning don't add"
+unknown = "Unknown"
 
 error_response_not_enough_permissions_for_channel = "I do not have enough permissions to use this channel!"
 error_response_not_a_text_channel = "The given channel is not a text channel!"

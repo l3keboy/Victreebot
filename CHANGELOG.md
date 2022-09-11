@@ -8,6 +8,13 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.7.0] - 11-09-2022
+### [NEW]
+- Added 4 custom bosses: Egg1, Egg3, Egg5 and EggMega! (Issue ID: #81)
+### [Bugfixes]
+- Added bigger thumbnail to raid embed (Issue ID: #84)
+- Fixed an issue where the wrong month would be shown on the raid create command (Issue ID: #85)
+
 ## [0.6.1] - 04-09-2022
 ### [NEW]
 - Added server setting for extended time format

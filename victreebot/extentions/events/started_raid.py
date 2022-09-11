@@ -34,7 +34,11 @@ async def event_started_raid(
         location_name = f"'{location_name}'"
         raid_takes_place_at = result.get("takes_place_at")
         boss = result.get("boss")
-        success, pokemon, pokemon_image = await bot.validate_pokemon(boss)
+        if boss != "egg1" and boss != "egg3" and boss != "egg5" and boss != "eggmega":
+            success, pokemon, pokemon_image = await bot.validate_pokemon(boss)
+            pokemon_name = pokemon.name
+        else:
+            pokemon_name = boss
         guild_id = result.get("guild_id")
         guild = event.app.cache.get_guild(guild_id) or await event.app.rest.fetch_guild(guild_id)
         end_time = result.get("end_time")
@@ -92,7 +96,7 @@ async def event_started_raid(
             location_name,
             raid_takes_place_at,
             raid_takes_place_at_to_show,
-            pokemon.name.lower(),
+            pokemon_name.lower(),
             guild,
             end_time,
             channel_raids_id,

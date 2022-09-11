@@ -78,6 +78,11 @@ async def autocomplete_pokemon(
         if len(result_map) == 25:
             break
         else:
+            if query in "egg":
+                result_map["Egg Normal (Egg1)"] = "egg1"
+                result_map["Egg Rare (Egg3)"] = "egg3"
+                result_map["Egg Legendary (Egg5)"] = "egg5"
+                result_map["Egg Mega (EggMega)"] = "eggmega"
             if pokemon.get("name").__contains__(query):
                 result_map[f"{pokemon.get('name')}"] = f"{pokemon.get('name')}"
 

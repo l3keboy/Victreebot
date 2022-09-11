@@ -4,6 +4,7 @@ import datetime
 import os
 import time
 import uuid
+from pathlib import Path
 
 import hikari
 import pytz
@@ -124,16 +125,30 @@ async def command_raid_create(
         await event.interaction.create_initial_response(6)
         raid_type = event.interaction.custom_id
 
-        success, pokemon, pokemon_image = await bot.validate_pokemon(boss)
-        if not success:
-            response = SUPPORTED_LANGUAGES.get(language).response_raid_create_unknown_boss.format(boss_name=boss)
-            await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
-            if log_errors:
-                log_response = SUPPORTED_LANGUAGES.get(language).log_response_raid_create_unknown_boss.format(
-                    datetime=await bot.get_timestamp_aware(gmt), member=ctx.member
-                )
-                await bot.log_from_ctx(ctx, db, log_response)
-            return
+        if boss != "egg1" and boss != "egg3" and boss != "egg5" and boss != "eggmega":
+            success, pokemon, pokemon_image = await bot.validate_pokemon(boss)
+            pokemon_name = pokemon.name
+            if not success:
+                response = SUPPORTED_LANGUAGES.get(language).response_raid_create_unknown_boss.format(boss_name=boss)
+                await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
+                if log_errors:
+                    log_response = SUPPORTED_LANGUAGES.get(language).log_response_raid_create_unknown_boss.format(
+                        datetime=await bot.get_timestamp_aware(gmt), member=ctx.member
+                    )
+                    await bot.log_from_ctx(ctx, db, log_response)
+                return
+        else:
+            path = Path().resolve()
+            pokemon = boss
+            pokemon_name = boss
+            if boss == "egg1":
+                pokemon_image = f"{path}/assets/raidEggs/raid_eggOne.png"
+            elif boss == "egg3":
+                pokemon_image = f"{path}/assets/raidEggs/raid_eggThree.png"
+            elif boss == "egg5":
+                pokemon_image = f"{path}/assets/raidEggs/raid_eggFive.png"
+            elif boss == "eggmega":
+                pokemon_image = f"{path}/assets/raidEggs/raid_eggMega.png"
 
     location_name = ""
     location_splitted = location.split(",")
@@ -203,7 +218,7 @@ async def command_raid_create(
     for day in days[:24]:
         date_action_row.add_option(
             f"{SUPPORTED_LANGUAGES.get(language).weekdays[day.weekday()]} {day.day} "
-            f"{SUPPORTED_LANGUAGES.get(language).months[day.month]}",
+            f"{SUPPORTED_LANGUAGES.get(language).months[day.month - 1]}",
             str(day),
         ).add_to_menu()
     date_action_row = date_action_row.add_to_container()
@@ -339,7 +354,8 @@ async def command_raid_create(
             ),
             colour=hikari.Colour(0x8BC683),
         )
-        .set_author(name=pokemon.name.replace("-", " ").capitalize(), icon=pokemon_image)
+        .set_thumbnail(pokemon_image)
+        .set_author(name=pokemon_name.replace("-", " ").capitalize(), icon=pokemon_image)
         .set_footer(
             text=SUPPORTED_LANGUAGES.get(language).raid_embed_footer.format(
                 member=ctx.member.display_name, attendees="0"
@@ -380,7 +396,7 @@ async def command_raid_create(
         location_name,
         raid_takes_place_at,
         raid_takes_place_at_to_show,
-        pokemon.name.lower(),
+        pokemon_name.lower(),
         ctx.get_guild(),
         end_time,
         channel_raids.id,

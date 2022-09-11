@@ -764,7 +764,7 @@ class DatabaseHandler:
         raid_message_channel_id: int,
         raid_message_id: int,
         raid_creator_id: int,
-        takes_place_at_to_show: str, 
+        takes_place_at_to_show: str,
     ) -> bool:
         """Insert a raid"""
         async with self._pool.acquire() as conn:
