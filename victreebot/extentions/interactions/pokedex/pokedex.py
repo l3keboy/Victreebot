@@ -1,5 +1,6 @@
 # IMPORTS
 import os
+from pathlib import Path
 
 import hikari
 import tanjun
@@ -45,44 +46,65 @@ async def command_pokedex(
         boss = boss.replace(" ", "-")
         boss = boss.lower()
 
-    success, pokemon, pokemon_image = await bot.validate_pokemon(boss)
-    if not success:
-        response = SUPPORTED_LANGUAGES.get(language).response_pokedex_unknown_pokemon.format(boss_name=boss)
-        await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
-        if log_errors:
-            log_response = SUPPORTED_LANGUAGES.get(language).log_response_pokedex_unknown_pokemon.format(
-                datetime=await bot.get_timestamp_aware(gmt), member=ctx.member
-            )
-            await bot.log_from_ctx(ctx, db, log_response)
-        return
-
-    pokemon_name = pokemon.name
-    pokemon_id = pokemon.id
-
-    pokemon_height_decimeters = pokemon.height
-    pokemon_weight_hecto_gram = pokemon.weight
-    pokemon_height_meters = pokemon_height_decimeters / 10
-    pokemon_weight_gram = pokemon_weight_hecto_gram * 100
     if unit_system == "Metric System":
         height_unit = SUPPORTED_LANGUAGES.get(language).height_metric_system
         weight_unit = SUPPORTED_LANGUAGES.get(language).weight_metric_system
-        pokemon_height = round(pokemon_height_meters, 2)
-        pokemon_weight = round(pokemon_weight_gram / 1000, 2)
     elif unit_system == "Imperial System":
         height_unit = SUPPORTED_LANGUAGES.get(language).height_imperial_system
         weight_unit = SUPPORTED_LANGUAGES.get(language).weight_imperial_system
-        pokemon_height = round(pokemon_height_meters, *0.3048, 3)
-        pokemon_weight = round(pokemon_weight_gram * 453.592, 2)
     else:
         height_unit = SUPPORTED_LANGUAGES.get(language).height_usc_system
         weight_unit = SUPPORTED_LANGUAGES.get(language).weight_usc_system
-        pokemon_height = round(pokemon_height_meters * 0.0254, 2)
-        pokemon_weight = round(pokemon_weight_gram * 453.592, 2)
 
-    pokemon_abilities = []
-    pokemon_all_abilities = pokemon.abilities
-    for ability in pokemon_all_abilities:
-        pokemon_abilities.append(ability.ability)
+    if boss != "egg1" and boss != "egg3" and boss != "egg5" and boss != "eggmega":
+        success, pokemon, pokemon_image = await bot.validate_pokemon(boss)
+        if not success:
+            response = SUPPORTED_LANGUAGES.get(language).response_pokedex_unknown_pokemon.format(boss_name=boss)
+            await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
+            if log_errors:
+                log_response = SUPPORTED_LANGUAGES.get(language).log_response_pokedex_unknown_pokemon.format(
+                    datetime=await bot.get_timestamp_aware(gmt), member=ctx.member
+                )
+                await bot.log_from_ctx(ctx, db, log_response)
+            return
+
+        pokemon_name = pokemon.name
+        pokemon_id = pokemon.id
+
+        pokemon_height_decimeters = pokemon.height
+        pokemon_weight_hecto_gram = pokemon.weight
+        pokemon_height_meters = pokemon_height_decimeters / 10
+        pokemon_weight_gram = pokemon_weight_hecto_gram * 100
+        if unit_system == "Metric System":
+            pokemon_height = round(pokemon_height_meters, 2)
+            pokemon_weight = round(pokemon_weight_gram / 1000, 2)
+        elif unit_system == "Imperial System":
+            pokemon_height = round(pokemon_height_meters, *0.3048, 3)
+            pokemon_weight = round(pokemon_weight_gram * 453.592, 2)
+        else:
+            pokemon_height = round(pokemon_height_meters * 0.0254, 2)
+            pokemon_weight = round(pokemon_weight_gram * 453.592, 2)
+
+        pokemon_abilities = []
+        pokemon_all_abilities = pokemon.abilities
+        for ability in pokemon_all_abilities:
+            pokemon_abilities.append(ability.ability)
+    else:
+        path = Path().resolve()
+
+        pokemon_name = boss.capitalize()
+        pokemon_id = SUPPORTED_LANGUAGES.get(language).unknown
+        pokemon_height = SUPPORTED_LANGUAGES.get(language).unknown
+        pokemon_weight = SUPPORTED_LANGUAGES.get(language).unknown
+        pokemon_abilities = [SUPPORTED_LANGUAGES.get(language).unknown]
+        if boss == "egg1":
+            pokemon_image = f"{path}/assets/raidEggs/raid_eggOne.png"
+        elif boss == "egg3":
+            pokemon_image = f"{path}/assets/raidEggs/raid_eggThree.png"
+        elif boss == "egg5":
+            pokemon_image = f"{path}/assets/raidEggs/raid_eggFive.png"
+        elif boss == "eggmega":
+            pokemon_image = f"{path}/assets/raidEggs/raid_eggMega.png"
 
     auto_delete = 20 if auto_delete < 20 else auto_delete
 

@@ -142,7 +142,9 @@ async def command_settings_update_general(
 @tanjun.with_author_permission_check(
     hikari.Permissions.MANAGE_GUILD, error_message="You need the `Manage Server` permissions to execute this command!"
 )
-@tanjun.with_bool_slash_option("extended_time_format", f"Do you want to use simple or extended time format?", default=None)
+@tanjun.with_bool_slash_option(
+    "extended_time_format", f"Do you want to use simple or extended time format?", default=None
+)
 @tanjun.with_int_slash_option(
     "raid_timeout",
     f"The time {BOT_NAME.capitalize()} waits before deleting a raid after it ended (in seconds!).",
@@ -202,7 +204,7 @@ async def command_settings_update_raid(
         return
 
     filtered_raids = [raid for raid in bot_aware.raids.values() if raid is not None and raid.guild == ctx.get_guild()]
-    
+
     if filtered_raids != []:
         # Send response
         response = SUPPORTED_LANGUAGES.get(language).response_settings_update_raid_failed_raids_active

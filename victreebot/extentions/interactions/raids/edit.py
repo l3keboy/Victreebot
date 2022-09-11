@@ -1,6 +1,7 @@
 # IMPORTS
 import asyncio
 import os
+from pathlib import Path
 
 import hikari
 import tanjun
@@ -84,16 +85,17 @@ async def command_raid_edit(
     raid = bot_aware.raids.get(f"'{raid_id}'")
 
     if new_boss is not None:
-        success, pokemon, pokemon_image = await bot.validate_pokemon(new_boss)
-        if not success:
-            response = SUPPORTED_LANGUAGES.get(language).response_raid_edit_unknown_boss.format(boss_name=new_boss)
-            await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
-            if log_errors:
-                log_response = SUPPORTED_LANGUAGES.get(language).log_response_raid_edit_unknown_boss.format(
-                    datetime=await bot.get_timestamp_aware(gmt), member=ctx.member
-                )
-                await bot.log_from_ctx(ctx, db, log_response)
-            return
+        if new_boss != "egg1" and new_boss != "egg3" and new_boss != "egg5" and new_boss != "eggmega":
+            success, pokemon, pokemon_image = await bot.validate_pokemon(new_boss)
+            if not success:
+                response = SUPPORTED_LANGUAGES.get(language).response_raid_edit_unknown_boss.format(boss_name=new_boss)
+                await ctx.edit_last_response(response, delete_after=auto_delete, embed=None, components=None)
+                if log_errors:
+                    log_response = SUPPORTED_LANGUAGES.get(language).log_response_raid_edit_unknown_boss.format(
+                        datetime=await bot.get_timestamp_aware(gmt), member=ctx.member
+                    )
+                    await bot.log_from_ctx(ctx, db, log_response)
+                return
 
     timeout = 120
     if new_location is not None:
