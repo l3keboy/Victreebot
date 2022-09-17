@@ -177,7 +177,7 @@ class RaidClass:
                     raid_id=self.raid_id.strip("'"),
                     raid_type=self.raid_type.strip("'").capitalize(),
                     time_date=f"""{str(self.takes_place_at_to_show).strip("'")}""",
-                    location=location_name.capitalize(),
+                    location=location_name.capitalize().replace("''", "'").removeprefix("'").removesuffix("'"),
                     latitude=latitude,
                     longitude=longitude,
                 )
@@ -186,7 +186,7 @@ class RaidClass:
                     raid_id=self.raid_id.strip("'"),
                     raid_type=self.raid_type.strip("'").capitalize(),
                     time_date=f"""{str(self.takes_place_at_to_show).strip("'")}""",
-                    location=location_name.capitalize(),
+                    location=location_name.capitalize().replace("''", "'").removeprefix("'").removesuffix("'"),
                 ),
                 colour=hikari.Colour(0x8BC683),
             )
@@ -300,7 +300,7 @@ class RaidClass:
                     raid_id=self.raid_id.strip("'"),
                     raid_type=self.raid_type.strip("'").capitalize(),
                     time_date=f"""{str(self.takes_place_at_to_show).strip("'")}""",
-                    location=self.location_name.capitalize().strip("'"),
+                    location=self.location_name.capitalize().replace("''", "'").removeprefix("'").removesuffix("'"),
                     latitude=latitude,
                     longitude=longitude,
                 )
@@ -309,7 +309,7 @@ class RaidClass:
                     raid_id=self.raid_id.strip("'"),
                     raid_type=self.raid_type.strip("'").capitalize(),
                     time_date=f"""{str(self.takes_place_at_to_show).strip("'")}""",
-                    location=self.location_name.capitalize().strip("'"),
+                    location=self.location_name.capitalize().replace("''", "'").removeprefix("'").removesuffix("'"),
                 ),
                 colour=hikari.Colour(0x8BC683),
             )
