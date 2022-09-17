@@ -8,6 +8,10 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.7.1] - 17-09-2022
+### [Bugfixes]
+- Fixed an issue where locations with the character, ', couldn't be used in a raid (Issue ID: #87)
+
 ## [0.7.0] - 11-09-2022
 ### [NEW]
 - Added 4 custom bosses: Egg1, Egg3, Egg5 and EggMega! (Issue ID: #81)

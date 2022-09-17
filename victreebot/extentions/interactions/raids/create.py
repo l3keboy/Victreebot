@@ -153,7 +153,8 @@ async def command_raid_create(
     location_name = ""
     location_splitted = location.split(",")
     if len(location_splitted) == 1:
-        location_name = f"'{location_splitted[0]}'"
+        location_name = location_splitted[0].replace("'", "''")
+        location_name = f"'{location_name}'"
         # GET LOCATION TYPE
         location_type_action_row = ctx.rest.build_action_row()
         for location_type in SUPPORTED_LOCATION_TYPES:
@@ -194,6 +195,7 @@ async def command_raid_create(
             location_type = f"'{location_type}'"
     else:
         location_name = location_splitted[1].removeprefix(" ")
+        location_name = location_name.replace("'", "''")
         location_name = f"'{location_name}'"
         location_type = f"'{location_splitted[0]}'"
 
@@ -341,7 +343,7 @@ async def command_raid_create(
                 raid_id=raid_id.strip("'"),
                 raid_type=raid_type.capitalize(),
                 time_date=f"""{raid_takes_place_at_to_show.strip("'")}""",
-                location=location_name.capitalize().strip("'"),
+                location=location_name.capitalize().replace("''", "'").removeprefix("'").removesuffix("'"),
                 latitude=latitude,
                 longitude=longitude,
             )
@@ -350,7 +352,7 @@ async def command_raid_create(
                 raid_id=raid_id.strip("'"),
                 raid_type=raid_type.capitalize(),
                 time_date=f"""{raid_takes_place_at_to_show.strip("'")}""",
-                location=location_name.capitalize().strip("'"),
+                location=location_name.capitalize().replace("''", "'").removeprefix("'").removesuffix("'"),
             ),
             colour=hikari.Colour(0x8BC683),
         )

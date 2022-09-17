@@ -102,7 +102,8 @@ async def command_raid_edit(
         location_name = ""
         location_splitted = new_location.split(",")
         if len(location_splitted) == 1:
-            location_name = f"'{location_splitted[0]}'"
+            location_name = location_splitted[0].replace("'", "''")
+            location_name = f"'{location_name}'"
             # GET LOCATION TYPE
             location_type_action_row = ctx.rest.build_action_row()
             for location_type in SUPPORTED_LOCATION_TYPES:
@@ -142,6 +143,7 @@ async def command_raid_edit(
                 location_type = f"'{location_type}'"
         else:
             location_name = location_splitted[1].removeprefix(" ")
+            location_name = location_name.replace("'", "''")
             location_name = f"'{location_name}'"
             location_type = f"'{location_splitted[0]}'"
 
