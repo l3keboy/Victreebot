@@ -7,6 +7,11 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased/Working on]
 
 ================================================================
+## [0.7.2] - 15-10-2022
+### [NEW]
+- Added support for Elite-Raids
+- EX-Raids support is also back
+- Added change date and time functionality to /raid_edit
 
 ## [0.7.1] - 17-09-2022
 ### [Bugfixes]
