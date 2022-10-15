@@ -52,27 +52,28 @@ class RaidClass:
         self.remote_present = self.remote_present if self.remote_present is not None else []
 
         self.wait_duration = 1 if self.end_time - time.time() <= 0 else self.end_time - time.time()
-        self.task = asyncio.ensure_future(self.end_raid())
+        self.task = asyncio.ensure_future(self.end_raid(True))
         self.bot_aware.raids[self.raid_id] = self
 
-    async def end_raid(self) -> None:
+    async def end_raid(self, is_new_raid: bool) -> None:
         self.raid_type = f"'{self.raid_type}'"
         self.takes_place_at = f"'{self.takes_place_at}'"
         self.boss = f"'{self.boss}'"
-        await self.bot_aware.db.insert_raid(
-            self.guild,
-            self.raid_id,
-            self.raid_type,
-            self.location_type,
-            self.location_name,
-            self.takes_place_at,
-            self.boss,
-            self.end_time,
-            self.raid_message_channel_id,
-            self.raid_message_id,
-            self.raid_creator_id,
-            self.takes_place_at_to_show,
-        )
+        if is_new_raid:
+            await self.bot_aware.db.insert_raid(
+                self.guild,
+                self.raid_id,
+                self.raid_type,
+                self.location_type,
+                self.location_name,
+                self.takes_place_at,
+                self.boss,
+                self.end_time,
+                self.raid_message_channel_id,
+                self.raid_message_id,
+                self.raid_creator_id,
+                self.takes_place_at_to_show,
+            )
 
         await asyncio.sleep(self.wait_duration)
 
@@ -209,7 +210,14 @@ class RaidClass:
         await raid_message.edit(embed=embed, replace_attachments=True, attachments=[])
 
     async def update_raid(
-        self, new_type: str = None, new_boss: str = None, new_location: str = None, new_location_type: str = None
+        self,
+        new_type: str = None,
+        new_boss: str = None,
+        new_location: str = None,
+        new_location_type: str = None,
+        new_end_time: str = None,
+        new_raid_takes_place_at_to_show: str = None,
+        new_raid_takes_place_at: str = None,
     ) -> bool:
         parameters = []
         if new_type is not None:
@@ -222,8 +230,22 @@ class RaidClass:
             parameters.append(f"location_name = {new_location}")
             parameters.append(f"location_type = {new_location_type}")
             self.location_name = new_location
+        if (
+            new_end_time is not None
+            and new_raid_takes_place_at_to_show is not None
+            and new_raid_takes_place_at is not None
+        ):
+            self.task.cancel()
+            parameters.append(f"takes_place_at = '{new_raid_takes_place_at}'")
+            parameters.append(f"end_time = '{new_end_time}'")
+            parameters.append(f"takes_place_at_to_show = '{new_raid_takes_place_at_to_show}'")
+            self.takes_place_at = new_raid_takes_place_at
+            self.takes_place_at_to_show = new_raid_takes_place_at_to_show
+            self.end_time = new_end_time
+            self.wait_duration = 1 if self.end_time - time.time() <= 0 else self.end_time - time.time()
+            self.task = asyncio.ensure_future(self.end_raid(False))
 
-        if new_type is not None or new_boss is not None or new_location is not None:
+        if new_type is not None or new_boss is not None or new_location is not None or new_end_time is not None:
             success = await self.bot_aware.db.set_raid_detail(self.guild, self.raid_id, parameters=parameters)
             if not success:
                 return False
