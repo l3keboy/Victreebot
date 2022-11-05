@@ -97,7 +97,7 @@ async def command_raid_edit(
             await bot.log_from_ctx(ctx, db, log_response)
         return
 
-    if ctx.author.id != raid.raid_creator_id and ctx.author.id != moderator_role_id:
+    if ctx.author.id != raid.raid_creator_id and moderator_role_id not in ctx.member.role_ids:
         response = SUPPORTED_LANGUAGES.get(language).response_raid_edit_not_creator_or_moderator.format(
             bot_name=BOT_NAME.capitalize()
         )
