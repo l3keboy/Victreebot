@@ -7,8 +7,12 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased/Working on]
 
 ================================================================
+## [0.7.4] - 05-11-2022
+### [Bugfixes]
+- Fixed an issue where raids can not be deleted by the moderator
+
 ## [0.7.3] - 05-11-2022
-### [NEW]
+### [Bugfixes]
 - Fixed an issue where raids can not be edited by the moderator
 
 ## [0.7.2] - 15-10-2022
