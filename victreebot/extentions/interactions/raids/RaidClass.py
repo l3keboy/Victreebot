@@ -207,7 +207,7 @@ class RaidClass:
         raid_message = self.bot_aware.cache.get_message(
             self.raid_message_id
         ) or await self.bot_aware.rest.fetch_message(self.raid_message_channel_id, self.raid_message_id)
-        await raid_message.edit(embed=embed, replace_attachments=True, attachments=[])
+        await raid_message.edit(embed=embed)
 
     async def update_raid(
         self,
@@ -351,7 +351,7 @@ class RaidClass:
         raid_message = self.bot_aware.cache.get_message(
             self.raid_message_id
         ) or await self.bot_aware.rest.fetch_message(self.raid_message_channel_id, self.raid_message_id)
-        await raid_message.edit(embed=embed, replace_attachments=True, attachments=[])
+        await raid_message.edit(embed=embed)
         return True
 
     async def delete_raid(self) -> None:
