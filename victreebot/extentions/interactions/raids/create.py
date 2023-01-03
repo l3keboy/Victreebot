@@ -90,7 +90,7 @@ async def command_raid_create(
     timeout = 120
 
     # GET RAID TYPE
-    raid_type_action_row = ctx.rest.build_action_row()
+    raid_type_action_row = ctx.rest.build_message_action_row()
     for raid_type in SUPPORTED_RAID_TYPES:
         raid_type_action_row.add_button(hikari.ButtonStyle.PRIMARY, raid_type.lower()).set_label(
             raid_type
@@ -156,7 +156,7 @@ async def command_raid_create(
         location_name = location_splitted[0].replace("'", "''")
         location_name = f"'{location_name}'"
         # GET LOCATION TYPE
-        location_type_action_row = ctx.rest.build_action_row()
+        location_type_action_row = ctx.rest.build_message_action_row()
         for location_type in SUPPORTED_LOCATION_TYPES:
             location_type_action_row.add_button(hikari.ButtonStyle.PRIMARY, location_type.lower()).set_label(
                 location_type
@@ -216,7 +216,7 @@ async def command_raid_create(
     days = rrule(DAILY, dtstart=timezone_aware_current_date)  # noqa F405
 
     # GET RAID TIME
-    date_action_row = ctx.rest.build_action_row().add_select_menu("date")
+    date_action_row = ctx.rest.build_message_action_row().add_select_menu("date")
     for day in days[:24]:
         date_action_row.add_option(
             f"{SUPPORTED_LANGUAGES.get(language).weekdays[day.weekday()]} {day.day} "

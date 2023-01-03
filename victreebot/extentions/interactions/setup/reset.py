@@ -58,7 +58,7 @@ async def command_reset(
     )
 
     action_row_1 = (
-        ctx.rest.build_action_row()
+        ctx.rest.build_message_action_row()
         .add_button(hikari.ButtonStyle.SUCCESS, "yes")
         .set_label(SUPPORTED_LANGUAGES.get(language).yes)
         .add_to_container()

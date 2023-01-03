@@ -50,7 +50,7 @@ async def command_settings_update_logging(
     )
 
     action_row_1 = (
-        ctx.rest.build_action_row()
+        ctx.rest.build_message_action_row()
         .add_button(hikari.ButtonStyle.PRIMARY, "logs_channel")
         .set_label(SUPPORTED_LANGUAGES.get(language).settings_logging_logs_channel)
         .add_to_container()
@@ -68,7 +68,7 @@ async def command_settings_update_logging(
         .add_to_container()
     )
     action_row_2 = (
-        ctx.rest.build_action_row()
+        ctx.rest.build_message_action_row()
         .add_button(hikari.ButtonStyle.PRIMARY, "trade_events")
         .set_label(SUPPORTED_LANGUAGES.get(language).settings_logging_trade_events)
         .add_to_container()

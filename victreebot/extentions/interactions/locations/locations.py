@@ -267,7 +267,7 @@ async def command_locations(
     )
 
     action_row_1 = (
-        ctx.rest.build_action_row()
+        ctx.rest.build_message_action_row()
         .add_button(hikari.ButtonStyle.SUCCESS, "add_gym")
         .set_label(SUPPORTED_LANGUAGES.get(language).location_action_row_add_gym)
         .add_to_container()
@@ -282,7 +282,7 @@ async def command_locations(
         .add_to_container()
     )
     action_row_2 = (
-        ctx.rest.build_action_row()
+        ctx.rest.build_message_action_row()
         .add_button(hikari.ButtonStyle.SUCCESS, "add_pokestop")
         .set_label(SUPPORTED_LANGUAGES.get(language).location_action_row_add_pokestop)
         .add_to_container()
@@ -411,7 +411,7 @@ async def command_locations(
 
                 index = 0
                 button_menu = (
-                    ctx.rest.build_action_row()
+                    ctx.rest.build_message_action_row()
                     .add_button(hikari.messages.ButtonStyle.SECONDARY, "<<")
                     .set_label("<<")
                     .add_to_container()
@@ -620,7 +620,7 @@ async def command_locations(
                 return
 
             location_edit_action_row = (
-                ctx.rest.build_action_row()
+                ctx.rest.build_message_action_row()
                 .add_button(hikari.ButtonStyle.PRIMARY, "location_description")
                 .set_label(SUPPORTED_LANGUAGES.get(language).location_action_row_edit_description)
                 .add_to_container()
