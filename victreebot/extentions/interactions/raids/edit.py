@@ -132,7 +132,7 @@ async def command_raid_edit(
             location_name = location_splitted[0].replace("'", "''")
             location_name = f"'{location_name}'"
             # GET LOCATION TYPE
-            location_type_action_row = ctx.rest.build_action_row()
+            location_type_action_row = ctx.rest.build_message_action_row()
             for location_type in SUPPORTED_LOCATION_TYPES:
                 location_type_action_row.add_button(hikari.ButtonStyle.PRIMARY, location_type.lower()).set_label(
                     location_type
@@ -198,7 +198,7 @@ async def command_raid_edit(
         timezone_aware_current_date = datetime.datetime.today().astimezone(timezone).date()
         days = rrule(DAILY, dtstart=timezone_aware_current_date)  # noqa F405
 
-        date_action_row = ctx.rest.build_action_row().add_select_menu("date")
+        date_action_row = ctx.rest.build_message_action_row().add_select_menu("date")
         for day in days[:24]:
             date_action_row.add_option(
                 f"{SUPPORTED_LANGUAGES.get(language).weekdays[day.weekday()]} {day.day} "
