@@ -9,6 +9,12 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.7.7] - 24-01-2022
+
+### [Bugfixes]
+
+- Extra fix for message buttons not showing because of dependency upgrades
+
 ## [0.7.6] - 03-01-2022
 
 ### [BREAKING]
