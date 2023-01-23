@@ -155,7 +155,7 @@ class BotUtils:
         )
 
         action_row = (
-            ctx.rest.build_action_row()
+            ctx.rest.build_message_action_row()
             .add_button(hikari.ButtonStyle.DANGER, "disable")
             .set_label(SUPPORTED_LANGUAGES.get(language).disable)
             .add_to_container()
@@ -202,7 +202,7 @@ class BotUtils:
         )
 
         action_row = (
-            ctx.rest.build_action_row()
+            ctx.rest.build_message_action_row()
             .add_button(hikari.ButtonStyle.DANGER, "no_add")
             .set_label(SUPPORTED_LANGUAGES.get(language).no)
             .add_to_container()
