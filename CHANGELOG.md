@@ -9,6 +9,12 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.7.8] - 25-01-2022
+
+### [Bugfixes]
+
+- Fix for listing locations not working
+
 ## [0.7.7] - 24-01-2022
 
 ### [Bugfixes]
