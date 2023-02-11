@@ -9,6 +9,12 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.7.9] - 02-11-2023
+
+### [Bugfixes]
+
+- Fix action rows with new dependency update
+
 ## [0.7.8] - 25-01-2022
 
 ### [Bugfixes]
