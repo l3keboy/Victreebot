@@ -216,7 +216,7 @@ async def command_raid_create(
     days = rrule(DAILY, dtstart=timezone_aware_current_date)  # noqa F405
 
     # GET RAID TIME
-    date_action_row = ctx.rest.build_message_action_row().add_select_menu("date")
+    date_action_row = ctx.rest.build_message_action_row().add_select_menu(hikari.ComponentType.TEXT_SELECT_MENU, "date")
     for day in days[:24]:
         date_action_row.add_option(
             f"{SUPPORTED_LANGUAGES.get(language).weekdays[day.weekday()]} {day.day} "
