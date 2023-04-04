@@ -45,21 +45,29 @@ async def command_profile_edit(
 
     action_row_1 = (
         ctx.rest.build_message_action_row()
-        .add_button(hikari.ButtonStyle.SUCCESS, "add_friend_codes")
-        .set_label(SUPPORTED_LANGUAGES.get(language).profile_action_row_add_friend_code)
-        .add_to_container()
-        .add_button(hikari.ButtonStyle.DANGER, "delete_friend_codes")
-        .set_label(SUPPORTED_LANGUAGES.get(language).profile_action_row_delete_friend_code)
-        .add_to_container()
+        .add_interactive_button(
+            hikari.ButtonStyle.SUCCESS,
+            "add_friend_codes",
+            label=SUPPORTED_LANGUAGES.get(language).profile_action_row_add_friend_code,
+        )
+        .add_interactive_button(
+            hikari.ButtonStyle.DANGER,
+            "delete_friend_codes",
+            label=SUPPORTED_LANGUAGES.get(language).profile_action_row_delete_friend_code,
+        )
     )
     action_row_2 = (
         ctx.rest.build_message_action_row()
-        .add_button(hikari.ButtonStyle.SUCCESS, "add_active_locations")
-        .set_label(SUPPORTED_LANGUAGES.get(language).profile_action_row_add_active_location)
-        .add_to_container()
-        .add_button(hikari.ButtonStyle.DANGER, "delete_active_locations")
-        .set_label(SUPPORTED_LANGUAGES.get(language).profile_action_row_delete_active_location)
-        .add_to_container()
+        .add_interactive_button(
+            hikari.ButtonStyle.SUCCESS,
+            "add_active_locations",
+            label=SUPPORTED_LANGUAGES.get(language).profile_action_row_add_active_location,
+        )
+        .add_interactive_button(
+            hikari.ButtonStyle.DANGER,
+            "delete_active_locations",
+            label=SUPPORTED_LANGUAGES.get(language).profile_action_row_delete_active_location,
+        )
     )
 
     response_message = await ctx.respond(embed, components=[action_row_1, action_row_2])
@@ -83,16 +91,10 @@ async def command_profile_edit(
         return
     else:
         if event.interaction.custom_id == "add_friend_codes":
-            add_friend_code_action_row = (
-                ctx.rest.build_modal_action_row()
-                .add_text_input(
-                    label=SUPPORTED_LANGUAGES.get(language).profile_modal_add_friend_codes_text_input_title,
-                    custom_id="friend_codes",
-                )
-                .set_placeholder(
-                    SUPPORTED_LANGUAGES.get(language).profile_modal_add_friend_codes_text_input_placeholder
-                )
-                .add_to_container()
+            add_friend_code_action_row = ctx.rest.build_modal_action_row().add_text_input(
+                label=SUPPORTED_LANGUAGES.get(language).profile_modal_add_friend_codes_text_input_title,
+                custom_id="friend_codes",
+                placeholder=SUPPORTED_LANGUAGES.get(language).profile_modal_add_friend_codes_text_input_placeholder,
             )
             await event.interaction.create_modal_response(
                 SUPPORTED_LANGUAGES.get(language).profile_modal_add_friend_codes,
@@ -173,16 +175,10 @@ async def command_profile_edit(
                             await bot.log_from_ctx(ctx, db, log_response)
 
         elif event.interaction.custom_id == "delete_friend_codes":
-            delete_friend_code_action_row = (
-                ctx.rest.build_modal_action_row()
-                .add_text_input(
-                    label=SUPPORTED_LANGUAGES.get(language).profile_modal_delete_friend_codes_text_input_title,
-                    custom_id="friend_codes",
-                )
-                .set_placeholder(
-                    SUPPORTED_LANGUAGES.get(language).profile_modal_delete_friend_codes_text_input_placeholder
-                )
-                .add_to_container()
+            delete_friend_code_action_row = ctx.rest.build_modal_action_row().add_text_input(
+                label=SUPPORTED_LANGUAGES.get(language).profile_modal_delete_friend_codes_text_input_title,
+                custom_id="friend_codes",
+                placeholder=SUPPORTED_LANGUAGES.get(language).profile_modal_delete_friend_codes_text_input_placeholder,
             )
             await event.interaction.create_modal_response(
                 SUPPORTED_LANGUAGES.get(language).profile_modal_delete_friend_codes,
@@ -268,16 +264,10 @@ async def command_profile_edit(
                             await bot.log_from_ctx(ctx, db, log_response)
 
         elif event.interaction.custom_id == "add_active_locations":
-            add_active_locations_action_row = (
-                ctx.rest.build_modal_action_row()
-                .add_text_input(
-                    label=SUPPORTED_LANGUAGES.get(language).profile_modal_add_active_locations_text_input_title,
-                    custom_id="active_locations",
-                )
-                .set_placeholder(
-                    SUPPORTED_LANGUAGES.get(language).profile_modal_add_active_locations_text_input_placeholder
-                )
-                .add_to_container()
+            add_active_locations_action_row = ctx.rest.build_modal_action_row().add_text_input(
+                label=SUPPORTED_LANGUAGES.get(language).profile_modal_add_active_locations_text_input_title,
+                custom_id="active_locations",
+                placeholder=SUPPORTED_LANGUAGES.get(language).profile_modal_add_active_locations_text_input_placeholder,
             )
             await event.interaction.create_modal_response(
                 SUPPORTED_LANGUAGES.get(language).profile_modal_add_active_locations,
@@ -342,16 +332,12 @@ async def command_profile_edit(
                             await bot.log_from_ctx(ctx, db, log_response)
 
         elif event.interaction.custom_id == "delete_active_locations":
-            delete_active_locations_action_row = (
-                ctx.rest.build_modal_action_row()
-                .add_text_input(
-                    label=SUPPORTED_LANGUAGES.get(language).profile_modal_delete_active_locations_text_input_title,
-                    custom_id="active_locations",
-                )
-                .set_placeholder(
-                    SUPPORTED_LANGUAGES.get(language).profile_modal_delete_active_locations_text_input_placeholder
-                )
-                .add_to_container()
+            delete_active_locations_action_row = ctx.rest.build_modal_action_row().add_text_input(
+                label=SUPPORTED_LANGUAGES.get(language).profile_modal_delete_active_locations_text_input_title,
+                custom_id="active_locations",
+                placeholder=SUPPORTED_LANGUAGES.get(
+                    language
+                ).profile_modal_delete_active_locations_text_input_placeholder,
             )
             await event.interaction.create_modal_response(
                 SUPPORTED_LANGUAGES.get(language).profile_modal_delete_active_locations,
