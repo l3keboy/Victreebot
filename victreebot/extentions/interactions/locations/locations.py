@@ -40,10 +40,9 @@ async def get_location_name(
                 location=location_type.strip("'")
             ),
             custom_id="location_name",
+            placeholder=SUPPORTED_LANGUAGES.get(language).location_name_modal_text_input_placeholder,
+            required=True
         )
-        .set_placeholder(SUPPORTED_LANGUAGES.get(language).location_name_modal_text_input_placeholder)
-        .set_required(True)
-        .add_to_container()
     )
 
     await event.interaction.create_modal_response(
@@ -99,10 +98,9 @@ async def get_location_description(
                 location=location_type.strip("'")
             ),
             custom_id="location_description",
+            placeholder=SUPPORTED_LANGUAGES.get(language).location_description_modal_text_input_placeholder,
+            required=True
         )
-        .set_placeholder(SUPPORTED_LANGUAGES.get(language).location_description_modal_text_input_placeholder)
-        .set_required(True)
-        .add_to_container()
     )
 
     await event.interaction.create_modal_response(
@@ -161,10 +159,9 @@ async def get_location_latitude_longitude(
                 location=location_type.strip("'")
             ),
             custom_id="location_longitude",
+            placeholder=SUPPORTED_LANGUAGES.get(language).location_longitude_modal_text_input_placeholder,
+            required=True
         )
-        .set_placeholder(SUPPORTED_LANGUAGES.get(language).location_longitude_modal_text_input_placeholder)
-        .set_required(True)
-        .add_to_container()
     )
     location_latitude_action_row = (
         ctx.rest.build_modal_action_row()
@@ -173,10 +170,9 @@ async def get_location_latitude_longitude(
                 location=location_type.strip("'")
             ),
             custom_id="location_latitude",
+            placeholder=SUPPORTED_LANGUAGES.get(language).location_latitude_modal_text_input_placeholder,
+            required=True
         )
-        .set_placeholder(SUPPORTED_LANGUAGES.get(language).location_latitude_modal_text_input_placeholder)
-        .set_required(True)
-        .add_to_container()
     )
 
     await event.interaction.create_modal_response(
@@ -268,33 +264,17 @@ async def command_locations(
 
     action_row_1 = (
         ctx.rest.build_message_action_row()
-        .add_button(hikari.ButtonStyle.SUCCESS, "add_gym")
-        .set_label(SUPPORTED_LANGUAGES.get(language).location_action_row_add_gym)
-        .add_to_container()
-        .add_button(hikari.ButtonStyle.DANGER, "delete_gym")
-        .set_label(SUPPORTED_LANGUAGES.get(language).location_action_row_delete_gym)
-        .add_to_container()
-        .add_button(hikari.ButtonStyle.PRIMARY, "edit_gym")
-        .set_label(SUPPORTED_LANGUAGES.get(language).location_action_row_edit_gym)
-        .add_to_container()
-        .add_button(hikari.ButtonStyle.PRIMARY, "list_gyms")
-        .set_label(SUPPORTED_LANGUAGES.get(language).location_action_row_list_gym)
-        .add_to_container()
+        .add_interactive_button(hikari.ButtonStyle.SUCCESS, "add_gym", label=SUPPORTED_LANGUAGES.get(language).location_action_row_add_gym)
+        .add_interactive_button(hikari.ButtonStyle.DANGER, "delete_gym", label=SUPPORTED_LANGUAGES.get(language).location_action_row_delete_gym)
+        .add_interactive_button(hikari.ButtonStyle.PRIMARY, "edit_gym", label=SUPPORTED_LANGUAGES.get(language).location_action_row_edit_gym)
+        .add_interactive_button(hikari.ButtonStyle.PRIMARY, "list_gyms", label=SUPPORTED_LANGUAGES.get(language).location_action_row_list_gym)
     )
     action_row_2 = (
         ctx.rest.build_message_action_row()
-        .add_button(hikari.ButtonStyle.SUCCESS, "add_pokestop")
-        .set_label(SUPPORTED_LANGUAGES.get(language).location_action_row_add_pokestop)
-        .add_to_container()
-        .add_button(hikari.ButtonStyle.DANGER, "delete_pokestop")
-        .set_label(SUPPORTED_LANGUAGES.get(language).location_action_row_delete_pokestop)
-        .add_to_container()
-        .add_button(hikari.ButtonStyle.PRIMARY, "edit_pokestop")
-        .set_label(SUPPORTED_LANGUAGES.get(language).location_action_row_edit_pokestop)
-        .add_to_container()
-        .add_button(hikari.ButtonStyle.PRIMARY, "list_pokestops")
-        .set_label(SUPPORTED_LANGUAGES.get(language).location_action_row_list_pokestop)
-        .add_to_container()
+        .add_interactive_button(hikari.ButtonStyle.SUCCESS, "add_pokestop", label=SUPPORTED_LANGUAGES.get(language).location_action_row_add_pokestop)
+        .add_interactive_button(hikari.ButtonStyle.DANGER, "delete_pokestop", label=SUPPORTED_LANGUAGES.get(language).location_action_row_delete_pokestop)
+        .add_interactive_button(hikari.ButtonStyle.PRIMARY, "edit_pokestop", label=SUPPORTED_LANGUAGES.get(language).location_action_row_edit_pokestop)
+        .add_interactive_button(hikari.ButtonStyle.PRIMARY, "list_pokestops", label=SUPPORTED_LANGUAGES.get(language).location_action_row_list_pokestop)
     )
 
     response_message = await ctx.respond(embed, components=[action_row_1, action_row_2])
@@ -412,18 +392,10 @@ async def command_locations(
                 index = 0
                 button_menu = (
                     ctx.rest.build_message_action_row()
-                    .add_button(hikari.ButtonStyle.SECONDARY, "<<")
-                    .set_label("<<")
-                    .add_to_container()
-                    .add_button(hikari.ButtonStyle.PRIMARY, "<")
-                    .set_label("<")
-                    .add_to_container()
-                    .add_button(hikari.ButtonStyle.PRIMARY, ">")
-                    .set_label(">")
-                    .add_to_container()
-                    .add_button(hikari.ButtonStyle.SECONDARY, ">>")
-                    .set_label(">>")
-                    .add_to_container()
+                    .add_interactive_button(hikari.ButtonStyle.SECONDARY, "<<", label="<<")
+                    .add_interactive_button(hikari.ButtonStyle.PRIMARY, "<", label="<")
+                    .add_interactive_button(hikari.ButtonStyle.PRIMARY, ">", label=">")
+                    .add_interactive_button(hikari.ButtonStyle.SECONDARY, ">>", label=">>")
                 )
 
                 response_message = await ctx.create_followup(values[0], component=button_menu)
@@ -621,12 +593,8 @@ async def command_locations(
 
             location_edit_action_row = (
                 ctx.rest.build_message_action_row()
-                .add_button(hikari.ButtonStyle.PRIMARY, "location_description")
-                .set_label(SUPPORTED_LANGUAGES.get(language).location_action_row_edit_description)
-                .add_to_container()
-                .add_button(hikari.ButtonStyle.PRIMARY, "location_latitude_longitude")
-                .set_label(SUPPORTED_LANGUAGES.get(language).location_action_row_edit_latitude_longitude)
-                .add_to_container()
+                .add_interactive_button(hikari.ButtonStyle.PRIMARY, "location_description", label=SUPPORTED_LANGUAGES.get(language).location_action_row_edit_description)
+                .add_interactive_button(hikari.ButtonStyle.PRIMARY, "location_latitude_longitude", label=SUPPORTED_LANGUAGES.get(language).location_action_row_edit_latitude_longitude)
             )
 
             response_message = await ctx.create_followup(embed, components=[location_edit_action_row])

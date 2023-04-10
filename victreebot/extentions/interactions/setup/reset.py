@@ -59,12 +59,8 @@ async def command_reset(
 
     action_row_1 = (
         ctx.rest.build_message_action_row()
-        .add_button(hikari.ButtonStyle.SUCCESS, "yes")
-        .set_label(SUPPORTED_LANGUAGES.get(language).yes)
-        .add_to_container()
-        .add_button(hikari.ButtonStyle.DANGER, "no")
-        .set_label(SUPPORTED_LANGUAGES.get(language).no)
-        .add_to_container()
+        .add_interactive_button(hikari.ButtonStyle.SUCCESS, "yes", label=SUPPORTED_LANGUAGES.get(language).yes)
+        .add_interactive_button(hikari.ButtonStyle.DANGER, "no", label=SUPPORTED_LANGUAGES.get(language).no)
     )
 
     response_message = await ctx.respond(embed, components=[action_row_1])

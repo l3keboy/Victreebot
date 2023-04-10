@@ -134,9 +134,7 @@ async def command_raid_edit(
             # GET LOCATION TYPE
             location_type_action_row = ctx.rest.build_message_action_row()
             for location_type in SUPPORTED_LOCATION_TYPES:
-                location_type_action_row.add_button(hikari.ButtonStyle.PRIMARY, location_type.lower()).set_label(
-                    location_type
-                ).add_to_container()
+                location_type_action_row.add_interactive_button(hikari.ButtonStyle.PRIMARY, location_type.lower(), label=location_type)
 
             location_type_embed = hikari.Embed(
                 title=SUPPORTED_LANGUAGES.get(language).raid_edit_embed_title_location_type,
@@ -198,24 +196,22 @@ async def command_raid_edit(
         timezone_aware_current_date = datetime.datetime.today().astimezone(timezone).date()
         days = rrule(DAILY, dtstart=timezone_aware_current_date)  # noqa F405
 
-        date_action_row = ctx.rest.build_message_action_row().add_select_menu(hikari.ComponentType.TEXT_SELECT_MENU, "date")
+        date_action_row = ctx.rest.build_message_action_row().add_text_menu("date")
         for day in days[:24]:
             date_action_row.add_option(
                 f"{SUPPORTED_LANGUAGES.get(language).weekdays[day.weekday()]} {day.day} "
                 f"{SUPPORTED_LANGUAGES.get(language).months[day.month - 1]}",
                 str(day),
-            ).add_to_menu()
-        date_action_row = date_action_row.add_to_container()
+            )
 
         time_action_row = (
             ctx.rest.build_modal_action_row()
             .add_text_input(
                 label=SUPPORTED_LANGUAGES.get(language).raid_create_modal_time_text_input,
                 custom_id="location_name",
+                placeholder=SUPPORTED_LANGUAGES.get(language).raid_create_modal_time_text_input_placeholder,
+                required=True
             )
-            .set_placeholder(SUPPORTED_LANGUAGES.get(language).raid_create_modal_time_text_input_placeholder)
-            .set_required(True)
-            .add_to_container()
         )
 
         date_embed = hikari.Embed(
