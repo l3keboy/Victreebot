@@ -7,13 +7,13 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased/Working on]
 
-## [0.7.10] - T.B.D.
+================================================================
+
+## [0.7.10] - 10-04-2023
 
 ### [BREAKING]
 
 - Bump different dependencies
-
-================================================================
 
 ## [0.7.9] - 02-11-2023
 
