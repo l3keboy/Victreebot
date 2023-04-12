@@ -203,12 +203,13 @@ async def command_raid_edit(
                 f"{SUPPORTED_LANGUAGES.get(language).months[day.month - 1]}",
                 str(day),
             )
+        date_action_row = date_action_row.parent
 
         time_action_row = (
             ctx.rest.build_modal_action_row()
             .add_text_input(
-                label=SUPPORTED_LANGUAGES.get(language).raid_create_modal_time_text_input,
-                custom_id="location_name",
+                "location_name",
+                SUPPORTED_LANGUAGES.get(language).raid_create_modal_time_text_input,
                 placeholder=SUPPORTED_LANGUAGES.get(language).raid_create_modal_time_text_input_placeholder,
                 required=True
             )

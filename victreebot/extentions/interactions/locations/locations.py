@@ -36,10 +36,10 @@ async def get_location_name(
     location_name_action_row = (
         ctx.rest.build_modal_action_row()
         .add_text_input(
-            label=SUPPORTED_LANGUAGES.get(language).location_name_modal_text_input_title.format(
+            "location_name",
+            SUPPORTED_LANGUAGES.get(language).location_name_modal_text_input_title.format(
                 location=location_type.strip("'")
             ),
-            custom_id="location_name",
             placeholder=SUPPORTED_LANGUAGES.get(language).location_name_modal_text_input_placeholder,
             required=True
         )
@@ -94,10 +94,10 @@ async def get_location_description(
     location_description_action_row = (
         ctx.rest.build_modal_action_row()
         .add_text_input(
-            label=SUPPORTED_LANGUAGES.get(language).location_description_modal_text_input_title.format(
+            "location_description",
+            SUPPORTED_LANGUAGES.get(language).location_description_modal_text_input_title.format(
                 location=location_type.strip("'")
             ),
-            custom_id="location_description",
             placeholder=SUPPORTED_LANGUAGES.get(language).location_description_modal_text_input_placeholder,
             required=True
         )
@@ -155,10 +155,10 @@ async def get_location_latitude_longitude(
     location_longitude_action_row = (
         ctx.rest.build_modal_action_row()
         .add_text_input(
-            label=SUPPORTED_LANGUAGES.get(language).location_longitude_modal_text_input_title.format(
+            "location_longitude",
+            SUPPORTED_LANGUAGES.get(language).location_longitude_modal_text_input_title.format(
                 location=location_type.strip("'")
             ),
-            custom_id="location_longitude",
             placeholder=SUPPORTED_LANGUAGES.get(language).location_longitude_modal_text_input_placeholder,
             required=True
         )
@@ -166,10 +166,10 @@ async def get_location_latitude_longitude(
     location_latitude_action_row = (
         ctx.rest.build_modal_action_row()
         .add_text_input(
-            label=SUPPORTED_LANGUAGES.get(language).location_latitude_modal_text_input_title.format(
+            "location_latitude",
+            SUPPORTED_LANGUAGES.get(language).location_latitude_modal_text_input_title.format(
                 location=location_type.strip("'")
             ),
-            custom_id="location_latitude",
             placeholder=SUPPORTED_LANGUAGES.get(language).location_latitude_modal_text_input_placeholder,
             required=True
         )

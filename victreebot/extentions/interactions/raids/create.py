@@ -212,21 +212,21 @@ async def command_raid_create(
     days = rrule(DAILY, dtstart=timezone_aware_current_date)  # noqa F405
 
     # GET RAID TIME
-    date_action_row = ctx.rest.build_message_action_row().add_text_menu("date")
+    date_action_row = ctx.rest.build_message_action_row().add_text_menu("date", min_values=1, max_values=1)
     for day in days[:24]:
         date_action_row.add_option(
-            f"{SUPPORTED_LANGUAGES.get(language).weekdays[day.weekday()]} {day.day} "
-            f"{SUPPORTED_LANGUAGES.get(language).months[day.month - 1]}",
+            f"{SUPPORTED_LANGUAGES.get(language).weekdays[day.weekday()]} {day.day} {SUPPORTED_LANGUAGES.get(language).months[day.month - 1]}",
             str(day),
         )
+    date_action_row = date_action_row.parent
 
     time_action_row = (
         ctx.rest.build_modal_action_row()
         .add_text_input(
-            label=SUPPORTED_LANGUAGES.get(language).raid_create_modal_time_text_input.format(
+            "location_name",
+            SUPPORTED_LANGUAGES.get(language).raid_create_modal_time_text_input.format(
                 location=location_type.strip("'")
             ),
-            custom_id="location_name",
             placeholder=SUPPORTED_LANGUAGES.get(language).raid_create_modal_time_text_input_placeholder,
             required=True
         )

@@ -1,5 +1,6 @@
 # IMPORTS
 import pokebase as pb
+import hikari
 import tanjun
 from core.bot import Bot
 from utils.DatabaseHandler import DatabaseHandler
