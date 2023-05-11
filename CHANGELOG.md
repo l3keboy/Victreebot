@@ -9,6 +9,12 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.7.13] - 11-05-2023
+
+### [Bugfixes]
+
+- Fix for old boss images staying when changing boss
+
 ## [0.7.12] - 22-04-2023
 
 ### [Bugfixes]
