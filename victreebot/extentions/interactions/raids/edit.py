@@ -134,7 +134,9 @@ async def command_raid_edit(
             # GET LOCATION TYPE
             location_type_action_row = ctx.rest.build_message_action_row()
             for location_type in SUPPORTED_LOCATION_TYPES:
-                location_type_action_row.add_interactive_button(hikari.ButtonStyle.PRIMARY, location_type.lower(), label=location_type)
+                location_type_action_row.add_interactive_button(
+                    hikari.ButtonStyle.PRIMARY, location_type.lower(), label=location_type
+                )
 
             location_type_embed = hikari.Embed(
                 title=SUPPORTED_LANGUAGES.get(language).raid_edit_embed_title_location_type,
@@ -205,14 +207,11 @@ async def command_raid_edit(
             )
         date_action_row = date_action_row.parent
 
-        time_action_row = (
-            ctx.rest.build_modal_action_row()
-            .add_text_input(
-                "location_name",
-                SUPPORTED_LANGUAGES.get(language).raid_create_modal_time_text_input,
-                placeholder=SUPPORTED_LANGUAGES.get(language).raid_create_modal_time_text_input_placeholder,
-                required=True
-            )
+        time_action_row = ctx.rest.build_modal_action_row().add_text_input(
+            "location_name",
+            SUPPORTED_LANGUAGES.get(language).raid_create_modal_time_text_input,
+            placeholder=SUPPORTED_LANGUAGES.get(language).raid_create_modal_time_text_input_placeholder,
+            required=True,
         )
 
         date_embed = hikari.Embed(
