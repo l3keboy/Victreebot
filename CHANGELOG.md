@@ -9,6 +9,12 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.7.14] - 28-10-2023
+
+### [Bugfixes]
+
+- Fix for raids not working correctly when using an unknown location
+
 ## [0.7.13] - 11-05-2023
 
 ### [Bugfixes]
