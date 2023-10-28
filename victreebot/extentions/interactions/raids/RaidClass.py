@@ -95,10 +95,13 @@ class RaidClass:
         elif reaction == "remote":
             self.remote_present.append(member.id) if add else self.remote_present.remove(member.id)
 
+        latitude = ""
+        longitude = ""
         results = await self.bot_aware.db.get_location_info(self.guild, self.location_type, self.location_name)
-        latitude = results[0].get("latitude")
-        longitude = results[0].get("longitude")
-        location_name = results[0].get("name")
+        if results is not None and results != []:
+            latitude = results[0].get("latitude")
+            longitude = results[0].get("longitude")
+        location_name = self.location_name
 
         if (
             reaction == "instinct"
@@ -182,7 +185,7 @@ class RaidClass:
                     latitude=latitude,
                     longitude=longitude,
                 )
-                if latitude is not None
+                if latitude is not None and latitude != ""
                 else SUPPORTED_LANGUAGES.get(self.language).raid_embed_description_without_location_link.format(
                     raid_id=self.raid_id.strip("'"),
                     raid_type=self.raid_type.strip("'").capitalize(),
