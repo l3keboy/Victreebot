@@ -9,6 +9,22 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.8.0] - 10-03-2024
+
+### [NEW]
+
+- Add Shadow raid option in raid create command
+- Add Shadow egg option in raid create command
+
+### [Changes]
+
+- Egg icon in raid embed now only shows as an image and not in the author portion of the embed
+
+### [Bugfixes]
+
+- Fix the `/setup` command not working
+- Fix the `/reset` command not working
+
 ## [0.7.14] - 28-10-2023
 
 ### [Bugfixes]
@@ -26,7 +42,6 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### [Bugfixes]
 
 - Fix for locations not working correctly
-
 
 ## [0.7.11] - 12-04-2023
 
