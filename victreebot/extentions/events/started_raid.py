@@ -34,7 +34,7 @@ async def event_started_raid(
         location_name = f"'{location_name}'"
         raid_takes_place_at = result.get("takes_place_at")
         boss = result.get("boss")
-        if boss != "egg1" and boss != "egg3" and boss != "egg5" and boss != "eggmega":
+        if boss != "egg1" and boss != "egg3" and boss != "egg5" and boss != "eggmega" and boss != "eggshadow":
             success, pokemon, pokemon_image = await bot.validate_pokemon(boss)
             pokemon_name = pokemon.name
         else:

@@ -41,7 +41,7 @@ async def command_setup(
         await ctx.edit_last_response(response, delete_after=auto_delete)
         return
 
-    gif = Path("../Husqy/assets/loading.gif")
+    gif = Path("./assets/gifs/loading.gif")
     embed_started = hikari.Embed(
         title=SUPPORTED_LANGUAGES.get(language).setup_started_embed_title.format(bot_name=BOT_NAME.capitalize()),
         description=SUPPORTED_LANGUAGES.get(language).setup_started_embed_description.format(

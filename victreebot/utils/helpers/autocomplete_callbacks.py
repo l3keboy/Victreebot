@@ -30,9 +30,9 @@ async def autocomplete_location(
         if len(result_map) == 25:
             break
         else:
-            result_map[
+            result_map[f"{location.get('type')}, {location.get('name')}"] = (
                 f"{location.get('type')}, {location.get('name')}"
-            ] = f"{location.get('type')}, {location.get('name')}"
+            )
 
     await ctx.set_choices(result_map)
 
@@ -84,6 +84,7 @@ async def autocomplete_pokemon(
                 result_map["Egg Rare (Egg3)"] = "egg3"
                 result_map["Egg Legendary (Egg5)"] = "egg5"
                 result_map["Egg Mega (EggMega)"] = "eggmega"
+                result_map["Egg Shadow (EggShadow)"] = "eggshadow"
             if pokemon.get("name").__contains__(query):
                 result_map[f"{pokemon.get('name')}"] = f"{pokemon.get('name')}"
 

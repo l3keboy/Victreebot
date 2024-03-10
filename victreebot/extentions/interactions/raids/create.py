@@ -123,7 +123,7 @@ async def command_raid_create(
         await event.interaction.create_initial_response(6)
         raid_type = event.interaction.custom_id
 
-        if boss != "egg1" and boss != "egg3" and boss != "egg5" and boss != "eggmega":
+        if boss != "egg1" and boss != "egg3" and boss != "egg5" and boss != "eggmega" and boss != "eggshadow":
             success, pokemon, pokemon_image = await bot.validate_pokemon(boss)
             pokemon_name = pokemon.name
             if not success:
@@ -147,6 +147,8 @@ async def command_raid_create(
                 pokemon_image = f"{path}/assets/raidEggs/raid_eggFive.png"
             elif boss == "eggmega":
                 pokemon_image = f"{path}/assets/raidEggs/raid_eggMega.png"
+            elif boss == "eggshadow":
+                pokemon_image = f"{path}/assets/raidEggs/raid_eggShadow.png"
 
     location_name = ""
     location_splitted = location.split(",")
@@ -156,7 +158,9 @@ async def command_raid_create(
         # GET LOCATION TYPE
         location_type_action_row = ctx.rest.build_message_action_row()
         for location_type in SUPPORTED_LOCATION_TYPES:
-            location_type_action_row.add_interactive_button(hikari.ButtonStyle.PRIMARY, location_type.lower(), label=location_type)
+            location_type_action_row.add_interactive_button(
+                hikari.ButtonStyle.PRIMARY, location_type.lower(), label=location_type
+            )
 
         location_type_embed = hikari.Embed(
             title=SUPPORTED_LANGUAGES.get(language).raid_create_embed_title_location_type,
@@ -220,16 +224,11 @@ async def command_raid_create(
         )
     date_action_row = date_action_row.parent
 
-    time_action_row = (
-        ctx.rest.build_modal_action_row()
-        .add_text_input(
-            "location_name",
-            SUPPORTED_LANGUAGES.get(language).raid_create_modal_time_text_input.format(
-                location=location_type.strip("'")
-            ),
-            placeholder=SUPPORTED_LANGUAGES.get(language).raid_create_modal_time_text_input_placeholder,
-            required=True
-        )
+    time_action_row = ctx.rest.build_modal_action_row().add_text_input(
+        "location_name",
+        SUPPORTED_LANGUAGES.get(language).raid_create_modal_time_text_input.format(location=location_type.strip("'")),
+        placeholder=SUPPORTED_LANGUAGES.get(language).raid_create_modal_time_text_input_placeholder,
+        required=True,
     )
 
     date_embed = hikari.Embed(
@@ -333,25 +332,27 @@ async def command_raid_create(
 
     embed = (
         hikari.Embed(
-            description=SUPPORTED_LANGUAGES.get(language).raid_embed_description_with_location_link.format(
-                raid_id=raid_id.strip("'"),
-                raid_type=raid_type.capitalize(),
-                time_date=f"""{raid_takes_place_at_to_show.strip("'")}""",
-                location=location_name.capitalize().replace("''", "'").removeprefix("'").removesuffix("'"),
-                latitude=latitude,
-                longitude=longitude,
-            )
-            if latitude is not None and latitude != ""
-            else SUPPORTED_LANGUAGES.get(language).raid_embed_description_without_location_link.format(
-                raid_id=raid_id.strip("'"),
-                raid_type=raid_type.capitalize(),
-                time_date=f"""{raid_takes_place_at_to_show.strip("'")}""",
-                location=location_name.capitalize().replace("''", "'").removeprefix("'").removesuffix("'"),
+            description=(
+                SUPPORTED_LANGUAGES.get(language).raid_embed_description_with_location_link.format(
+                    raid_id=raid_id.strip("'"),
+                    raid_type=raid_type.capitalize(),
+                    time_date=f"""{raid_takes_place_at_to_show.strip("'")}""",
+                    location=location_name.capitalize().replace("''", "'").removeprefix("'").removesuffix("'"),
+                    latitude=latitude,
+                    longitude=longitude,
+                )
+                if latitude is not None and latitude != ""
+                else SUPPORTED_LANGUAGES.get(language).raid_embed_description_without_location_link.format(
+                    raid_id=raid_id.strip("'"),
+                    raid_type=raid_type.capitalize(),
+                    time_date=f"""{raid_takes_place_at_to_show.strip("'")}""",
+                    location=location_name.capitalize().replace("''", "'").removeprefix("'").removesuffix("'"),
+                )
             ),
             colour=hikari.Colour(0x8BC683),
         )
         .set_thumbnail(pokemon_image)
-        .set_author(name=pokemon_name.replace("-", " ").capitalize(), icon=pokemon_image)
+        .set_author(name=pokemon_name.replace("-", " ").capitalize())
         .set_footer(
             text=SUPPORTED_LANGUAGES.get(language).raid_embed_footer.format(
                 member=ctx.member.display_name, attendees="0"

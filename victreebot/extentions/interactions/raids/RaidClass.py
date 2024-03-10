@@ -195,7 +195,7 @@ class RaidClass:
                 colour=hikari.Colour(0x8BC683),
             )
             .set_thumbnail(pokemon_image)
-            .set_author(name=self.boss.strip("'").replace("-", " ").capitalize(), icon=pokemon_image)
+            .set_author(name=self.boss.strip("'").replace("-", " ").capitalize())
             .set_footer(
                 text=SUPPORTED_LANGUAGES.get(self.language).raid_embed_footer.format(
                     member=raid_creator.display_name, attendees=self.total_attendess
@@ -339,7 +339,7 @@ class RaidClass:
                 colour=hikari.Colour(0x8BC683),
             )
             .set_thumbnail(pokemon_image)
-            .set_author(name=self.boss.strip("'").replace("-", " ").capitalize(), icon=pokemon_image)
+            .set_author(name=self.boss.strip("'").replace("-", " ").capitalize())
             .set_footer(
                 text=SUPPORTED_LANGUAGES.get(self.language).raid_embed_footer.format(
                     member=raid_creator.display_name, attendees=self.total_attendess
