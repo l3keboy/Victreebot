@@ -9,6 +9,18 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.9.0] - 21-10-2024
+
+### [BREAKING]
+
+- Remove automatic updating based on GitHub repository.
+- Migrated to Docker image.
+
+### [NEW]
+
+- Added files for building docker image
+- Added pipelines for automatic building of image and deploying to https://hub.docker.com/.
+
 ## [0.8.0] - 10-03-2024
 
 ### [NEW]
