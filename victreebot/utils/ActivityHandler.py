@@ -29,7 +29,7 @@ class ActivityHandler:
                 ),
                 hikari.Activity(
                     type=hikari.ActivityType.PLAYING,
-                    name=f"{self.bot.vs().version_full}",
+                    name=f"{self.bot.version}",
                 ),
                 hikari.Activity(
                     type=hikari.ActivityType.WATCHING,

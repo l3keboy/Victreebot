@@ -1,0 +1,14 @@
+.nox/
+.mypy_cache/
+.venv/
+.vscode/
+.__pycache__/
+.github/
+.flake8
+.gitignore
+Dockerfile
+noxfile.py
+pyproject.toml
+README.md
+.dockerignore
+.dockerignore.example

@@ -1,13 +1,13 @@
 # IMPORTS
 import os
 
+from core.bot import Bot
 import hikari
 import tanjun
 from dotenv import load_dotenv
 from utils.DatabaseHandler import DatabaseHandler
 from utils.helpers.BotUtils import BotUtils
 from utils.helpers.contants import SUPPORTED_LANGUAGES
-from utils.VersionHandler import VersionHandler
 
 load_dotenv()
 BOT_NAME = os.getenv("BOT_NAME")
@@ -24,6 +24,7 @@ async def command_info(
     ctx: tanjun.abc.SlashContext,
     db: DatabaseHandler = tanjun.injected(type=DatabaseHandler),
     bot: BotUtils = tanjun.injected(type=BotUtils),
+    bot_aware: Bot = tanjun.injected(type=Bot),
 ):
     (
         language,
@@ -112,7 +113,6 @@ async def command_info(
         await ctx.edit_last_response(response, delete_after=auto_delete)
         return
 
-    version = VersionHandler().version_full
     gmt = gmt
     unit_system = unit_system
     raid_timeout = raid_timeout
@@ -176,7 +176,7 @@ async def command_info(
     embed = (
         hikari.Embed(
             title=SUPPORTED_LANGUAGES.get(language).info_bot_embed_title.format(
-                bot_name=BOT_NAME.capitalize(), version=version
+                bot_name=BOT_NAME.capitalize(), version=bot_aware.version
             ),
             colour=hikari.Colour(0x8BC683),
         )

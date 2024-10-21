@@ -1,0 +1,57 @@
+name: Build & Publish Docker Image (Publish)
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build_publish_docker_image:
+    runs-on: ubuntu-latest
+    environment: main
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Create .env file
+        run: |
+          echo 'BOT_TOKEN=${{ secrets.BOT_TOKEN }}' >> .env
+          echo 'BOT_NAME=${{ secrets.BOT_NAME }}' >> .env
+          echo 'BOT_PERM=${{ secrets.BOT_PERM }}' >> .env
+          echo 'BOT_INVITE_LINK=${{ secrets.BOT_INVITE_LINK }}' >> .env
+          echo 'SUPPORT_SERVER_LINK=${{ secrets.SUPPORT_SERVER_LINK }}' >> .env
+          echo 'SUPPORT_SERVER_ID=${{ secrets.SUPPORT_SERVER_ID }}' >> .env
+          echo 'SUPPORT_SERVER_BUG_CHANNEL=${{ secrets.SUPPORT_SERVER_BUG_CHANNEL }}' >> .env
+          echo 'SUPPORT_SERVER_FEATURE_IMPROVEMENT_CHANNEL=${{ secrets.SUPPORT_SERVER_FEATURE_IMPROVEMENT_CHANNEL }}' >> .env
+          echo 'SUPPORT_SERVER_FEATURE_REQUEST_CHANNEL=${{ secrets.SUPPORT_SERVER_FEATURE_REQUEST_CHANNEL }}' >> .env
+
+          echo 'DB_USER=${{ secrets.DB_USER }}' >> .env
+          echo 'DB_PASSWORD=${{ secrets.DB_PASSWORD }}' >> .env
+          echo 'DB_HOST=${{ secrets.DB_HOST }}' >> .env
+          echo 'DB_PORT=${{ secrets.DB_PORT }}' >> .env
+          echo 'DB_DATABASENAME=${{ secrets.DB_DATABASENAME }}' >> .env
+
+          echo 'API_BEARER_GITHUB=${{ secrets.API_BEARER_GITHUB }}' >> .env
+          echo 'API_RELEASE_URL_GITHUB=${{ secrets.API_RELEASE_URL_GITHUB }}' >> .env
+
+          echo 'TEST_BOT_INVITE_LINK=${{ secrets.TEST_BOT_INVITE_LINK }}' >> .env
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: victreebot/victreebot
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: victreebot/victreebot:PROD-victreebot-latest, victreebot/victreebot:PROD-victreebot-${{ github.event.release.tag_name }}
+          labels: ${{ steps.meta.outputs.labels }}
