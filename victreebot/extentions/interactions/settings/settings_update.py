@@ -172,133 +172,98 @@ async def command_settings_update_raid(
     bot: BotUtils = tanjun.injected(type=BotUtils),
     bot_aware: Bot = tanjun.injected(type=Bot),
 ):
-    try:
-        language, auto_delete, *none = await db.get_guild_settings(
-            guild=ctx.get_guild(), settings=["language", "auto_delete"]
-        )
-        log_errors, log_settings_changed, *none = await db.get_guild_log_settings(
-            ctx.get_guild(), settings=["log_errors", "log_settings_changed"]
-        )
+    language, auto_delete, *none = await db.get_guild_settings(
+        guild=ctx.get_guild(), settings=["language", "auto_delete"]
+    )
+    log_errors, log_settings_changed, *none = await db.get_guild_log_settings(
+        ctx.get_guild(), settings=["log_errors", "log_settings_changed"]
+    )
 
-        if (
-            instinct_role is None
-            and mystic_role is None
-            and valor_role is None
-            and instinct_emoji is None
-            and mystic_emoji is None
-            and valor_emoji is None
-            and raid_timeout is None
-            and extended_time_format is None
-        ):
-            # Send response
-            response = SUPPORTED_LANGUAGES.get(language).error_response_settings_update_insert_at_least_1
-            await ctx.respond(response, ensure_result=True, delete_after=int(auto_delete))
-            if log_errors:
-                # Send to log channel
-                await bot.log_from_ctx(
-                    ctx,
-                    db,
-                    message=SUPPORTED_LANGUAGES.get(language).log_response_settings_update_general_failed.format(
-                        datetime=await bot.get_timestamp(), member=ctx.member
-                    ),
-                )
-            return
-
-        filtered_raids = [
-            raid for raid in bot_aware.raids.values() if raid is not None and raid.guild == ctx.get_guild()
-        ]
-
-        if filtered_raids != []:
-            # Send response
-            response = SUPPORTED_LANGUAGES.get(language).response_settings_update_raid_failed_raids_active
-            await ctx.respond(response, ensure_result=True, delete_after=int(auto_delete))
-            if log_errors:
-                # Send to log channel
-                await bot.log_from_ctx(
-                    ctx,
-                    db,
-                    message=SUPPORTED_LANGUAGES.get(
-                        language
-                    ).log_response_settings_update_raid_failed_raids_active.format(
-                        datetime=await bot.get_timestamp(), member=ctx.member
-                    ),
-                )
-            return
-
-        parameters = []
-        # Handle new instinct_role
-        if instinct_role is not None:
-            parameters.append(f'"instinct_role_id" = {instinct_role.id}')
-
-        # Handle new mystic_role
-        if mystic_role is not None:
-            parameters.append(f'"mystic_role_id" = {mystic_role.id}')
-
-        # Handle new valor_role
-        if valor_role is not None:
-            parameters.append(f'"valor_role_id" = {valor_role.id}')
-
-        # Handle new instinct_emoji
-        if instinct_emoji is not None:
-            instinct_emoji_id = filter(str.isdigit, instinct_emoji)
-            instinct_emoji_id = "".join(instinct_emoji_id)
-            emoji = ctx.cache.get_emoji(instinct_emoji_id) or await ctx.rest.fetch_emoji(
-                ctx.get_guild(), instinct_emoji_id
-            )
-            parameters.append(f'"instinct_emoji_id" = {emoji.id}')
-
-        # Handle new mystic_emoji
-        if mystic_emoji is not None:
-            mystic_emoji_id = filter(str.isdigit, mystic_emoji)
-            mystic_emoji_id = "".join(mystic_emoji_id)
-            emoji = ctx.cache.get_emoji(mystic_emoji_id) or await ctx.rest.fetch_emoji(ctx.get_guild(), mystic_emoji_id)
-            parameters.append(f'"mystic_emoji_id" = {emoji.id}')
-
-        # Handle new valor_emoji
-        if valor_emoji is not None:
-            valor_emoji_id = filter(str.isdigit, valor_emoji)
-            valor_emoji_id = "".join(valor_emoji_id)
-            emoji = ctx.cache.get_emoji(valor_emoji_id) or await ctx.rest.fetch_emoji(ctx.get_guild(), valor_emoji_id)
-            parameters.append(f'"valor_emoji_id" = {emoji.id}')
-
-        # Handle new raid_timeout
-        if raid_timeout is not None:
-            parameters.append(f'"raid_timeout" = {raid_timeout}')
-
-        # Handle new extended_time_format
-        if extended_time_format is not None:
-            parameters.append(f'"extended_time_format" = {extended_time_format}')
-
-        success = await db.set_guild_setting(guild=ctx.get_guild(), parameters=parameters)
-        if not success:
-            # Send response
-            response = SUPPORTED_LANGUAGES.get(language).response_settings_update_raid_failed
-            await ctx.respond(response, ensure_result=True, delete_after=int(auto_delete))
-            if log_errors:
-                # Send to log channel
-                await bot.log_from_ctx(
-                    ctx,
-                    db,
-                    message=SUPPORTED_LANGUAGES.get(language).log_response_settings_update_raid_failed.format(
-                        datetime=await bot.get_timestamp(), member=ctx.member
-                    ),
-                )
-            return
-
+    if (
+        instinct_role is None
+        and mystic_role is None
+        and valor_role is None
+        and instinct_emoji is None
+        and mystic_emoji is None
+        and valor_emoji is None
+        and raid_timeout is None
+        and extended_time_format is None
+    ):
         # Send response
-        response = SUPPORTED_LANGUAGES.get(language).response_settings_update_raid_success
+        response = SUPPORTED_LANGUAGES.get(language).error_response_settings_update_insert_at_least_1
         await ctx.respond(response, ensure_result=True, delete_after=int(auto_delete))
-        if log_settings_changed:
+        if log_errors:
             # Send to log channel
             await bot.log_from_ctx(
                 ctx,
                 db,
-                message=SUPPORTED_LANGUAGES.get(language).log_response_settings_update_raid_success.format(
+                message=SUPPORTED_LANGUAGES.get(language).log_response_settings_update_general_failed.format(
                     datetime=await bot.get_timestamp(), member=ctx.member
                 ),
             )
-    except Exception as e:
-        print(e)
+        return
+
+    filtered_raids = [raid for raid in bot_aware.raids.values() if raid is not None and raid.guild == ctx.get_guild()]
+
+    if filtered_raids != []:
+        # Send response
+        response = SUPPORTED_LANGUAGES.get(language).response_settings_update_raid_failed_raids_active
+        await ctx.respond(response, ensure_result=True, delete_after=int(auto_delete))
+        if log_errors:
+            # Send to log channel
+            await bot.log_from_ctx(
+                ctx,
+                db,
+                message=SUPPORTED_LANGUAGES.get(language).log_response_settings_update_raid_failed_raids_active.format(
+                    datetime=await bot.get_timestamp(), member=ctx.member
+                ),
+            )
+        return
+
+    parameters = []
+    # Handle new instinct_role
+    if instinct_role is not None:
+        parameters.append(f'"instinct_role_id" = {instinct_role.id}')
+
+    # Handle new mystic_role
+    if mystic_role is not None:
+        parameters.append(f'"mystic_role_id" = {mystic_role.id}')
+
+    # Handle new valor_role
+    if valor_role is not None:
+        parameters.append(f'"valor_role_id" = {valor_role.id}')
+
+    # Handle new instinct_emoji
+    if instinct_emoji is not None:
+        instinct_emoji_id = filter(str.isdigit, instinct_emoji)
+        instinct_emoji_id = "".join(instinct_emoji_id)
+        emoji = ctx.cache.get_emoji(instinct_emoji_id) or await ctx.rest.fetch_emoji(ctx.get_guild(), instinct_emoji_id)
+        parameters.append(f'"instinct_emoji_id" = {emoji.id}')
+
+    # Handle new mystic_emoji
+    if mystic_emoji is not None:
+        mystic_emoji_id = filter(str.isdigit, mystic_emoji)
+        mystic_emoji_id = "".join(mystic_emoji_id)
+        emoji = ctx.cache.get_emoji(mystic_emoji_id) or await ctx.rest.fetch_emoji(ctx.get_guild(), mystic_emoji_id)
+        parameters.append(f'"mystic_emoji_id" = {emoji.id}')
+
+    # Handle new valor_emoji
+    if valor_emoji is not None:
+        valor_emoji_id = filter(str.isdigit, valor_emoji)
+        valor_emoji_id = "".join(valor_emoji_id)
+        emoji = ctx.cache.get_emoji(valor_emoji_id) or await ctx.rest.fetch_emoji(ctx.get_guild(), valor_emoji_id)
+        parameters.append(f'"valor_emoji_id" = {emoji.id}')
+
+    # Handle new raid_timeout
+    if raid_timeout is not None:
+        parameters.append(f'"raid_timeout" = {raid_timeout}')
+
+    # Handle new extended_time_format
+    if extended_time_format is not None:
+        parameters.append(f'"extended_time_format" = {extended_time_format}')
+
+    success = await db.set_guild_setting(guild=ctx.get_guild(), parameters=parameters)
+    if not success:
         # Send response
         response = SUPPORTED_LANGUAGES.get(language).response_settings_update_raid_failed
         await ctx.respond(response, ensure_result=True, delete_after=int(auto_delete))
@@ -311,3 +276,17 @@ async def command_settings_update_raid(
                     datetime=await bot.get_timestamp(), member=ctx.member
                 ),
             )
+        return
+
+    # Send response
+    response = SUPPORTED_LANGUAGES.get(language).response_settings_update_raid_success
+    await ctx.respond(response, ensure_result=True, delete_after=int(auto_delete))
+    if log_settings_changed:
+        # Send to log channel
+        await bot.log_from_ctx(
+            ctx,
+            db,
+            message=SUPPORTED_LANGUAGES.get(language).log_response_settings_update_raid_success.format(
+                datetime=await bot.get_timestamp(), member=ctx.member
+            ),
+        )
