@@ -41,7 +41,8 @@ async def command_setup(
         await ctx.edit_last_response(response, delete_after=auto_delete)
         return
 
-    gif = Path("./assets/gifs/loading.gif")
+    starter_path = Path().cwd()
+    gif = Path(f"{starter_path}/assets/gifs/loading.gif")
     embed_started = hikari.Embed(
         title=SUPPORTED_LANGUAGES.get(language).setup_started_embed_title.format(bot_name=BOT_NAME.capitalize()),
         description=SUPPORTED_LANGUAGES.get(language).setup_started_embed_description.format(
@@ -83,7 +84,8 @@ async def command_setup(
                 )
 
     try:
-        with open(Path("./assets/emojis/instinct.png"), "rb") as image:
+        starter_path = Path().cwd()
+        with open(Path(f"{starter_path}/assets/emojis/instinct.png"), "rb") as image:
             instinct_image_bytes = image.read()
             instinct_emoji = await ctx.rest.create_emoji(
                 guild,
@@ -91,7 +93,7 @@ async def command_setup(
                 instinct_image_bytes,
                 reason=f"{BOT_NAME.capitalize()} setup Handler -- Setup!",
             )
-        with open(Path("./assets/emojis/mystic.png"), "rb") as image:
+        with open(Path(f"{starter_path}/assets/emojis/mystic.png"), "rb") as image:
             mystic_image_bytes = image.read()
             mystic_emoji = await ctx.rest.create_emoji(
                 guild,
@@ -99,7 +101,7 @@ async def command_setup(
                 mystic_image_bytes,
                 reason=f"{BOT_NAME.capitalize()} setup Handler -- Setup!",
             )
-        with open(Path("./assets/emojis/valor.png"), "rb") as image:
+        with open(Path(f"{starter_path}/assets/emojis/valor.png"), "rb") as image:
             valor_image_bytes = image.read()
             valor_emoji = await ctx.rest.create_emoji(
                 guild,

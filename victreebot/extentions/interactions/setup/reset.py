@@ -87,7 +87,8 @@ async def command_reset(
     else:
         await event.interaction.create_initial_response(6)
         if event.interaction.custom_id == "yes":
-            gif = Path("./assets/gifs/loading.gif")
+            starter_path = Path().cwd()
+            gif = Path(f"{starter_path}/assets/gifs/loading.gif")
             embed_started = hikari.Embed(
                 title=SUPPORTED_LANGUAGES.get(language).reset_started_embed_title.format(
                     bot_name=BOT_NAME.capitalize()

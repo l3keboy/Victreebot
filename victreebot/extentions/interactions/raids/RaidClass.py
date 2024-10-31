@@ -128,7 +128,7 @@ class RaidClass:
         ):
             success, pokemon, pokemon_image = await self.bot.validate_pokemon(self.boss.strip("'"))
         else:
-            path = Path().resolve()
+            path = Path().cwd()
             if self.boss.strip("'") == "egg1":
                 pokemon_image = f"{path}/assets/raidEggs/raid_eggOne.png"
             elif self.boss.strip("'") == "egg3":
@@ -268,7 +268,7 @@ class RaidClass:
         ):
             success, pokemon, pokemon_image = await self.bot.validate_pokemon(self.boss.strip("'"))
         else:
-            path = Path().resolve()
+            path = Path().cwd()
             if self.boss.strip("'") == "egg1":
                 pokemon_image = f"{path}/assets/raidEggs/raid_eggOne.png"
             elif self.boss.strip("'") == "egg3":

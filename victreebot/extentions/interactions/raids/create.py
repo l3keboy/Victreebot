@@ -136,7 +136,7 @@ async def command_raid_create(
                     await bot.log_from_ctx(ctx, db, log_response)
                 return
         else:
-            path = Path().resolve()
+            path = Path().cwd()
             pokemon = boss
             pokemon_name = boss
             if boss == "egg1":

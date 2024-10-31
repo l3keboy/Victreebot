@@ -90,7 +90,7 @@ async def command_pokedex(
         for ability in pokemon_all_abilities:
             pokemon_abilities.append(ability.ability)
     else:
-        path = Path().resolve()
+        path = Path().cwd()
 
         pokemon_name = boss.capitalize()
         pokemon_id = SUPPORTED_LANGUAGES.get(language).unknown
