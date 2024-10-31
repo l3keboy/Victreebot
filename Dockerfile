@@ -13,11 +13,12 @@ FROM python:3.12.2-alpine3.19
 ENV PYTHONDONTWRITEBYTECODE=1
 
 # Copy all files
-COPY . /Victreebot
+WORKDIR /Victreebot
+COPY . .
 
 # Initialize Git and install requirements
-RUN cd /Victreebot && pip install --no-cache-dir --no-deps --no-compile -r /Victreebot/requirements.txt
+RUN pip install --no-cache-dir --no-deps --no-compile -r /Victreebot/requirements.txt
 
 # Start
-CMD python3 -O /Victreebot/victreebot/__main__.py
+CMD python3 -O ./victreebot/__main__.py
 # END OF STAGE 1

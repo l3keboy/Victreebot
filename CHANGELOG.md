@@ -9,6 +9,13 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [0.9.1] - 31-10-2024
+
+### [Bugfixes]
+
+- Fixed an issue with a local path not being found in the docker container causing some commands to fail.
+- Added a temp try, except block to improve debugging for an unknown issue occuring in the PROD docker image
+
 ## [0.9.0] - 21-10-2024
 
 ### [BREAKING]
