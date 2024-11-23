@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: victreebot
+  name: victreebot
+  labels:
+    app: victreebot
+    environment: prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: victreebot
+      environment: prod
+  template:
+    metadata:
+      labels:
+        app: victreebot
+        environment: prod
+    spec:
+      containers:
+        - name: victreebot
+          image: victreebot/victreebot:PROD-victreebot-Version0.9.1
+      imagePullSecrets:
+        - name: victreebotregcred

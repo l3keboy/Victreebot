@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: qa-victreebot
+  name: victreebot
+  labels:
+    app: victreebot
+    environment: qa
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: victreebot
+      environment: qa
+  template:
+    metadata:
+      labels:
+        app: victreebot
+        environment: qa
+    spec:
+      containers:
+        - name: victreebot
+          image: victreebot/victreebot:QA-victreebot-latest
+          imagePullPolicy: Always
+      imagePullSecrets:
+        - name: victreebotregcred
