@@ -7,6 +7,12 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased/Working on]
 
+## [0.9.2] - T.B.D.
+
+### [Bugfixes]
+
+- Removed previously added temp try, except block
+
 ================================================================
 
 ## [0.9.1] - 31-10-2024
