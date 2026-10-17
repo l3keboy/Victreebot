@@ -1,0 +1,33 @@
+line-length = 120
+
+[format]
+docstring-code-format = true
+docstring-code-line-length = 80
+quote-style = "double"
+line-ending = "lf"
+skip-magic-trailing-comma = true
+
+[lint]
+# https://docs.astral.sh/ruff/rules/
+select = ["ALL"]
+ignore = [
+    "S101",     # Use of assert detected (used for testing purposes)
+    "D100",     # Missing docstring in public module
+    "D104",     # Missing docstring in public package
+    "COM812",   # Missing trailing comma (interferes with the formatter)
+    "N801",     # Class name `Database_Table` should use CapWords convention
+]
+exclude = ["**/utils/**"]
+
+[lint.isort]
+required-imports = []
+force-single-line = true
+
+[lint.pydocstyle]
+convention = "numpy"
+
+[lint.pylint]
+max-args = 20
+
+[lint.mccabe]
+max-complexity = 20
