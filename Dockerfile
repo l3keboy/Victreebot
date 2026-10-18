@@ -1,5 +1,5 @@
 # Stage 1: Build environment
-FROM ghcr.io/astral-sh/uv:python3.14-trixie-slim AS builder
+FROM ghcr.io/astral-sh/uv:python3.12-trixie-slim AS builder
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PIP_NO_CACHE_DIR=1 \
@@ -22,7 +22,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 COPY . ./
 
 # Stage 2: Production image
-FROM ghcr.io/astral-sh/uv:python3.14-trixie-slim AS runtime
+FROM ghcr.io/astral-sh/uv:python3.12-trixie-slim AS runtime
 
 ENV VENV_PATH=/app/.venv \
     PATH=/app/.venv/bin:$PATH \
@@ -31,8 +31,6 @@ ENV VENV_PATH=/app/.venv \
     UV_COMPILE_BYTE=1 \
     UV_LINK_MODE=copy \
     UV_CACHE_DIR=/tmp/uv-cache
-
-RUN python -m venv $VENV_PATH
 
 WORKDIR /app
 
