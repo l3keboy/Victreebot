@@ -1,3 +1,5 @@
+# Copyright (c) 2022-present l3keboy
+
 monday = "Monday"
 tuesday = "Tuesday"
 wednesday = "Wednesday"
@@ -20,7 +22,7 @@ november = "November"
 december = "December"
 months = [january, february, march, april, may, june, july, august, september, october, november, december]
 
-validate_enable_or_disable = "Enable or disable {item}"
+validate_enable_or_disable = "## Enable or disable {item}"
 validate_enable_or_disable_description = "Do you want to enable or disable {item}?"
 disable = "Disable"
 disabled = "Disabled"
@@ -72,16 +74,26 @@ log_trade_search = "Trade searches"
 # ------------------------------------------------------------------------- #
 # Responses
 response_already_setup = "{bot_name} is already setup!"
+response_setup_failed = "Failed while setting up {bot_name}! Try again later!"
 response_not_yet_setup = (
     "{bot_name} is not yet setup! Please contact the administrator of the server to setup {bot_name}!"
 )
 # Log responses
 # Embeds
-setup_started_embed_title = "{bot_name} setup started!"
+setup_started_embed_title = "## {bot_name} setup started!"
 setup_started_embed_description = "Please wait while {bot_name} gets things ready!"
-setup_finished_embed_title = "{bot_name} setup finished!"
+setup_finished_embed_title = "## {bot_name} setup finished!"
 setup_finished_embed_description = (
     "{bot_name} is finished with the setup! Please check {logs_channel_mention} for extra info!"
+)
+setup_overview_title = "## Welcome to {bot_name}"
+setup_overview_description = "Hello! Thanks for using and trusting {bot_name}!\nWhile joining the server, there are a few things that have been setup for you, these include:\n- Created custom emoji's;\n\u200b \u200b \u200b `Instinct`: {instinct_emoji} | `Mystic`: {mystic_emoji} | `Valor`: {valor_emoji}\n- Created default role's;\n\u200b \u200b \u200b `Instinct`: {role_instinct} | `Mystic`: {role_mystic}\n\u200b \u200b \u200b `Valor`: {role_valor} | `Moderator`: {role_moderator}\n- Created default channels;\n\u200b \u200b \u200b `Raids Channel`: {channel_raids} | `Logs Channel`: {channel_logs}\n\n`NOTE: Please make sure the {bot_name} bot role is placed above all other roles to ensure the working of {bot_name}`"
+setup_overview_field_1_title = "### Changeable server settings:"
+setup_overview_field_1_description = "Some default settings are changable, these include:\n- `Language`: {language}\n- `Timezone`: {timezone}\n- `Unit Systems`: {unit_system}\n- `Auto Delete`: {auto_delete} seconds\n- `Raids Channel ID`: {channel_raids}\n- `Logs Channel ID`: {channel_logs}\n\nMake sure to change these settings to your liking to make full use of {bot_name}!"
+setup_overview_field_2_title = "### {bot_name} resources:"
+setup_overview_field_2_description = "[Support server]({support_server_link}) | [Invite {bot_name}]({bot_invite_link})"
+setup_overview_footer = (
+    "Thanks for using {bot_name}! If you encounter any issues or you have feature ideas, join our support server!"
 )
 
 # ------------------------------------------------------------------------- #
@@ -99,11 +111,11 @@ log_response_reset_cancelled = (
     "`[{datetime}]` -- **{member}** tried to reset {bot_name}, but they cancelled the request!"
 )
 # Embeds
-reset_validation_embed_title = "{bot_name} reset requested!"
+reset_validation_embed_title = "## {bot_name} reset requested!"
 reset_validation_embed_description = "Are you sure you want to reset {bot_name}?\n This will reset:\n - {bot_name} emoji's\n - {bot_name} channels\n - {bot_name} roles\n - Removed ongoing raids\n\n This will not reset:\n - {bot_name} language\n - {bot_name} auto_delete\n - {bot_name} GMT\n - {bot_name} Unit System\n - {bot_name} log variables\n - User profiles\n - {bot_name} locations\n"
-reset_started_embed_title = "{bot_name} reset started!"
+reset_started_embed_title = "## {bot_name} reset started!"
 reset_started_embed_description = "Please wait while {bot_name} resets all values!"
-reset_finished_embed_title = "{bot_name} is reset!"
+reset_finished_embed_title = "## {bot_name} is reset!"
 reset_finished_embed_description = "{bot_name} has been reset! You can now use `/setup` again!"
 
 
@@ -125,11 +137,11 @@ response_pokedex_unknown_pokemon = "The pokémon `{boss_name}` does not seem to 
 log_response_pokedex_unknown_pokemon = "`[{datetime}]` -- **{member}** requested information about a pokémon, but the given pokémon does not seem to exist!"
 log_response_pokedex_requested = "`[{datetime}]` -- **{member}** requested the pokédex of a pokémon!"
 # Embeds
-pokedex_embed_title = "Pokédex information about {pokemon}"
-pokedex_embed_name_title = "Pokémon name:"
-pokedex_embed_id_title = "Pokémon ID:"
-pokedex_embed_length_weight_title = "Pokémon height and weight:"
-pokedex_embed_abilities_title = "Abilities:"
+pokedex_embed_title = "## Pokédex information about {pokemon}"
+pokedex_embed_name_title = "### Pokémon name:"
+pokedex_embed_id_title = "### Pokémon ID:"
+pokedex_embed_length_weight_title = "### Pokémon height and weight:"
+pokedex_embed_abilities_title = "### Abilities:"
 
 # ------------------------------------------------------------------------- #
 # profile #
@@ -172,24 +184,32 @@ log_response_profile_edit_timeout_reached = (
 log_response_profile_edit = "`[{datetime}]` -- **{member}** edited their profile!"
 log_response_profile_edit_invalid_friend_code_format = "`[{datetime}]` -- **{member}** tried to edit their friend code(s), but the given friend code(s) is not in the correct format!"
 # Embeds
-profile_edit_embed_title = "Profile configuration"
+profile_edit_embed_title = "## Profile configuration"
 profile_edit_embed_description = "Welcome to the profile configurator. Please select what action you want to perform."
 
 # ------------------------------------------------------------------------- #
 # view.py #
 # ------------------------------------------------------------------------- #
+profile_no_member = "There is an issue getting info about the member!"
+profile_edit_no_member = "There is an issue getting info about the member!"
 profile_no_friend_codes_set = "No friend codes set!"
 profile_no_active_locations_set = "No active locations set!"
 # Response
 # Log response
+log_response_profile_no_member = (
+    "`[{datetime}]` -- **{member}** tried to view a members profile! But something went wrong!"
+)
+log_response_profile_edit_no_member = (
+    "`[{datetime}]` -- **{member}** tried to edit their profile! But something went wrong!"
+)
 log_response_profile_view = "`[{datetime}]` -- **{member}** viewed {target_member} their profile!"
 # Embeds
-profile_view_embed_title = "Profile"
+profile_view_embed_title = "## Profile"
 profile_view_embed_description = "Viewing {member}'s profile"
-profile_view_embed_field_friend_codes = "Friend codes:"
-profile_view_embed_field_active_locations = "Active in:"
-profile_view_embed_field_raids_created = "Created"
-profile_view_embed_field_raids_participated = "Participated in"
+profile_view_embed_field_friend_codes = "### Friend codes:"
+profile_view_embed_field_active_locations = "### Active in:"
+profile_view_embed_field_raids_created = "### Created"
+profile_view_embed_field_raids_participated = "### Participated in"
 
 
 # ------------------------------------------------------------------------- #
@@ -265,14 +285,14 @@ log_response_location_info_requested = (
     "`[{datetime}]` -- **{member}** requested information about a `{location_type}'s`!"
 )
 # Embeds
-location_embed_title = "Location view"
+location_embed_title = "## Location view"
 location_embed_description = "Welcome to the location view. Please select what action you want to perform."
-location_list_embed_title = "Location list"
+location_list_embed_title = "## Location list"
 location_list_embed_description = "Showing all `{location_type}'s`!"
-location_list_embed_field_locations = "Locations:"
-location_info_embed_title = "Location info"
-location_info_embed_field_coordinates = "Coordinates:"
-location_info_embed_field_google_maps = "Google Maps link:"
+location_list_embed_field_locations = "### Locations:"
+location_info_embed_title = "## Location info"
+location_info_embed_field_coordinates = "### Coordinates:"
+location_info_embed_field_google_maps = "### Google Maps link:"
 
 
 # ------------------------------------------------------------------------- #
@@ -292,10 +312,17 @@ response_raid_create_timeout_reached = "Stopping Raid creation, timeout was reac
 response_raid_create_location_not_found = (
     "The `{location_type}` with the name `{location_name}` does not exist! Please try to create the Raid again!"
 )
+response_raid_create_no_raids_channel = (
+    "No raids channel is configured! Please configure it first before creating the Raid again!"
+)
+response_raid_create_missing_emojis = (
+    "One or more emojis are not configured! Please configure first before creating the Raid again!"
+)
 response_raid_create_unknown_boss = "The given boss, `{boss_name}`, is not found! Please try to create the Raid again!"
 response_raid_create_invalid_time = "The given time is not in a valid timeformat!"
 response_raid_create_date_time_already_past = "The given date and time combination is in the past!"
 response_raid_create_success = "The raid is created!"
+response_raid_create_failed = "Something went wrong while creating the raid!"
 # Log responses
 log_response_raid_create_timeout_reached = (
     "`[{datetime}]` -- **{member}** tried to create a raid, but the timeout was reached!"
@@ -306,23 +333,31 @@ log_response_raid_create_location_not_found = (
 log_response_raid_create_unknown_boss = (
     "`[{datetime}]` -- **{member}** tried to create a raid, but the given boss is not found!"
 )
+log_response_raid_create_no_raids_channel = (
+    "`[{datetime}]` -- **{member}** tried to create a raid, but the raids channel is not configured!"
+)
+log_response_raid_create_missing_emojis = (
+    "`[{datetime}]` -- **{member}** tried to create a raid, but one or more emojis where not configured!"
+)
 log_response_raid_create_invalid_time = (
     "`[{datetime}]` -- **{member}** tried to create a raid, but the given time is not in the valid format!"
 )
 log_response_raid_create_date_time_already_past = (
     "`[{datetime}]` -- **{member}** tried to create a raid, but the given date and time combination is in the past!"
 )
+log_response_raid_create_failed = "`[{datetime}]` -- **{member}** tried to create a raid, but something went wrong!"
 log_response_raid_create_success = "`[{datetime}]` -- **{member}** created a raid!"
 # Embed
-raid_create_embed_title_raid_type = "Raid type"
+raid_create_embed_title_raid_type = "## Raid type"
 raid_create_embed_description_raid_type = "Please select the type of the raid."
-raid_create_embed_title_location_type = "Location type"
+raid_create_embed_title_location_type = "## Location type"
 raid_create_embed_description_location_type = "Please select the type of the location where the raid takes place."
-raid_create_embed_title_date = "Raid date and time"
+raid_create_embed_title_date = "## Raid date and time"
 raid_create_embed_description_date = "When does the raid take place? (Note: The format of the dates is: Month/Day!)"
-raid_embed_description_with_location_link = "**Raid ID:** {raid_id}\n **Raid type:** {raid_type}\n **Time and date:** {time_date}\n **Location:** [{location}](https://www.google.com/maps/place/{latitude},{longitude})\n"
+raid_embed_subdescription = "**Instinct:** {instinct}\n**Mystic:** {mystic}\n**Valor:** {valor}\n**Remote:** {remote}\n"
+raid_embed_description_with_location_link = "**Raid ID:** {raid_id}\n**Raid type:** {raid_type}\n**Time and date:** {time_date}\n**Location:** [{location}](https://www.google.com/maps/place/{latitude},{longitude})\n"
 raid_embed_description_without_location_link = (
-    "**Raid ID:** {raid_id}\n **Raid type:** {raid_type}\n **Time and date:** {time_date}\n **Location:** {location}\n"
+    "**Raid ID:** {raid_id}\n**Raid type:** {raid_type}\n**Time and date:** {time_date}\n**Location:** {location}\n"
 )
 raid_embed_footer = "Raid created by: {member} | Total attendees: {attendees}"
 
@@ -394,24 +429,21 @@ raid_edit_embed_description_location_type = "Please select the type of the locat
 # Log response
 log_response_info_requested = "`[{datetime}]` -- **{member}** requested my information!"
 # Embeds
-info_bot_embed_title = "{bot_name} info! {version}"
+info_bot_embed_title = "## {bot_name} info! {version}"
 info_bot_embed_footer = "Server stats -- Raids completed: {raids_completed} | Raids created: {raids_created} | Raids deleted: {raids_deleted}"
-info_bot_embed_field_title_language = "Language:"
-info_bot_embed_field_title_auto_delete = "Auto delete:"
-info_bot_embed_field_title_unit_system = "Unit system:"
-info_bot_embed_field_title_gmt = "Timezone:"
-info_bot_embed_field_title_timeout = "Raid timeout:"
-info_bot_embed_field_title_instinct_emoji = "Instinct emoji:"
-info_bot_embed_field_title_instinct_role = "Insstinct role:"
-info_bot_embed_field_title_mystic_emoji = "Mystic emoji:"
-info_bot_embed_field_title_mystic_role = "Mystic role:"
-info_bot_embed_field_title_valor_emoji = "Valor emoji:"
-info_bot_embed_field_title_valor_role = "Valor role:"
-info_bot_embed_field_title_raids_channel = "Raids channel:"
-info_bot_embed_field_title_extended_time_format = "Extended time format:"
-info_bot_embed_field_title_logging_channel = "Logs channel:"
-info_bot_embed_field_title_moderator_role = "Moderator role:"
-info_bot_embed_field_title_logging_events_1 = "Logged events:"
+info_bot_embed_field_title_settings_general_title_settings = "### Settings"
+info_bot_embed_field_title_settings_general_description_settings = "Language: `{language}`\nAuto delete: `{auto_delete}`\nUnit system: `{unit_system}`\nTimezone: `{timezone}`\nRaid timeout: `{raid_timeout}`\nExtended time format: `{extended_time_format}`"
+info_bot_embed_field_title_settings_general_title_emojis = "### Emojis"
+info_bot_embed_field_title_settings_general_description_emojis = (
+    "Instinct emoji: {instinct}\nMystic emoji: {mystic}\nValor emoji: {valor}"
+)
+info_bot_embed_field_title_settings_general_title_roles = "### Roles"
+info_bot_embed_field_title_settings_general_description_roles = (
+    "Instinct role: {instinct}\nMystic role: {mystic}\nValor role: {valor}\nModerator role: {moderator}"
+)
+info_bot_embed_field_title_settings_general_title_channels = "### Channels"
+info_bot_embed_field_title_settings_general_description_channels = "Raids channel: {raids}\nLogs channel: {logs}"
+info_bot_embed_field_title_settings_general_title_logged_events = "### Logged events"
 
 # ------------------------------------------------------------------------- #
 # settings_update.py #
@@ -452,6 +484,7 @@ error_response_settings_update_logging_events_user_input_longer_than_possible_ev
     "You gave more values than possible, please try again by re-running the command!"
 )
 response_settings_update_logging_failed_timeout = "Stopping updates to logging settings, timeout reached!"
+response_settings_update_logging_failed = "Something went wrong while trying to update the logging settings!"
 response_settings_update_logging_logs_channel_failed = "Something went wrong while trying to update the logs channel!"
 response_settings_update_logging_logs_channel_success = "I have updated the logs channel to {channel}!"
 response_settings_update_logging_events_failed = "Something went wrong while trying to update the `{event}`!"
@@ -459,6 +492,9 @@ response_settings_update_logging_events_success = "The `{event}` are updated!"
 # Log response
 log_response_settings_update_logging_failed_timeout = (
     "`[{datetime}]` -- **{member}** tried to edit `Logging Settings`, but the timeout was reached!"
+)
+log_response_settings_update_logging_failed = (
+    "`[{datetime}]` -- **{member}** tried to edit `Logging Settings`, but something went wrong!"
 )
 log_response_settings_update_logging_logs_channel_failed_not_enough_privileges = "`[{datetime}]` -- **{member}** tried to edit the logs channel of the `Logging Settings`, but inserted a channel where I don't have enough permissions for!"
 log_response_settings_update_logging_logs_channel_failed_not_a_text_channel = "`[{datetime}]` -- **{member}** tried to edit the logs channel of the `Logging Settings`, but didn't insert a text channel!"
@@ -473,15 +509,15 @@ log_response_settings_update_logging_events_failed = (
 )
 log_response_settings_update_logging_events_success = "`[{datetime}]` -- **{member}** changed the {event}!"
 # Embeds
-settings_update_logging_embed_title = "Update logging settings"
+settings_update_logging_embed_title = "## Update logging settings"
 settings_update_logging_embed_description = "Please select what option you want to update."
-settings_update_logging_embed_logs_channel_title = "Update logs channel"
+settings_update_logging_embed_logs_channel_title = "## Update logs channel"
 settings_update_logging_embed_logs_channel_description = (
     "Please tag the channel which you want to use as the new logs channel or insert its ID."
 )
-settings_update_logging_embed_events_title = "Update events"
+settings_update_logging_embed_events_title = "## Update events"
 settings_update_logging_embed_events_description = "Please select the events you want to {status}"
-settings_update_logging_embed_field_events = "Events that can be {status}:"
+settings_update_logging_embed_field_events = "### Events that can be {status}:"
 
 
 # ------------------------------------------------------------------------- #
@@ -529,23 +565,23 @@ log_response_trade_proposal_member_proposing = "`[{datetime}]` -- **{member}** c
 log_response_trade_offer_member_offering = "`[{datetime}]` -- **{member}** offered a pokémon!"
 log_response_trade_search_member_searching = "`[{datetime}]` -- **{member}** searched for a pokémon!"
 # Embeds
-trade_embed_title = "Trading"
+trade_embed_title = "## Trading"
 trade_embed_description = "Welcome to trading! Please select what you want to do."
-trade_proposal_embed_title = "Trading proposal"
+trade_proposal_embed_title = "### Trading proposal"
 trade_proposal_embed_description = (
     "Hello everyone!\n\n I am looking for `{pokemon_search}`!\n I have `{pokemon_offer}` to offer!"
 )
 trade_proposal_embed_footer = (
     "Trade proposed by: {member}. If you have any interest or would like to negotiate, please contact me!"
 )
-trade_proposal_embed_field_offering = "Offering:"
-trade_proposal_embed_field_search = "Searching:"
-trade_offer_embed_title = "Trading offer"
+trade_proposal_embed_field_offering = "Offering: {pokemon_offer}"
+trade_proposal_embed_field_search = "Searching: {pokemon_search}"
+trade_offer_embed_title = "## Trading offer"
 trade_offer_embed_description = "Hello everyone!\n\n I have `{pokemon_offer}` to offer!"
 trade_offered_embed_footer = (
     "Trade offered by: {member}. If you have any interest or would like to negotiate, please contact me!"
 )
-trade_search_embed_title = "Trade search"
+trade_search_embed_title = "## Trade search"
 trade_search_embed_description = "Hello everyone!\n\n I am looking for `{pokemon_search}`!"
 trade_search_embed_footer = (
     "Trade search by: {member}. If you have any interest or would like to negotiate, please contact me!"

@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qa-victreebot-config
+  namespace: qa-victreebot
+data:
+  BOT_NAME: Victreebot
+  BOT_PERM: 10440260709623
+  BOT_INVITE_LINK: https://discord.com/api/oauth2/authorize?client_id=927259062586970195&permissions=10440260709623&scope=bot%20applications.commands
+  SUPPORT_SERVER_LINK: https://discord.gg/sVmMUXCYp2
+  SUPPORT_SERVER_ID: 953976913968390184
+  SUPPORT_SERVER_BUG_CHANNEL: 953976914194866231
+  SUPPORT_SERVER_FEATURE_IMPROVEMENT_CHANNEL: 953976914194866232
+  SUPPORT_SERVER_FEATURE_REQUEST_CHANNEL: 953976914194866233
+  DB_HOST: 85.215.200.41
+  DB_PORT: 5432
+  DB_DATABASENAME: VictreebotTest
+  API_RELEASE_URL_GITHUB: https://api.github.com/repos/l3keboy/Victreebot/releases/latest
+  ENVIRONMENT: dev
+  TEST_BOT_INVITE_LINK: https://discord.com/api/oauth2/authorize?client_id=927259062586970195&permissions=10440260709623&scope=bot%20applications.commands
+  SEQ_ENDPOINT_TRACES: ""
+  SEQ_ENDPOINT_LOGS: ""
+  SEQ_API_KEY: ""
+  SERVICE_NAME: Victreebot.core
+  LOG_LEVEL: info
