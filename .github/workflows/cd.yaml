@@ -1,0 +1,55 @@
+name: Release
+
+on:
+    release:
+        types: [published]
+
+jobs:
+    build_and_publish_docker:
+        runs-on: ubuntu-latest
+        environment: main
+        permissions:
+            contents: read
+
+        steps:
+            # Free disk space on runner. Caused issues when not running.
+            - name: Free Disk Space (Ubuntu)
+              uses: jlumbroso/free-disk-space@main
+              with:
+                  # this might remove tools that are actually needed,
+                  # if set to "true" but frees about 6 GB
+                  tool-cache: false
+                  # all of these default to true, but feel free to set to
+                  # "false" if necessary for your workflow
+                  android: true
+                  dotnet: true
+                  haskell: true
+                  large-packages: true
+                  docker-images: true
+                  swap-storage: true
+
+            # Checkout repository
+            - uses: actions/checkout@v5
+
+            # Log in to Docker hub
+            - name: Log in to Docker Hub
+              uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+              with:
+                  username: ${{ secrets.DOCKER_USERNAME }}
+                  password: ${{ secrets.DOCKER_PASSWORD }}
+
+            # Extract metadata
+            - name: Extract metadata (tags, labels) for Docker
+              id: meta
+              uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+              with:
+                  images: victreebot/victreebot
+
+            - name: Build and push Docker image
+              uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+              with:
+                  context: .
+                  file: ./Dockerfile
+                  push: true
+                  tags: victreebot/victreebot:PROD-victreebot-latest, victreebot/victreebot:PROD-victreebot-${{ github.event.release.tag_name }}
+                  labels: ${{ steps.meta.outputs.labels }}

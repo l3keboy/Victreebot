@@ -20,6 +20,11 @@ spec:
     spec:
       containers:
         - name: victreebot
-          image: victreebot/victreebot:PROD-victreebot-Version0.9.1
+          image: victreebot/victreebot:PROD-victreebot-1.0.0
+          envFrom:
+            - configMapRef:
+                name: victreebot-config
+            - secretRef:
+                name: victreebot-secrets
       imagePullSecrets:
         - name: victreebotregcred

@@ -1,3 +1,5 @@
+# Copyright (c) 2022-present l3keboy
+
 from types import ModuleType
 
 import hikari
@@ -24,14 +26,14 @@ class LocationLongLatModal(lightbulb.components.Modal):
             self._language_helper.location_longitude_modal_text_input_title.format(location=location_type.strip("'")),
             custom_id="location_longitude",
             placeholder=self._language_helper.location_longitude_modal_text_input_placeholder,
-            required=True
+            required=True,
         )
 
         self.add_text_field_title_input_lat = self.add_short_text_input(
             self._language_helper.location_latitude_modal_text_input_title.format(location=location_type.strip("'")),
             custom_id="location_latitude",
             placeholder=self._language_helper.location_latitude_modal_text_input_placeholder,
-            required=True
+            required=True,
         )
 
     async def on_submit(self, ctx: lightbulb.components.ModalContext) -> None:

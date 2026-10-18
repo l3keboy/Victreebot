@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import logging
@@ -42,9 +41,7 @@ from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapProp
 def setup_opentelemetry(bot: Bot) -> tuple[TracerProvider | None, LoggerProvider | None]:
     SEQ_API_KEY = EnvVarLoader.load_optional_env_variable("SEQ_API_KEY")
     if not SEQ_API_KEY:
-        logging.getLogger(__name__).warning(
-            "SEQ_API_KEY is not set. OpenTelemetry will not be configured."
-        )
+        logging.getLogger(__name__).warning("SEQ_API_KEY is not set. OpenTelemetry will not be configured.")
         return None, None
 
     """Configure opentelemetry for distributed tracing."""
@@ -52,10 +49,7 @@ def setup_opentelemetry(bot: Bot) -> tuple[TracerProvider | None, LoggerProvider
 
     # -------- TRACING --------
     tracer_provider = TracerProvider(resource=resource)
-    span_exporter = OTLPSpanExporter(
-        endpoint=bot.vars.SEQ_ENDPOINT_TRACES,
-        headers={"X-Seq-ApiKey": SEQ_API_KEY},
-    )
+    span_exporter = OTLPSpanExporter(endpoint=bot.vars.SEQ_ENDPOINT_TRACES, headers={"X-Seq-ApiKey": SEQ_API_KEY})
     tracer_provider.add_span_processor(BatchSpanProcessor(span_exporter))
     trace.set_tracer_provider(tracer_provider)
 
@@ -63,10 +57,7 @@ def setup_opentelemetry(bot: Bot) -> tuple[TracerProvider | None, LoggerProvider
 
     # -------- LOGGING --------
     logger_provider = LoggerProvider(resource=resource)
-    log_exporter = OTLPLogExporter(
-        endpoint=bot.vars.SEQ_ENDPOINT_LOGS,
-        headers={"X-Seq-ApiKey": SEQ_API_KEY},
-    )
+    log_exporter = OTLPLogExporter(endpoint=bot.vars.SEQ_ENDPOINT_LOGS, headers={"X-Seq-ApiKey": SEQ_API_KEY})
     logger_provider.add_log_record_processor(BatchLogRecordProcessor(log_exporter))
 
     handler = LoggingHandler(

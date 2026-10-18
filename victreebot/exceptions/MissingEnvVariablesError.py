@@ -1,3 +1,6 @@
+# Copyright (c) 2022-present l3keboy
+
+
 class MissingEnvVariablesError(Exception):
     """Exception raised when a required environment variable is missing."""
 

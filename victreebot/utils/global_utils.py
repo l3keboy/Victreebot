@@ -9,6 +9,7 @@ import datetime
 from zoneinfo import ZoneInfo
 import lightbulb
 import pokebase as pb
+from pokebase import APIResource
 
 from victreebot.contants import SUPPORTED_LANGUAGES
 from victreebot.languages import en
@@ -28,7 +29,7 @@ class GlobalUtils:
         self._bot = bot
         self._auto_delete_tasks: list[asyncio.Task[None]] = []
 
-    #region TIMESTAMPS
+    # region TIMESTAMPS
     async def get_timestamp(self) -> str:
         return datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
 
@@ -42,9 +43,10 @@ class GlobalUtils:
         timestamp_current = datetime.datetime.strptime(timestamp, current_datetime_format)
         timestamp_wished = datetime.datetime.strftime(timestamp_current, wished_datetime_format)
         return timestamp_wished
-    #endregion
 
-    #region AUTO DELETE
+    # endregion
+
+    # region AUTO DELETE
     async def determine_auto_delete(self, auto_delete: int | None) -> int:
         return auto_delete if auto_delete is not None else 5
 
@@ -75,9 +77,10 @@ class GlobalUtils:
             await self._bot.discord_service.delete_message(channel_id, response_message_id)
         except Exception:
             logging.getLogger(__name__).exception("Failed to auto-delete message %s:", response_message_id)
-    #endregion
 
-    #region LOGGING
+    # endregion
+
+    # region LOGGING
     async def handle_log_message(self, bot: Bot, guild_id: hikari.Snowflake | int, message: str) -> None:
         guild_log_settings = await bot.database.get_guild_log_settings(guild_id)
         if guild_log_settings is None or guild_log_settings.logs_channel_id is None:
@@ -90,26 +93,25 @@ class GlobalUtils:
                 "Unexpected error while trying to send log message to log channel for "
                 f"guild_id: {guild_id}! Got error: {e}"
             )
-    #endregion
 
-    #region EMBEDS
+    # endregion
+
+    # region EMBEDS
     async def embed_to_user(self, guild: hikari.Guild, title: str, description: str) -> hikari.Embed:
-        embed = hikari.Embed(
-            title=title,
-            description=description,
-        ).set_author(name=guild.name, icon=guild.make_icon_url())
+        embed = hikari.Embed(title=title, description=description).set_author(
+            name=guild.name, icon=guild.make_icon_url()
+        )
         return embed
-    #endregion
 
-    #region VALIDATIONS
+    # endregion
+
+    # region VALIDATIONS
     async def validate_id(self, id_to_check: str | int) -> bool:
         try:
             int(id_to_check)
             valid_id = True
         except Exception:
-            logging.getLogger(__name__).error(
-                "ID check failed! Given value can't be converted to type int!"
-            )
+            logging.getLogger(__name__).error("ID check failed! Given value can't be converted to type int!")
             valid_id = False
         return valid_id
 
@@ -143,9 +145,7 @@ class GlobalUtils:
         if float(latitude) >= -90 and float(latitude) <= 90:
             valid_latitude = True
         else:
-            logging.getLogger(__name__).error(
-                "Latitude range check failed! Given latitude is not in the right range!"
-            )
+            logging.getLogger(__name__).error("Latitude range check failed! Given latitude is not in the right range!")
 
         if float(longitude) >= -180 and float(longitude) <= 180:
             valid_longitude = True
@@ -155,9 +155,7 @@ class GlobalUtils:
             )
         return valid_latitude, valid_longitude
 
-    async def validate_channel_type(
-        self, channel_to_check: object, type_to_check: any # type: ignore
-    ) -> bool:
+    async def validate_channel_type(self, channel_to_check: object, type_to_check: type[object]) -> bool:
         desired_type = True
         if not isinstance(channel_to_check, type_to_check):
             logging.getLogger(__name__).error(
@@ -165,7 +163,7 @@ class GlobalUtils:
             )
             desired_type = False
         return desired_type
-    
+
     async def validate_friend_code(self, friend_code: str) -> bool:
         friend_code_regex = r"^\d{4}\ \d{4}\ \d{4}$"
         if re.match(friend_code_regex, friend_code):
@@ -176,7 +174,7 @@ class GlobalUtils:
             )
             return False
 
-    async def validate_pokemon(self, pokemon: str | int) -> Tuple[bool, pb.pokemon | None, str | None]:
+    async def validate_pokemon(self, pokemon: str | int) -> Tuple[bool, APIResource | None, str | None]:
         success = False
         pb_pokemon = None
         pokemon_image = None
@@ -213,11 +211,11 @@ class GlobalUtils:
             )
             desired_format = False
         return desired_format
- 
+
     async def validate_enable_or_disable(self, ctx: lightbulb.Context, bot: Bot, item: str) -> tuple[bool, bool]:
         if ctx.guild_id is None:
             return False, True
-        
+
         guild_settings = await bot.database.get_guild_settings(ctx.guild_id)
         if guild_settings is None:
             return False, True
@@ -229,8 +227,12 @@ class GlobalUtils:
             hikari.impl.ContainerComponentBuilder(
                 accent_color=hikari.Colour(0x8BC683),
                 components=[
-                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.validate_enable_or_disable.format(item=item)),
-                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.validate_enable_or_disable_description.format(item=item)),
+                    hikari.impl.TextDisplayComponentBuilder(
+                        content=language_helper.validate_enable_or_disable.format(item=item)
+                    ),
+                    hikari.impl.TextDisplayComponentBuilder(
+                        content=language_helper.validate_enable_or_disable_description.format(item=item)
+                    ),
                     hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
                     hikari.impl.MessageActionRowBuilder(
                         components=[
@@ -246,7 +248,7 @@ class GlobalUtils:
                             ),
                         ]
                     ),
-                ]
+                ],
             )
         ]
 
@@ -280,9 +282,7 @@ class GlobalUtils:
                 await ctx.delete_response(response_message)
                 return False, True
             except Exception:
-                logging.getLogger(__name__).exception(
-                    "An error occurred while listening for the info command!"
-                )
+                logging.getLogger(__name__).exception("An error occurred while listening for the info command!")
                 await ctx.delete_response(response_message)
                 return False, True
         return False, True
@@ -292,7 +292,7 @@ class GlobalUtils:
     ) -> Tuple[hikari.ComponentInteractionCreateEvent | None, bool]:
         if ctx.guild_id is None:
             return None, True
-        
+
         guild_settings = await bot.database.get_guild_settings(ctx.guild_id)
         if guild_settings is None:
             return None, True
@@ -304,24 +304,24 @@ class GlobalUtils:
             hikari.impl.ContainerComponentBuilder(
                 accent_color=hikari.Colour(0x8BC683),
                 components=[
-                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.validate_add_or_no_add.format(item=item)),
-                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.validate_add_or_no_add_description.format(item=item)),
+                    hikari.impl.TextDisplayComponentBuilder(
+                        content=language_helper.validate_add_or_no_add.format(item=item)
+                    ),
+                    hikari.impl.TextDisplayComponentBuilder(
+                        content=language_helper.validate_add_or_no_add_description.format(item=item)
+                    ),
                     hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
                     hikari.impl.MessageActionRowBuilder(
                         components=[
                             hikari.impl.InteractiveButtonBuilder(
-                                style=hikari.ButtonStyle.DANGER,
-                                label=language_helper.no,
-                                custom_id="validate,no_add",
+                                style=hikari.ButtonStyle.DANGER, label=language_helper.no, custom_id="validate,no_add"
                             ),
                             hikari.impl.InteractiveButtonBuilder(
-                                style=hikari.ButtonStyle.SUCCESS,
-                                label=language_helper.yes,
-                                custom_id="validate,add",
+                                style=hikari.ButtonStyle.SUCCESS, label=language_helper.yes, custom_id="validate,add"
                             ),
                         ]
                     ),
-                ]
+                ],
             )
         ]
 
@@ -352,10 +352,9 @@ class GlobalUtils:
                 await ctx.delete_response(response_message)
                 return None, False
             except Exception:
-                logging.getLogger(__name__).exception(
-                    "An error occurred while listening for the info command!"
-                )
+                logging.getLogger(__name__).exception("An error occurred while listening for the info command!")
                 await ctx.delete_response(response_message)
                 return None, False
         return None, False
-    #endregion
+
+    # endregion

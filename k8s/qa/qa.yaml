@@ -22,5 +22,10 @@ spec:
         - name: victreebot
           image: victreebot/victreebot:QA-victreebot-latest
           imagePullPolicy: Always
+          envFrom:
+          - configMapRef:
+              name: qa-victreebot-config
+          - secretRef:
+              name: qa-victreebot-secrets
       imagePullSecrets:
         - name: victreebotregcred

@@ -1,8 +1,11 @@
+# Copyright (c) 2022-present l3keboy
+
 # IMPORTS
 from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
+from typing import cast
 from urllib.parse import quote_plus
 
 from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor  # pyright: ignore[reportMissingTypeStubs]
@@ -10,22 +13,30 @@ from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
-from sqlmodel import and_, select
+from sqlmodel import and_
+from sqlmodel import select
 
 from victreebot.exceptions.DatabaseError import DatabaseError
-from victreebot.models.GuildStats import Guild_Stats, Guild_StatsUpdate
+from victreebot.models.GuildLogSettings import Guild_Log_Settings
+from victreebot.models.GuildLogSettings import Guild_Log_SettingsUpdate
 from victreebot.models.Guilds import Guilds
-from victreebot.models.GuildLogSettings import Guild_Log_Settings, Guild_Log_SettingsUpdate
-from victreebot.models.GuildSettings import Guild_Settings, Guild_SettingsUpdate
-from victreebot.models.Users import Users, UsersUpdate
-from victreebot.models.Locations import Locations, LocationsUpdate
-from victreebot.models.Raids import Raids, RaidsUpdate
+from victreebot.models.GuildSettings import Guild_Settings
+from victreebot.models.GuildSettings import Guild_SettingsUpdate
+from victreebot.models.GuildStats import Guild_Stats
+from victreebot.models.GuildStats import Guild_StatsUpdate
+from victreebot.models.Locations import Locations
+from victreebot.models.Locations import LocationsUpdate
+from victreebot.models.Raids import Raids
+from victreebot.models.Raids import RaidsUpdate
+from victreebot.models.Users import Users
+from victreebot.models.Users import UsersUpdate
 from victreebot.utils.EnvVarLoader import EnvVarLoader
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
     import hikari
+    from sqlalchemy.sql.elements import ColumnElement
 
     from victreebot.core.bot import Bot
 
@@ -75,22 +86,13 @@ class DatabaseHandler:
         """Insert a guild."""
         try:
             async with AsyncSession(self.engine) as session:
-                await session.execute(
-                    insert(Guilds).values(
-                        guild_id=guild_id,
-                        guild_owner_id=guild_owner_id,
-                    )
-                )
+                await session.execute(insert(Guilds).values(guild_id=guild_id, guild_owner_id=guild_owner_id))
                 await session.commit()
 
                 fetched_guilds = await session.scalars(
-                    select(Guilds).where(
-                        (Guilds.guild_id == guild_id)
-                        & (Guilds.guild_owner_id == guild_owner_id)
-                    )
+                    select(Guilds).where((Guilds.guild_id == guild_id) & (Guilds.guild_owner_id == guild_owner_id))
                 )
-                final_guild = fetched_guilds.first()
-                return final_guild
+                return fetched_guilds.first()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
@@ -112,9 +114,8 @@ class DatabaseHandler:
         try:
             async with AsyncSession(self.engine) as session:
                 fetched_guilds = await session.scalars(select(Guilds))
-                final_guilds = fetched_guilds.all()
+                return fetched_guilds.all()
 
-                return final_guilds
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
@@ -124,16 +125,13 @@ class DatabaseHandler:
         try:
             async with AsyncSession(self.engine) as session:
                 fetched_guilds = await session.scalars(select(Guilds).where(Guilds.guild_id == guild_id))
-                final_guild = fetched_guilds.first()
+                return fetched_guilds.first()
 
-                return final_guild
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
 
-    async def insert_guild_settings(
-        self, guild_id: hikari.Snowflake
-    ) -> Guild_Settings | None:
+    async def insert_guild_settings(self, guild_id: hikari.Snowflake) -> Guild_Settings | None:
         """Insert guild settings."""
         try:
             async with AsyncSession(self.engine) as session:
@@ -160,12 +158,9 @@ class DatabaseHandler:
                 await session.commit()
 
                 fetched_guilds = await session.scalars(
-                    select(Guild_Settings).where(
-                        (Guild_Settings.guild_id == guild_id)
-                    )
+                    select(Guild_Settings).where(Guild_Settings.guild_id == guild_id)
                 )
-                final_guild = fetched_guilds.first()
-                return final_guild
+                return fetched_guilds.first()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
@@ -186,12 +181,9 @@ class DatabaseHandler:
         try:
             async with AsyncSession(self.engine) as session:
                 fetched_settings = await session.scalars(
-                    select(Guild_Settings).where(
-                        Guild_Settings.guild_id == guild_id
-                    )
+                    select(Guild_Settings).where(Guild_Settings.guild_id == guild_id)
                 )
-                final_settings = fetched_settings.first()
-                return final_settings
+                return fetched_settings.first()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
@@ -216,9 +208,7 @@ class DatabaseHandler:
     # ------------------------------------------------------------------------- #
     # Guild log settings methods #
     # ------------------------------------------------------------------------- #
-    async def insert_guild_log_settings(
-        self, guild_id: hikari.Snowflake
-    ) -> Guild_Log_Settings | None:
+    async def insert_guild_log_settings(self, guild_id: hikari.Snowflake) -> Guild_Log_Settings | None:
         """Insert guild log settings."""
         try:
             async with AsyncSession(self.engine) as session:
@@ -247,12 +237,9 @@ class DatabaseHandler:
                 await session.commit()
 
                 fetched_guilds = await session.scalars(
-                    select(Guild_Log_Settings).where(
-                        (Guild_Log_Settings.guild_id == guild_id)
-                    )
+                    select(Guild_Log_Settings).where(Guild_Log_Settings.guild_id == guild_id)
                 )
-                final_guild = fetched_guilds.first()
-                return final_guild
+                return fetched_guilds.first()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
@@ -273,12 +260,9 @@ class DatabaseHandler:
         try:
             async with AsyncSession(self.engine) as session:
                 fetched_settings = await session.scalars(
-                    select(Guild_Log_Settings).where(
-                        Guild_Log_Settings.guild_id == guild_id
-                    )
+                    select(Guild_Log_Settings).where(Guild_Log_Settings.guild_id == guild_id)
                 )
-                final_settings = fetched_settings.first()
-                return final_settings
+                return fetched_settings.first()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
@@ -303,29 +287,17 @@ class DatabaseHandler:
     # ------------------------------------------------------------------------- #
     # Guild stats methods #
     # ------------------------------------------------------------------------- #
-    async def insert_guild_stats(
-        self, guild_id: hikari.Snowflake
-    ) -> Guild_Stats | None:
+    async def insert_guild_stats(self, guild_id: hikari.Snowflake) -> Guild_Stats | None:
         """Insert guild stats."""
         try:
             async with AsyncSession(self.engine) as session:
                 await session.execute(
-                    insert(Guild_Stats).values(
-                        guild_id=guild_id,
-                        raids_completed=0,
-                        raids_deleted=0,
-                        raids_created=0
-                    )
+                    insert(Guild_Stats).values(guild_id=guild_id, raids_completed=0, raids_deleted=0, raids_created=0)
                 )
                 await session.commit()
 
-                fetched_guilds = await session.scalars(
-                    select(Guild_Stats).where(
-                        (Guild_Stats.guild_id == guild_id)
-                    )
-                )
-                final_guild = fetched_guilds.first()
-                return final_guild
+                fetched_guilds = await session.scalars(select(Guild_Stats).where(Guild_Stats.guild_id == guild_id))
+                return fetched_guilds.first()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
@@ -345,20 +317,13 @@ class DatabaseHandler:
     async def get_guild_stats(self, guild_id: hikari.Snowflake | int) -> Guild_Stats | None:
         try:
             async with AsyncSession(self.engine) as session:
-                fetched_settings = await session.scalars(
-                    select(Guild_Stats).where(
-                        Guild_Stats.guild_id == guild_id
-                    )
-                )
-                final_settings = fetched_settings.first()
-                return final_settings
+                fetched_settings = await session.scalars(select(Guild_Stats).where(Guild_Stats.guild_id == guild_id))
+                return fetched_settings.first()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
 
-    async def change_guild_stats_settings(
-        self, stats: Guild_Stats, new_stats: Guild_StatsUpdate
-    ) -> Guild_Stats:
+    async def change_guild_stats_settings(self, stats: Guild_Stats, new_stats: Guild_StatsUpdate) -> Guild_Stats:
         try:
             async with AsyncSession(self.engine) as session:
                 stats.sqlmodel_update(new_stats.model_dump(exclude_unset=True))
@@ -376,9 +341,7 @@ class DatabaseHandler:
     # ------------------------------------------------------------------------- #
     # User methods #
     # ------------------------------------------------------------------------- #
-    async def insert_user(
-        self, guild_id: hikari.Snowflake, user_id: hikari.Snowflake
-    ) -> Users | None:
+    async def insert_user(self, guild_id: hikari.Snowflake, user_id: hikari.Snowflake) -> Users | None:
         """Insert user."""
         try:
             async with AsyncSession(self.engine) as session:
@@ -395,12 +358,9 @@ class DatabaseHandler:
                 await session.commit()
 
                 fetched_users = await session.scalars(
-                    select(Users).where(
-                        (Users.guild_id == guild_id) & (Users.user_id == user_id)
-                    )
+                    select(Users).where((Users.guild_id == guild_id) & (Users.user_id == user_id))
                 )
-                final_user = fetched_users.first()
-                return final_user
+                return fetched_users.first()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
@@ -430,17 +390,15 @@ class DatabaseHandler:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
 
-    async def get_user_for_guild(self, guild_id: hikari.Snowflake | int, user_id: hikari.Snowflake | int) -> Users | None:
+    async def get_user_for_guild(
+        self, guild_id: hikari.Snowflake | int, user_id: hikari.Snowflake | int
+    ) -> Users | None:
         try:
             async with AsyncSession(self.engine) as session:
                 fetched_users = await session.scalars(
-                    select(Users).where(
-                        (Users.guild_id == guild_id) 
-                        & (Users.user_id == user_id)
-                    )
+                    select(Users).where((Users.guild_id == guild_id) & (Users.user_id == user_id))
                 )
-                final_user = fetched_users.first()
-                return final_user
+                return fetched_users.first()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
@@ -448,20 +406,13 @@ class DatabaseHandler:
     async def get_users_for_guild(self, guild_id: hikari.Snowflake | int) -> Sequence[Users]:
         try:
             async with AsyncSession(self.engine) as session:
-                fetched_users = await session.scalars(
-                    select(Users).where(
-                        (Users.guild_id == guild_id) 
-                    )
-                )
-                final_users = fetched_users.all()
-                return final_users
+                fetched_users = await session.scalars(select(Users).where(Users.guild_id == guild_id))
+                return fetched_users.all()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
 
-    async def change_user(
-        self, user: Users, new_user: UsersUpdate
-    ) -> Users:
+    async def change_user(self, user: Users, new_user: UsersUpdate) -> Users:
         try:
             async with AsyncSession(self.engine) as session:
                 user.sqlmodel_update(new_user.model_dump(exclude_unset=True))
@@ -480,7 +431,13 @@ class DatabaseHandler:
     # Location methods #
     # ------------------------------------------------------------------------- #
     async def insert_location(
-        self, guild_id: hikari.Snowflake, location_type: str, name: str, latitude: float| None , longitude: float| None , description: str | None
+        self,
+        guild_id: hikari.Snowflake,
+        location_type: str,
+        name: str,
+        latitude: float | None,
+        longitude: float | None,
+        description: str | None,
     ) -> Locations | None:
         """Insert location."""
         try:
@@ -492,20 +449,17 @@ class DatabaseHandler:
                         name=name,
                         latitude=latitude,
                         longitude=longitude,
-                        description=description
+                        description=description,
                     )
                 )
                 await session.commit()
 
                 fetched_locations = await session.scalars(
                     select(Locations).where(
-                        (Locations.guild_id == guild_id) 
-                        & (Locations.type == location_type) 
-                        & (Locations.name == name)
+                        (Locations.guild_id == guild_id) & (Locations.type == location_type) & (Locations.name == name)
                     )
                 )
-                final_location = fetched_locations.first()
-                return final_location
+                return fetched_locations.first()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
@@ -538,13 +492,8 @@ class DatabaseHandler:
     async def get_locations_for_guild(self, guild_id: hikari.Snowflake | int) -> Sequence[Locations]:
         try:
             async with AsyncSession(self.engine) as session:
-                fetched_location = await session.scalars(
-                    select(Locations).where(
-                        (Locations.guild_id == guild_id) 
-                    )
-                )
-                final_locations = fetched_location.all()
-                return final_locations
+                fetched_location = await session.scalars(select(Locations).where(Locations.guild_id == guild_id))
+                return fetched_location.all()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
@@ -553,36 +502,31 @@ class DatabaseHandler:
         try:
             async with AsyncSession(self.engine) as session:
                 fetched_location = await session.scalars(
-                    select(Locations).where(
-                        (Locations.guild_id == guild_id) 
-                        & (Locations.type == location_type) 
-                    )
+                    select(Locations).where((Locations.guild_id == guild_id) & (Locations.type == location_type))
                 )
-                final_locations = fetched_location.all()
-                return final_locations
+                return fetched_location.all()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
 
-    async def get_location(self, guild_id: hikari.Snowflake | int, location_type: str, location_name: str) -> Locations | None:
+    async def get_location(
+        self, guild_id: hikari.Snowflake | int, location_type: str, location_name: str
+    ) -> Locations | None:
         try:
             async with AsyncSession(self.engine) as session:
                 fetched_location = await session.scalars(
                     select(Locations).where(
-                        (Locations.guild_id == guild_id) 
-                        & (Locations.type == location_type) 
-                        & (Locations.name == location_name) 
+                        (Locations.guild_id == guild_id)
+                        & (Locations.type == location_type)
+                        & (Locations.name == location_name)
                     )
                 )
-                final_location = fetched_location.first()
-                return final_location
+                return fetched_location.first()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
 
-    async def change_location(
-        self, location: Locations, new_location: LocationsUpdate
-    ) -> Locations:
+    async def change_location(self, location: Locations, new_location: LocationsUpdate) -> Locations:
         try:
             async with AsyncSession(self.engine) as session:
                 location.sqlmodel_update(new_location.model_dump(exclude_unset=True))
@@ -606,13 +550,12 @@ class DatabaseHandler:
                 fetched_locations = await session.scalars(
                     select(Locations).where(
                         and_(
-                            Locations.guild_id== guild_id,
-                            Locations.name.like(f"%{location_format}%"),  # type: ignore[attr-defined]
+                            Locations.guild_id == guild_id,
+                            cast("ColumnElement[str | None]", Locations.name).like(f"%{location_format}%"),
                         )
                     )
                 )
-                final_locations = fetched_locations.all()
-                return final_locations
+                return fetched_locations.all()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
@@ -621,7 +564,7 @@ class DatabaseHandler:
     # Raid methods #
     # ------------------------------------------------------------------------- #
     async def insert_raid(
-        self, 
+        self,
         guild_id: hikari.Snowflake | int,
         raid_id: str,
         raid_type: str,
@@ -657,13 +600,9 @@ class DatabaseHandler:
                 await session.commit()
 
                 fetched_raids = await session.scalars(
-                    select(Raids).where(
-                        (Raids.guild_id == guild_id) 
-                        & (Raids.raid_id == raid_id) 
-                    )
+                    select(Raids).where((Raids.guild_id == guild_id) & (Raids.raid_id == raid_id))
                 )
-                final_raid = fetched_raids.first()
-                return final_raid
+                return fetched_raids.first()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
@@ -697,21 +636,17 @@ class DatabaseHandler:
         try:
             async with AsyncSession(self.engine) as session:
                 fetched_raid_ids = await session.scalars(select(Raids.raid_id).distinct())
-                raid_ids = fetched_raid_ids.all()
+                return fetched_raid_ids.all()
 
-                return raid_ids
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
-    
+
     async def get_all_raids(self) -> Sequence[Raids]:
         try:
             async with AsyncSession(self.engine) as session:
-                fetched_raid = await session.scalars(
-                    select(Raids)
-                )
-                final_raids = fetched_raid.all()
-                return final_raids
+                fetched_raid = await session.scalars(select(Raids))
+                return fetched_raid.all()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
@@ -719,50 +654,37 @@ class DatabaseHandler:
     async def get_raids_for_guild(self, guild_id: hikari.Snowflake | int) -> Sequence[Raids]:
         try:
             async with AsyncSession(self.engine) as session:
-                fetched_raid = await session.scalars(
-                    select(Raids).where(
-                        (Raids.guild_id == guild_id) 
-                    )
-                )
-                final_raids = fetched_raid.all()
-                return final_raids
+                fetched_raid = await session.scalars(select(Raids).where(Raids.guild_id == guild_id))
+                return fetched_raid.all()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
-        
+
     async def get_raid(self, guild_id: hikari.Snowflake | int, raid_id: str) -> Raids | None:
         try:
             async with AsyncSession(self.engine) as session:
                 fetched_raid = await session.scalars(
-                    select(Raids).where(
-                        (Raids.guild_id == guild_id) 
-                        & (Raids.raid_id == raid_id)
-                    )
+                    select(Raids).where((Raids.guild_id == guild_id) & (Raids.raid_id == raid_id))
                 )
-                final_raid = fetched_raid.first()
-                return final_raid
+                return fetched_raid.first()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
 
-    async def get_raid_by_message_id(self, guild_id: hikari.Snowflake | int, raid_message_id: hikari.Snowflake | int) -> Raids | None:
+    async def get_raid_by_message_id(
+        self, guild_id: hikari.Snowflake | int, raid_message_id: hikari.Snowflake | int
+    ) -> Raids | None:
         try:
             async with AsyncSession(self.engine) as session:
                 fetched_raid = await session.scalars(
-                    select(Raids).where(
-                        (Raids.guild_id == guild_id) 
-                        & (Raids.raid_message_id == raid_message_id)
-                    )
+                    select(Raids).where((Raids.guild_id == guild_id) & (Raids.raid_message_id == raid_message_id))
                 )
-                final_raid = fetched_raid.first()
-                return final_raid
+                return fetched_raid.first()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
 
-    async def change_raid(
-        self, raid: Raids, new_raid: RaidsUpdate
-    ) -> Raids:
+    async def change_raid(self, raid: Raids, new_raid: RaidsUpdate) -> Raids:
         try:
             async with AsyncSession(self.engine) as session:
                 raid.sqlmodel_update(new_raid.model_dump(exclude_unset=True))
@@ -777,23 +699,19 @@ class DatabaseHandler:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
 
-    async def autocomplete_get_raid_id_like(
-        self, guild_id: hikari.Snowflake, raid_id_format: str
-    ) -> Sequence[Raids]:
+    async def autocomplete_get_raid_id_like(self, guild_id: hikari.Snowflake, raid_id_format: str) -> Sequence[Raids]:
         """Get raid IDs based on an input."""
         try:
             async with AsyncSession(self.engine) as session:
                 fetched_raid_ids = await session.scalars(
                     select(Raids).where(
                         and_(
-                            Raids.guild_id== guild_id,
+                            Raids.guild_id == guild_id,
                             Raids.raid_id.like(f"%{raid_id_format}%"),  # type: ignore[attr-defined]
                         )
                     )
                 )
-                final_raid_ids = fetched_raid_ids.all()
-                return final_raid_ids
+                return fetched_raid_ids.all()
         except Exception as e:
             logging.getLogger(__name__).exception("Got unexpected error while interacting with the database")
             raise DatabaseError from e
-

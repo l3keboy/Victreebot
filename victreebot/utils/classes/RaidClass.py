@@ -13,6 +13,7 @@ import hikari
 
 from victreebot.languages import en
 from victreebot.models.GuildStats import Guild_StatsUpdate
+
 if TYPE_CHECKING:
     from victreebot.core.bot import Bot
 from dotenv import load_dotenv
@@ -66,24 +67,26 @@ class RaidClass:
         if is_new_raid:
             await self.bot.database.insert_raid(
                 self.guild_id,
-                self.raid_id, 
-                self.raid_type, 
-                self.location_type, 
-                self.location_name, 
-                str(self.takes_place_at), 
-                self.boss, 
-                self.end_time, 
-                self.raid_message_channel_id, 
-                self.raid_message_id, 
-                self.raid_creator_id, 
-                self.takes_place_at_to_show
+                self.raid_id,
+                self.raid_type,
+                self.location_type,
+                self.location_name,
+                str(self.takes_place_at),
+                self.boss,
+                self.end_time,
+                self.raid_message_channel_id,
+                self.raid_message_id,
+                self.raid_creator_id,
+                self.takes_place_at_to_show,
             )
 
         await asyncio.sleep(self.wait_duration)
 
         guild_stats = await self.bot.database.get_guild_stats(self.guild_id)
         if guild_stats:
-            new_guild_stats = Guild_StatsUpdate(guild_id=self.guild_id, raids_completed=int(guild_stats.raids_completed) + 1)
+            new_guild_stats = Guild_StatsUpdate(
+                guild_id=self.guild_id, raids_completed=int(guild_stats.raids_completed) + 1
+            )
             await self.bot.database.change_guild_stats_settings(guild_stats, new_guild_stats)
 
         # NOTE UPDATE USER STATS!
@@ -125,13 +128,14 @@ class RaidClass:
             self.guild_id, self.raid_creator_id
         ) or await self.bot.rest.fetch_member(self.guild_id, self.raid_creator_id)
 
+        pokemon_image: str | None = None
         if (
             self.boss.strip("'") != "egg1"
             and self.boss.strip("'") != "egg3"
             and self.boss.strip("'") != "egg5"
             and self.boss.strip("'") != "eggmega"
         ):
-            success, pokemon, pokemon_image = await self.bot.utils.validate_pokemon(self.boss.strip("'"))
+            _, _, pokemon_image = await self.bot.utils.validate_pokemon(self.boss.strip("'"))
         else:
             path = Path().cwd()
             if self.boss.strip("'") == "egg1":
@@ -142,6 +146,9 @@ class RaidClass:
                 pokemon_image = f"{path}/assets/raidEggs/raid_eggFive.png"
             elif self.boss.strip("'") == "eggmega":
                 pokemon_image = f"{path}/assets/raidEggs/raid_eggMega.png"
+
+        if pokemon_image is None:
+            return
 
         instinct_members = (
             [
@@ -183,7 +190,7 @@ class RaidClass:
         guild_settings = await self.bot.database.get_guild_settings(self.guild_id)
         if guild_settings is None:
             return
-        
+
         language_helper = SUPPORTED_LANGUAGES.get(guild_settings.language, en)
 
         components_raid_messsage = [
@@ -191,16 +198,17 @@ class RaidClass:
                 accent_color=hikari.Colour(0x8BC683),
                 components=[
                     hikari.impl.SectionComponentBuilder(
-                        accessory=hikari.impl.ThumbnailComponentBuilder(
-                            media=pokemon_image,
-                        ),
+                        accessory=hikari.impl.ThumbnailComponentBuilder(media=pokemon_image),
                         components=[
-                            hikari.impl.TextDisplayComponentBuilder(content=
-                                language_helper.raid_embed_description_with_location_link.format(
+                            hikari.impl.TextDisplayComponentBuilder(
+                                content=language_helper.raid_embed_description_with_location_link.format(
                                     raid_id=self.raid_id.strip("'"),
                                     raid_type=self.raid_type.capitalize(),
                                     time_date=f"""{self.takes_place_at_to_show.strip("'")}""",
-                                    location=self.location_name.capitalize().replace("''", "'").removeprefix("'").removesuffix("'"),
+                                    location=self.location_name.capitalize()
+                                    .replace("''", "'")
+                                    .removeprefix("'")
+                                    .removesuffix("'"),
                                     latitude=latitude,
                                     longitude=longitude,
                                 )
@@ -209,24 +217,36 @@ class RaidClass:
                                     raid_id=self.raid_id.strip("'"),
                                     raid_type=self.raid_type.capitalize(),
                                     time_date=f"""{self.takes_place_at_to_show.strip("'")}""",
-                                    location=self.location_name.capitalize().replace("''", "'").removeprefix("'").removesuffix("'"),
+                                    location=self.location_name.capitalize()
+                                    .replace("''", "'")
+                                    .removeprefix("'")
+                                    .removesuffix("'"),
                                 )
-                            ),
-                        ]
+                            )
+                        ],
                     ),
                     hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
-                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.raid_embed_subdescription.format(instinct=", ".join(instinct.display_name for instinct in instinct_members), mystic=", ".join(mystic.display_name for mystic in mystic_members), valor=", ".join(valor.display_name for valor in valor_members), remote=", ".join(remote.display_name for remote in remote_members))),
+                    hikari.impl.TextDisplayComponentBuilder(
+                        content=language_helper.raid_embed_subdescription.format(
+                            instinct=", ".join(instinct.display_name for instinct in instinct_members),
+                            mystic=", ".join(mystic.display_name for mystic in mystic_members),
+                            valor=", ".join(valor.display_name for valor in valor_members),
+                            remote=", ".join(remote.display_name for remote in remote_members),
+                        )
+                    ),
                     hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
-                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.raid_embed_footer.format(
-                        member=raid_creator.display_name, attendees="0"
-                    )),
-                ]
+                    hikari.impl.TextDisplayComponentBuilder(
+                        content=language_helper.raid_embed_footer.format(
+                            member=raid_creator.display_name, attendees="0"
+                        )
+                    ),
+                ],
             )
         ]
 
-        raid_message = self.bot.cache.get_message(
-            self.raid_message_id
-        ) or await self.bot.rest.fetch_message(self.raid_message_channel_id, self.raid_message_id)
+        raid_message = self.bot.cache.get_message(self.raid_message_id) or await self.bot.rest.fetch_message(
+            self.raid_message_channel_id, self.raid_message_id
+        )
         await raid_message.edit(components=components_raid_messsage)
 
     async def update_raid(
@@ -246,13 +266,10 @@ class RaidClass:
         guild_settings = await self.bot.database.get_guild_settings(self.guild_id)
         if guild_settings is None:
             return False
-        
+
         language_helper = SUPPORTED_LANGUAGES.get(guild_settings.language, en)
 
-        new_raid = RaidsUpdate(
-            guild_id=self.guild_id,
-            raid_id=self.raid_id
-        )
+        new_raid = RaidsUpdate(guild_id=self.guild_id, raid_id=self.raid_id)
         if new_type is not None:
             self.raid_type = new_type
             new_raid.raid_type = new_type
@@ -290,13 +307,14 @@ class RaidClass:
             latitude = results.latitude
             longitude = results.longitude
 
+        pokemon_image: str | None = None
         if (
             self.boss.strip("'") != "egg1"
             and self.boss.strip("'") != "egg3"
             and self.boss.strip("'") != "egg5"
             and self.boss.strip("'") != "eggmega"
         ):
-            success, pokemon, pokemon_image = await self.bot.utils.validate_pokemon(self.boss.strip("'"))
+            _, _, pokemon_image = await self.bot.utils.validate_pokemon(self.boss.strip("'"))
         else:
             path = Path().cwd()
             if self.boss.strip("'") == "egg1":
@@ -307,6 +325,9 @@ class RaidClass:
                 pokemon_image = f"{path}/assets/raidEggs/raid_eggFive.png"
             elif self.boss.strip("'") == "eggmega":
                 pokemon_image = f"{path}/assets/raidEggs/raid_eggMega.png"
+
+        if pokemon_image is None:
+            return False
 
         raid_creator = self.bot.cache.get_member(
             self.guild_id, self.raid_creator_id
@@ -354,16 +375,17 @@ class RaidClass:
                 accent_color=hikari.Colour(0x8BC683),
                 components=[
                     hikari.impl.SectionComponentBuilder(
-                        accessory=hikari.impl.ThumbnailComponentBuilder(
-                            media=pokemon_image,
-                        ),
+                        accessory=hikari.impl.ThumbnailComponentBuilder(media=pokemon_image),
                         components=[
-                            hikari.impl.TextDisplayComponentBuilder(content=
-                                language_helper.raid_embed_description_with_location_link.format(
+                            hikari.impl.TextDisplayComponentBuilder(
+                                content=language_helper.raid_embed_description_with_location_link.format(
                                     raid_id=self.raid_id.strip("'"),
                                     raid_type=self.raid_type.capitalize(),
                                     time_date=f"""{self.takes_place_at_to_show.strip("'")}""",
-                                    location=self.location_name.capitalize().replace("''", "'").removeprefix("'").removesuffix("'"),
+                                    location=self.location_name.capitalize()
+                                    .replace("''", "'")
+                                    .removeprefix("'")
+                                    .removesuffix("'"),
                                     latitude=latitude,
                                     longitude=longitude,
                                 )
@@ -372,24 +394,36 @@ class RaidClass:
                                     raid_id=self.raid_id.strip("'"),
                                     raid_type=self.raid_type.capitalize(),
                                     time_date=f"""{self.takes_place_at_to_show.strip("'")}""",
-                                    location=self.location_name.capitalize().replace("''", "'").removeprefix("'").removesuffix("'"),
+                                    location=self.location_name.capitalize()
+                                    .replace("''", "'")
+                                    .removeprefix("'")
+                                    .removesuffix("'"),
                                 )
-                            ),
-                        ]
+                            )
+                        ],
                     ),
                     hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
-                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.raid_embed_subdescription.format(instinct=", ".join(instinct.display_name for instinct in instinct_members), mystic=", ".join(mystic.display_name for mystic in mystic_members), valor=", ".join(valor.display_name for valor in valor_members), remote=", ".join(remote.display_name for remote in remote_members))),
+                    hikari.impl.TextDisplayComponentBuilder(
+                        content=language_helper.raid_embed_subdescription.format(
+                            instinct=", ".join(instinct.display_name for instinct in instinct_members),
+                            mystic=", ".join(mystic.display_name for mystic in mystic_members),
+                            valor=", ".join(valor.display_name for valor in valor_members),
+                            remote=", ".join(remote.display_name for remote in remote_members),
+                        )
+                    ),
                     hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
-                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.raid_embed_footer.format(
-                        member=raid_creator.display_name, attendees="0"
-                    )),
-                ]
+                    hikari.impl.TextDisplayComponentBuilder(
+                        content=language_helper.raid_embed_footer.format(
+                            member=raid_creator.display_name, attendees="0"
+                        )
+                    ),
+                ],
             )
         ]
 
-        raid_message = self.bot.cache.get_message(
-            self.raid_message_id
-        ) or await self.bot.rest.fetch_message(self.raid_message_channel_id, self.raid_message_id)
+        raid_message = self.bot.cache.get_message(self.raid_message_id) or await self.bot.rest.fetch_message(
+            self.raid_message_channel_id, self.raid_message_id
+        )
         await raid_message.edit(components=components_raid_messsage, attachment=None)
         return True
 
@@ -404,6 +438,6 @@ class RaidClass:
                 return
             except Exception as e:
                 logging.getLogger(__name__).error(
-                    "Unexpected error while trying to delete raid for " f"guild_id: {self.guild_id}! Got error: {e}!"
+                    f"Unexpected error while trying to delete raid for guild_id: {self.guild_id}! Got error: {e}!"
                 )
             self.task.cancel()

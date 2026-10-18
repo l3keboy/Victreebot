@@ -1,11 +1,14 @@
+# Copyright (c) 2022-present l3keboy
+
 from sqlalchemy import Column
-from sqlmodel import BigInteger, Field  # pyright: ignore[reportUnknownVariableType]
+from sqlmodel import BigInteger  # pyright: ignore[reportUnknownVariableType]
+from sqlmodel import Field  # pyright: ignore[reportUnknownVariableType]
 from sqlmodel import SQLModel
 from sqlmodel import UniqueConstraint
 
 
 class Users(SQLModel, table=True):
-    __tablename__ = "Users" # type: ignore
+    __tablename__ = "Users"  # pyright: ignore[reportAssignmentType]
 
     guild_id: int = Field(sa_column=Column(name="guild_id", nullable=False, primary_key=True, type_=BigInteger))
     user_id: int = Field(nullable=False, primary_key=True, sa_type=BigInteger)

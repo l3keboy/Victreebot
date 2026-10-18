@@ -1,0 +1,13 @@
+services:
+  victreebot:
+    image: victreebot/victreebot:PROD-victreebot-1.0.0
+    container_name: Victreebot
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - victreebot_network
+
+networks:
+  victreebot_network:
+    driver: bridge

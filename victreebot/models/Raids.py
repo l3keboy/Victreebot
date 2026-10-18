@@ -1,11 +1,14 @@
+# Copyright (c) 2022-present l3keboy
+
 from sqlalchemy import Column
-from sqlmodel import BigInteger, Field  # pyright: ignore[reportUnknownVariableType]
+from sqlmodel import BigInteger  # pyright: ignore[reportUnknownVariableType]
+from sqlmodel import Field  # pyright: ignore[reportUnknownVariableType]
 from sqlmodel import SQLModel
 from sqlmodel import UniqueConstraint
 
 
 class Raids(SQLModel, table=True):
-    __tablename__ = "Raids" # type: ignore
+    __tablename__ = "Raids"  # pyright: ignore[reportAssignmentType]
 
     guild_id: int = Field(sa_column=Column(name="guild_id", nullable=False, primary_key=True, type_=BigInteger))
     raid_id: str = Field(nullable=False, primary_key=True)
@@ -25,6 +28,7 @@ class Raids(SQLModel, table=True):
     raid_creator_id: int = Field(nullable=False, sa_type=BigInteger)
     takes_place_at_to_show: str = Field(nullable=True, default=None)
     UniqueConstraint("guild_id", "raid_id", name="raids_un")
+
 
 class RaidsUpdate(SQLModel):
     guild_id: int

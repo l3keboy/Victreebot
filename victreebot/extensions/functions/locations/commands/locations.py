@@ -1,3 +1,5 @@
+# Copyright (c) 2022-present l3keboy
+
 import logging
 import math
 
@@ -13,17 +15,15 @@ from victreebot.extensions.functions.locations.menus.location_name_menu import L
 from victreebot.languages import en
 from victreebot.models.Locations import LocationsUpdate
 
+LOCATION_AUTO_DELETE_THRESHOLD = 5
+
 # Load command
 loader = lightbulb.Loader()
 
 
 # Command
 @loader.command
-class Locations(
-    lightbulb.SlashCommand, 
-    name="locations", 
-    description="Interactions for locations",
-):
+class Locations(lightbulb.SlashCommand, name="locations", description="Interactions for locations"):
     """Command to get info about a pokemon."""
 
     @lightbulb.invoke
@@ -49,11 +49,13 @@ class Locations(
         auto_delete_helper = await bot.utils.determine_auto_delete(guild_settings.auto_delete)
 
         if not guild_settings.is_setup:
-            response_message = await ctx.respond(language_helper.response_not_yet_setup.format(bot_name=bot.vars.BOT_NAME.capitalize()))
+            response_message = await ctx.respond(
+                language_helper.response_not_yet_setup.format(bot_name=bot.vars.BOT_NAME.capitalize())
+            )
             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
             return
 
-        auto_delete_helper = 120 if auto_delete_helper < 120 else auto_delete_helper
+        auto_delete_helper = max(auto_delete_helper, 120)
 
         components_home = [
             hikari.impl.ContainerComponentBuilder(
@@ -110,7 +112,7 @@ class Locations(
                             ),
                         ]
                     ),
-                ]
+                ],
             )
         ]
 
@@ -130,16 +132,22 @@ class Locations(
                     return
 
                 await bot.discord_service.delete_message(ctx.channel_id, response_message)
-                if action == "list_gyms" or action == "list_pokestops":
+                if action in {"list_gyms", "list_pokestops"}:
                     await event.interaction.create_initial_response(6)
                     location_type = "gym" if action == "list_gyms" else "pokéstop"
                     locations = await bot.database.get_locations_by_type(ctx.guild_id, location_type)
                     if len(locations) <= 0:
-                        response_message = await ctx.respond(language_helper.response_location_list_no_results.format(location_type=location_type.strip("'")))
+                        response_message = await ctx.respond(
+                            language_helper.response_location_list_no_results.format(
+                                location_type=location_type.strip("'")
+                            )
+                        )
                         await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                         if guild_log_settings.log_errors:
                             log_response = language_helper.log_response_location_list_no_results.format(
-                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type.strip("'"),
+                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                member=ctx.member,
+                                location_type=location_type.strip("'"),
                             )
                             await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                         return
@@ -147,41 +155,55 @@ class Locations(
                     all_locations = [location.name for location in locations]
                     if guild_log_settings.log_errors:
                         log_response = language_helper.log_response_location_list_requested.format(
-                            datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type.strip("'"),
+                            datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                            member=ctx.member,
+                            location_type=location_type.strip("'"),
                         )
                         await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
 
-
                     components: list[tuple[hikari.impl.ContainerComponentBuilder]] = []
-                    if len(all_locations) < 5:
-                        auto_delete_helper = 20 if auto_delete_helper < 20 else auto_delete_helper
+                    if len(all_locations) < LOCATION_AUTO_DELETE_THRESHOLD:
+                        auto_delete_helper = max(auto_delete_helper, 20)
 
                         known_coordinates = (
                             "[{google_maps_translation}](https://www.google.com/maps/place/{latitude},{longitude})"
                         )
                         unknown_coordinates = f"`{language_helper.location_no_coordinates_set}`"
 
-                        components.append((
-                            hikari.impl.ContainerComponentBuilder(
-                                accent_color=hikari.Colour(0x8BC683),
-                                components=[
-                                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.location_list_embed_title),
-                                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.location_list_embed_description.format(location_type=location_type.strip("'"))),
-                                    hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
-                                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.location_list_embed_field_locations),
-                                    hikari.impl.TextDisplayComponentBuilder(content="\n".join(
-                                            f"***{location.name}***"
-                                            + " \n"
-                                            + f"{known_coordinates.format(google_maps_translation=language_helper.location_google_maps, latitude=location.latitude, longitude=location.longitude) if location.latitude is not None and location.longitude is not None else unknown_coordinates}"  # noqa E501
-                                            for location in locations
+                        components.append(
+                            (
+                                hikari.impl.ContainerComponentBuilder(
+                                    accent_color=hikari.Colour(0x8BC683),
+                                    components=[
+                                        hikari.impl.TextDisplayComponentBuilder(
+                                            content=language_helper.location_list_embed_title
                                         ),
-                                    ),
-                                ]
-                            ),
-                        ))
+                                        hikari.impl.TextDisplayComponentBuilder(
+                                            content=language_helper.location_list_embed_description.format(
+                                                location_type=location_type.strip("'")
+                                            )
+                                        ),
+                                        hikari.impl.SeparatorComponentBuilder(
+                                            divider=True, spacing=hikari.SpacingType.LARGE
+                                        ),
+                                        hikari.impl.TextDisplayComponentBuilder(
+                                            content=language_helper.location_list_embed_field_locations
+                                        ),
+                                        hikari.impl.TextDisplayComponentBuilder(
+                                            content="\n".join(
+                                                f"***{location.name}***"
+                                                " \n"
+                                                f"{known_coordinates.format(google_maps_translation=language_helper.location_google_maps, latitude=location.latitude, longitude=location.longitude) if location.latitude is not None and location.longitude is not None else unknown_coordinates}"  # noqa: E501
+                                                for location in locations
+                                            )
+                                        ),
+                                    ],
+                                ),
+                            )
+                        )
                         await self._handle_listening(components, ctx, bot, auto_delete_helper)
                     else:
-                        auto_delete_helper = 45 if auto_delete_helper < 45 else auto_delete_helper
+                        auto_delete_helper = max(auto_delete_helper, 45)
 
                         i, start, end, max_length = 1, 0, 5, 5
                         pages = math.ceil(len(locations) / max_length)
@@ -192,24 +214,37 @@ class Locations(
                         unknown_coordinates = f"`{language_helper.location_no_coordinates_set}`"
 
                         while i <= pages:
-                            components.append((
-                                hikari.impl.ContainerComponentBuilder(
-                                    accent_color=hikari.Colour(0x8BC683),
-                                    components=[
-                                        hikari.impl.TextDisplayComponentBuilder(content=language_helper.location_list_embed_title),
-                                        hikari.impl.TextDisplayComponentBuilder(content=language_helper.location_list_embed_description.format(location_type=location_type.strip("'"))),
-                                        hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
-                                        hikari.impl.TextDisplayComponentBuilder(content=language_helper.location_list_embed_field_locations),
-                                        hikari.impl.TextDisplayComponentBuilder(content="\n".join(
-                                                f"***{location.name}***"
-                                                + " \n"
-                                                + f"{known_coordinates.format(google_maps_translation=language_helper.location_google_maps, latitude=location.latitude, longitude=location.longitude) if location.latitude is not None and location.longitude is not None else unknown_coordinates}"  # noqa E501
-                                                for location in locations[start:end]
+                            components.append(
+                                (
+                                    hikari.impl.ContainerComponentBuilder(
+                                        accent_color=hikari.Colour(0x8BC683),
+                                        components=[
+                                            hikari.impl.TextDisplayComponentBuilder(
+                                                content=language_helper.location_list_embed_title
                                             ),
-                                        ),
-                                    ]
-                                ),
-                            ))
+                                            hikari.impl.TextDisplayComponentBuilder(
+                                                content=language_helper.location_list_embed_description.format(
+                                                    location_type=location_type.strip("'")
+                                                )
+                                            ),
+                                            hikari.impl.SeparatorComponentBuilder(
+                                                divider=True, spacing=hikari.SpacingType.LARGE
+                                            ),
+                                            hikari.impl.TextDisplayComponentBuilder(
+                                                content=language_helper.location_list_embed_field_locations
+                                            ),
+                                            hikari.impl.TextDisplayComponentBuilder(
+                                                content="\n".join(
+                                                    f"***{location.name}***"
+                                                    " \n"
+                                                    f"{known_coordinates.format(google_maps_translation=language_helper.location_google_maps, latitude=location.latitude, longitude=location.longitude) if location.latitude is not None and location.longitude is not None else unknown_coordinates}"  # noqa: E501
+                                                    for location in locations[start:end]
+                                                )
+                                            ),
+                                        ],
+                                    ),
+                                )
+                            )
                             start += 5
                             end += 5
                             i += 1
@@ -217,7 +252,7 @@ class Locations(
                         components = await self._add_pagination_to_components(components)
                         await self._handle_listening(components, ctx, bot, auto_delete_helper)
 
-                if action == "add_gym" or action == "add_pokestop":
+                if action in {"add_gym", "add_pokestop"}:
                     location_type = "gym" if action == "add_gym" else "pokéstop"
                     success, location_name = await self._get_location_name(ctx, event, bot, location_type)
                     if not success:
@@ -225,18 +260,26 @@ class Locations(
                         await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                         if guild_log_settings.log_errors:
                             log_response = language_helper.log_response_location_add_failed.format(
-                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type
+                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                member=ctx.member,
+                                location_type=location_type,
                             )
                             await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                         return
 
                     location_exists = await bot.database.get_location(ctx.guild_id, location_type, location_name)
                     if location_exists:
-                        response_message = await ctx.respond(language_helper.response_location_add_failed_already_exists.format(location_type=location_type.strip("'")))
+                        response_message = await ctx.respond(
+                            language_helper.response_location_add_failed_already_exists.format(
+                                location_type=location_type.strip("'")
+                            )
+                        )
                         await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                         if guild_log_settings.log_errors:
                             log_response = language_helper.log_response_location_add_failed_already_exists.format(
-                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type.strip("'")
+                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                member=ctx.member,
+                                location_type=location_type.strip("'"),
                             )
                             await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                         return
@@ -247,20 +290,26 @@ class Locations(
                         await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                         if guild_log_settings.log_errors:
                             log_response = language_helper.log_response_location_add_failed.format(
-                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type
+                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                member=ctx.member,
+                                location_type=location_type,
                             )
                             await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                         return
 
                     location_description = None
                     if add:
-                        success, location_description = await self._get_location_description(ctx, event, bot, location_type)
+                        success, location_description = await self._get_location_description(
+                            ctx, event, bot, location_type
+                        )
                         if not success:
                             response_message = await ctx.respond(language_helper.response_location_add_failed)
                             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                             if guild_log_settings.log_errors:
                                 log_response = language_helper.log_response_location_add_failed.format(
-                                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type
+                                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                    member=ctx.member,
+                                    location_type=location_type,
                                 )
                                 await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                             return
@@ -271,7 +320,9 @@ class Locations(
                         await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                         if guild_log_settings.log_errors:
                             log_response = language_helper.log_response_location_add_failed.format(
-                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type
+                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                member=ctx.member,
+                                location_type=location_type,
                             )
                             await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                         return
@@ -284,19 +335,25 @@ class Locations(
                             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                             if guild_log_settings.log_errors:
                                 log_response = language_helper.log_response_location_add_failed.format(
-                                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type
+                                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                    member=ctx.member,
+                                    location_type=location_type,
                                 )
                                 await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                             return
 
                     try:
-                        _ = await bot.database.insert_location(ctx.guild_id, location_type, location_name, latitude, longitude, location_description)
+                        _ = await bot.database.insert_location(
+                            ctx.guild_id, location_type, location_name, latitude, longitude, location_description
+                        )
                     except DatabaseError:
                         response_message = await ctx.respond(language_helper.response_location_add_failed)
                         await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                         if guild_log_settings.log_errors:
                             log_response = language_helper.log_response_location_add_failed.format(
-                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type
+                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                member=ctx.member,
+                                location_type=location_type,
                             )
                             await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                         raise
@@ -305,11 +362,13 @@ class Locations(
                     await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                     if guild_log_settings.log_location_add:
                         log_response = language_helper.log_response_location_add_success.format(
-                            datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type
+                            datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                            member=ctx.member,
+                            location_type=location_type,
                         )
                         await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
 
-                if action == "delete_gym" or action == "delete_pokestop":
+                if action in {"delete_gym", "delete_pokestop"}:
                     location_type = "gym" if action == "delete_gym" else "pokéstop"
                     success, location_name = await self._get_location_name(ctx, event, bot, location_type)
                     if not success:
@@ -324,11 +383,17 @@ class Locations(
 
                     location_exists = await bot.database.get_location(ctx.guild_id, location_type, location_name)
                     if not location_exists:
-                        response_message = await ctx.respond(language_helper.response_location_delete_failed_no_such_location.format(location_type=location_type.strip("'")))
+                        response_message = await ctx.respond(
+                            language_helper.response_location_delete_failed_no_such_location.format(
+                                location_type=location_type.strip("'")
+                            )
+                        )
                         await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                         if guild_log_settings.log_errors:
                             log_response = language_helper.log_response_location_delete_failed_no_such_location.format(
-                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type.strip("'")
+                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                member=ctx.member,
+                                location_type=location_type.strip("'"),
                             )
                             await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                         return
@@ -336,24 +401,34 @@ class Locations(
                     try:
                         await bot.database.delete_location(location_exists)
                     except DatabaseError:
-                        response_message = await ctx.respond(language_helper.response_location_delete_failed.format(location_type=location_type.strip("'")))
+                        response_message = await ctx.respond(
+                            language_helper.response_location_delete_failed.format(
+                                location_type=location_type.strip("'")
+                            )
+                        )
                         await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                         if guild_log_settings.log_errors:
                             log_response = language_helper.log_response_location_delete_failed.format(
-                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type.strip("'")
+                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                member=ctx.member,
+                                location_type=location_type.strip("'"),
                             )
                             await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                         raise
 
-                    response_message = await ctx.respond(language_helper.response_location_delete_success.format(location_type=location_type.strip("'")))
+                    response_message = await ctx.respond(
+                        language_helper.response_location_delete_success.format(location_type=location_type.strip("'"))
+                    )
                     await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                     if guild_log_settings.log_location_delete:
                         log_response = language_helper.log_response_location_delete_success.format(
-                            datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type.strip("'")
+                            datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                            member=ctx.member,
+                            location_type=location_type.strip("'"),
                         )
                         await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
 
-                if action == "edit_gym" or action == "edit_pokestop":
+                if action in {"edit_gym", "edit_pokestop"}:
                     location_type = "gym" if action == "edit_gym" else "pokéstop"
                     success, location_name = await self._get_location_name(ctx, event, bot, location_type)
                     if not success:
@@ -368,11 +443,17 @@ class Locations(
 
                     location_exists = await bot.database.get_location(ctx.guild_id, location_type, location_name)
                     if not location_exists:
-                        response_message = await ctx.respond(language_helper.response_location_edit_failed_no_such_location.format(location_type=location_type.strip("'")))
+                        response_message = await ctx.respond(
+                            language_helper.response_location_edit_failed_no_such_location.format(
+                                location_type=location_type.strip("'")
+                            )
+                        )
                         await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                         if guild_log_settings.log_errors:
                             log_response = language_helper.log_response_location_edit_failed_no_such_location.format(
-                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type.strip("'")
+                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                member=ctx.member,
+                                location_type=location_type.strip("'"),
                             )
                             await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                         return
@@ -382,7 +463,9 @@ class Locations(
                             accent_color=hikari.Colour(0x8BC683),
                             components=[
                                 hikari.impl.TextDisplayComponentBuilder(content=language_helper.location_embed_title),
-                                hikari.impl.TextDisplayComponentBuilder(content=language_helper.location_embed_description),
+                                hikari.impl.TextDisplayComponentBuilder(
+                                    content=language_helper.location_embed_description
+                                ),
                                 hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
                                 hikari.impl.MessageActionRowBuilder(
                                     components=[
@@ -398,7 +481,7 @@ class Locations(
                                         ),
                                     ]
                                 ),
-                            ]
+                            ],
                         )
                     ]
 
@@ -420,40 +503,58 @@ class Locations(
                             await bot.discord_service.delete_message(ctx.channel_id, response_message_edit)
 
                             if action == "location_description":
-                                event_edit_description, add = await bot.utils.validate_add_or_no_add(ctx, bot, "a description")
+                                event_edit_description, add = await bot.utils.validate_add_or_no_add(
+                                    ctx, bot, "a description"
+                                )
                                 if not event_edit_description:
                                     response_message = await ctx.respond(language_helper.response_location_edit_failed)
-                                    await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
+                                    await bot.utils.handle_auto_delete(
+                                        ctx.channel_id, response_message, auto_delete_helper
+                                    )
                                     if guild_log_settings.log_errors:
                                         log_response = language_helper.log_response_location_edit_failed.format(
-                                            datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type
+                                            datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                            member=ctx.member,
+                                            location_type=location_type,
                                         )
                                         await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                                     return
 
                                 location_description = None
                                 if add:
-                                    success, location_description = await self._get_location_description(ctx, event_edit_description, bot, location_type)
+                                    success, location_description = await self._get_location_description(
+                                        ctx, event_edit_description, bot, location_type
+                                    )
                                     if not success:
-                                        response_message = await ctx.respond(language_helper.response_location_edit_failed)
-                                        await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
+                                        response_message = await ctx.respond(
+                                            language_helper.response_location_edit_failed
+                                        )
+                                        await bot.utils.handle_auto_delete(
+                                            ctx.channel_id, response_message, auto_delete_helper
+                                        )
                                         if guild_log_settings.log_errors:
                                             log_response = language_helper.log_response_location_edit_failed.format(
-                                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type
+                                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                                member=ctx.member,
+                                                location_type=location_type,
                                             )
                                             await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                                         return
-                                
+
                                 new_location = LocationsUpdate(guild_id=ctx.guild_id, description=location_description)
 
                                 try:
                                     _ = await bot.database.change_location(location_exists, new_location)
                                 except DatabaseError:
                                     response_message = await ctx.respond(language_helper.response_location_edit_failed)
-                                    await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
+                                    await bot.utils.handle_auto_delete(
+                                        ctx.channel_id, response_message, auto_delete_helper
+                                    )
                                     if guild_log_settings.log_errors:
                                         log_response = language_helper.log_response_location_edit_failed.format(
-                                            datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type
+                                            datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                            member=ctx.member,
+                                            location_type=location_type,
                                         )
                                         await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                                     raise
@@ -462,45 +563,67 @@ class Locations(
                                 await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                                 if guild_log_settings.log_location_add:
                                     log_response = language_helper.log_response_location_edit_success.format(
-                                        datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type
+                                        datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                        member=ctx.member,
+                                        location_type=location_type,
                                     )
                                     await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
 
                             if action == "location_latitude_longitude":
-                                event_edit_long_lat, add = await bot.utils.validate_add_or_no_add(ctx, bot, "the latitude and longitude")
+                                event_edit_long_lat, add = await bot.utils.validate_add_or_no_add(
+                                    ctx, bot, "the latitude and longitude"
+                                )
                                 if not event_edit_long_lat:
                                     response_message = await ctx.respond(language_helper.response_location_edit_failed)
-                                    await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
+                                    await bot.utils.handle_auto_delete(
+                                        ctx.channel_id, response_message, auto_delete_helper
+                                    )
                                     if guild_log_settings.log_errors:
                                         log_response = language_helper.log_response_location_edit_failed.format(
-                                            datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type
+                                            datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                            member=ctx.member,
+                                            location_type=location_type,
                                         )
                                         await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                                     return
 
                                 latitude, longitude = None, None
                                 if add:
-                                    success, longitude, latitude = await self._get_location_long_lat(ctx, event_edit_long_lat, bot, location_type)
+                                    success, longitude, latitude = await self._get_location_long_lat(
+                                        ctx, event_edit_long_lat, bot, location_type
+                                    )
                                     if not success:
-                                        response_message = await ctx.respond(language_helper.response_location_edit_failed)
-                                        await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
+                                        response_message = await ctx.respond(
+                                            language_helper.response_location_edit_failed
+                                        )
+                                        await bot.utils.handle_auto_delete(
+                                            ctx.channel_id, response_message, auto_delete_helper
+                                        )
                                         if guild_log_settings.log_errors:
                                             log_response = language_helper.log_response_location_edit_failed.format(
-                                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type
+                                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                                member=ctx.member,
+                                                location_type=location_type,
                                             )
                                             await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                                         return
-                                
-                                new_location = LocationsUpdate(guild_id=ctx.guild_id, longitude=longitude, latitude=latitude)
+
+                                new_location = LocationsUpdate(
+                                    guild_id=ctx.guild_id, longitude=longitude, latitude=latitude
+                                )
 
                                 try:
                                     _ = await bot.database.change_location(location_exists, new_location)
                                 except DatabaseError:
                                     response_message = await ctx.respond(language_helper.response_location_edit_failed)
-                                    await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
+                                    await bot.utils.handle_auto_delete(
+                                        ctx.channel_id, response_message, auto_delete_helper
+                                    )
                                     if guild_log_settings.log_errors:
                                         log_response = language_helper.log_response_location_edit_failed.format(
-                                            datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type
+                                            datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                            member=ctx.member,
+                                            location_type=location_type,
                                         )
                                         await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                                     raise
@@ -509,10 +632,11 @@ class Locations(
                                 await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                                 if guild_log_settings.log_location_add:
                                     log_response = language_helper.log_response_location_edit_success.format(
-                                        datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member, location_type=location_type
+                                        datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                        member=ctx.member,
+                                        location_type=location_type,
                                     )
                                     await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
-
 
                             listening = False
                         except TimeoutError:
@@ -530,9 +654,7 @@ class Locations(
                 await ctx.delete_response(response_message)
                 listening = False
             except Exception:
-                logging.getLogger(__name__).exception(
-                    "An error occurred while listening for the info command!"
-                )
+                logging.getLogger(__name__).exception("An error occurred while listening for the info command!")
                 await ctx.delete_response(response_message)
                 listening = False
 
@@ -566,7 +688,7 @@ class Locations(
         ctx: lightbulb.Context,
         bot: Bot,
         auto_delete_helper: int,
-        response_id: hikari.Snowflakeish | int | None = None
+        response_id: hikari.Snowflakeish | int | None = None,
     ) -> None:
         index = 0
         if response_id is None:
@@ -608,11 +730,7 @@ class Locations(
                 listening = False
 
     async def _get_location_name(
-        self,
-        ctx: lightbulb.Context,
-        event: hikari.ComponentInteractionCreateEvent,
-        bot: Bot,
-        location_type: str,
+        self, ctx: lightbulb.Context, event: hikari.ComponentInteractionCreateEvent, bot: Bot, location_type: str
     ) -> tuple[bool, str]:
         if ctx.guild_id is None:
             await ctx.respond("Command must be executed in a server.")
@@ -625,13 +743,11 @@ class Locations(
 
         language_helper = SUPPORTED_LANGUAGES.get(guild_settings.language, en)
         auto_delete_helper = await bot.utils.determine_auto_delete(guild_settings.auto_delete)
-        auto_delete_helper = 120 if auto_delete_helper < 120 else auto_delete_helper
+        auto_delete_helper = max(auto_delete_helper, 120)
 
         location_name_modal = LocationNameModal(guild_settings.language, location_type)
         await event.interaction.create_modal_response(
-            language_helper.location_name_modal_location_name,
-            "_get_location_name",
-            components=location_name_modal,
+            language_helper.location_name_modal_location_name, "_get_location_name", components=location_name_modal
         )
 
         try:
@@ -647,11 +763,7 @@ class Locations(
         return False, ""
 
     async def _get_location_description(
-        self,
-        ctx: lightbulb.Context,
-        event: hikari.ComponentInteractionCreateEvent,
-        bot: Bot,
-        location_type: str,
+        self, ctx: lightbulb.Context, event: hikari.ComponentInteractionCreateEvent, bot: Bot, location_type: str
     ) -> tuple[bool, str | None]:
         if ctx.guild_id is None:
             await ctx.respond("Command must be executed in a server.")
@@ -664,7 +776,7 @@ class Locations(
 
         language_helper = SUPPORTED_LANGUAGES.get(guild_settings.language, en)
         auto_delete_helper = await bot.utils.determine_auto_delete(guild_settings.auto_delete)
-        auto_delete_helper = 120 if auto_delete_helper < 120 else auto_delete_helper
+        auto_delete_helper = max(auto_delete_helper, 120)
 
         location_description_modal = LocationDescriptionModal(guild_settings.language, location_type)
         await event.interaction.create_modal_response(
@@ -683,16 +795,14 @@ class Locations(
             ):
                 if location_description_modal.given_location_description.lower().strip().replace(" ", "") == "":
                     return True, None
-                return True, location_description_modal.given_location_description.lower().strip().replace(" ", "").lower()
+                return True, location_description_modal.given_location_description.lower().strip().replace(
+                    " ", ""
+                ).lower()
 
         return False, ""
 
     async def _get_location_long_lat(
-        self,
-        ctx: lightbulb.Context,
-        event: hikari.ComponentInteractionCreateEvent,
-        bot: Bot,
-        location_type: str,
+        self, ctx: lightbulb.Context, event: hikari.ComponentInteractionCreateEvent, bot: Bot, location_type: str
     ) -> tuple[bool, float | None, float | None]:
         if ctx.guild_id is None:
             await ctx.respond("Command must be executed in a server.")
@@ -705,7 +815,7 @@ class Locations(
 
         language_helper = SUPPORTED_LANGUAGES.get(guild_settings.language, en)
         auto_delete_helper = await bot.utils.determine_auto_delete(guild_settings.auto_delete)
-        auto_delete_helper = 120 if auto_delete_helper < 120 else auto_delete_helper
+        auto_delete_helper = max(auto_delete_helper, 120)
 
         location_long_lat_modal = LocationLongLatModal(guild_settings.language, location_type)
         await event.interaction.create_modal_response(
@@ -719,14 +829,21 @@ class Locations(
         except TimeoutError:
             return False, 0, 0
         else:
-            if (location_long_lat_modal.selected_btn == "_get_location_long_lat" and 
-                location_long_lat_modal.given_location_long is not None and
-                location_long_lat_modal.given_location_lat is not None
+            if (
+                location_long_lat_modal.selected_btn == "_get_location_long_lat"
+                and location_long_lat_modal.given_location_long is not None
+                and location_long_lat_modal.given_location_lat is not None
             ):
-                valid_latitude, valid_longitude = await bot.utils.validate_latitude_longitude_type(location_long_lat_modal.given_location_lat, location_long_lat_modal.given_location_long)
+                valid_latitude, valid_longitude = await bot.utils.validate_latitude_longitude_type(
+                    location_long_lat_modal.given_location_lat, location_long_lat_modal.given_location_long
+                )
                 if not valid_latitude or not valid_longitude:
                     return False, None, None
 
-                return True, float(location_long_lat_modal.given_location_long), float(location_long_lat_modal.given_location_lat)
+                return (
+                    True,
+                    float(location_long_lat_modal.given_location_long),
+                    float(location_long_lat_modal.given_location_lat),
+                )
 
         return False, 0, 0

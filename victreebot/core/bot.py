@@ -1,16 +1,17 @@
+# Copyright (c) 2022-present l3keboy
+
 import asyncio
 import datetime
 import logging
 from collections.abc import Sequence
-from typing import Dict
 
 import hikari
 import lightbulb
 import linkd
+import requests
 from apscheduler.schedulers.asyncio import AsyncIOScheduler  # type: ignore[import-untyped]
 from dotenv import load_dotenv
 from hikari import presences
-import requests
 
 from victreebot import extensions
 from victreebot.handlers.activity_handler import ActivityHandler
@@ -40,7 +41,7 @@ class Bot(hikari.GatewayBot):
     discord_service: DiscordService
     discord_cache_service: hikari.api.Cache
     # Raids
-    raids: Dict[str, RaidClass | None]
+    raids: dict[str, RaidClass | None]
 
     # INIT
     def __init__(self) -> None:
@@ -52,9 +53,7 @@ class Bot(hikari.GatewayBot):
         self.raids = {}
 
         logging.getLogger(__name__).debug("Initializing VictreeBot.....")
-        super().__init__(
-            token=EnvVarLoader.load_env_variable("BOT_TOKEN"), intents=hikari.Intents.ALL, banner=None
-        )
+        super().__init__(token=EnvVarLoader.load_env_variable("BOT_TOKEN"), intents=hikari.Intents.ALL, banner=None)
         logging.getLogger(__name__).info("Initialized VictreeBot!")
 
     def load_environment_variables(self) -> None:
@@ -66,8 +65,12 @@ class Bot(hikari.GatewayBot):
         self.vars.SUPPORT_SERVER_LINK = EnvVarLoader.load_env_variable("SUPPORT_SERVER_LINK")
         self.vars.SUPPORT_SERVER_ID = EnvVarLoader.load_env_variable("SUPPORT_SERVER_ID")
         self.vars.SUPPORT_SERVER_BUG_CHANNEL = EnvVarLoader.load_env_variable("SUPPORT_SERVER_BUG_CHANNEL")
-        self.vars.SUPPORT_SERVER_FEATURE_IMPROVEMENT_CHANNEL = EnvVarLoader.load_env_variable("SUPPORT_SERVER_FEATURE_IMPROVEMENT_CHANNEL")
-        self.vars.SUPPORT_SERVER_FEATURE_REQUEST_CHANNEL = EnvVarLoader.load_env_variable("SUPPORT_SERVER_FEATURE_REQUEST_CHANNEL")
+        self.vars.SUPPORT_SERVER_FEATURE_IMPROVEMENT_CHANNEL = EnvVarLoader.load_env_variable(
+            "SUPPORT_SERVER_FEATURE_IMPROVEMENT_CHANNEL"
+        )
+        self.vars.SUPPORT_SERVER_FEATURE_REQUEST_CHANNEL = EnvVarLoader.load_env_variable(
+            "SUPPORT_SERVER_FEATURE_REQUEST_CHANNEL"
+        )
         self.vars.DB_HOST = EnvVarLoader.load_env_variable("DB_HOST")
         self.vars.DB_PORT = int(EnvVarLoader.load_env_variable("DB_PORT"))
         self.vars.DB_DATABASENAME = EnvVarLoader.load_env_variable("DB_DATABASENAME")
@@ -111,20 +114,18 @@ class Bot(hikari.GatewayBot):
         logging.getLogger(__name__).info("Initialized DiscordCacheService.....")
 
     def check_latest_version(self) -> str:
-        """Function to check the latest version number on GitHub Repo"""
+        """Check the latest version number on the GitHub repository."""
         logging.getLogger(__name__).debug("Checking latest version number.....!")
         version = "Latest Version"
         try:
             headers = {"Authorization": "Bearer " + EnvVarLoader.load_env_variable("API_BEARER_GITHUB")}
-            response = requests.get(url=self.vars.API_RELEASE_URL_GITHUB, headers=headers)
+            response = requests.get(url=self.vars.API_RELEASE_URL_GITHUB, headers=headers, timeout=10)
             response = response.json()
             version = response["tag_name"]
-            logging.getLogger(__name__).info(
-                f"Found latest version, continuing with: '{version}'!"
-            )
-        except Exception as e:
-            logging.getLogger(__name__).error(
-                "Checking latest version number failed, continuing with: 'Latest Version'! " f"Got error: {e}"
+            logging.getLogger(__name__).info("Found latest version, continuing with: '%s'!", version)
+        except Exception:
+            logging.getLogger(__name__).exception(
+                "Checking latest version number failed, continuing with: 'Latest Version'!"
             )
         self.version = version
         return version

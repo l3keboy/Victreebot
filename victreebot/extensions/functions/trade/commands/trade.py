@@ -1,14 +1,16 @@
+# Copyright (c) 2022-present l3keboy
+
 from io import BytesIO
-from PIL import Image
 
 import aiohttp
 import hikari
 import lightbulb
+from PIL import Image
 
 from victreebot.contants import SUPPORTED_LANGUAGES
 from victreebot.core.bot import Bot
-from victreebot.utils.shared_autocompletes import autocomplete_pokemon
 from victreebot.languages import en
+from victreebot.utils.shared_autocompletes import autocomplete_pokemon
 
 # Load command
 loader = lightbulb.Loader()
@@ -17,8 +19,8 @@ loader = lightbulb.Loader()
 # Command
 @loader.command
 class Trade(
-    lightbulb.SlashCommand, 
-    name="trade", 
+    lightbulb.SlashCommand,
+    name="trade",
     description="Create a trade offer/search/proposal (fill both options for proposal)",
 ):
     """Command to reset the bots settings."""
@@ -43,6 +45,7 @@ class Trade(
         if ctx.guild_id is None:
             await ctx.respond("Command must be executed in a server.")
             return
+        member_name = ctx.member.display_name if ctx.member is not None else ctx.user.username
 
         guild_settings = await bot.database.get_guild_settings(ctx.guild_id)
         if guild_settings is None:
@@ -59,7 +62,9 @@ class Trade(
         auto_delete_helper = await bot.utils.determine_auto_delete(guild_settings.auto_delete)
 
         if not guild_settings.is_setup:
-            response_message = await ctx.respond(language_helper.response_not_yet_setup.format(bot_name=bot.vars.BOT_NAME.capitalize()))
+            response_message = await ctx.respond(
+                language_helper.response_not_yet_setup.format(bot_name=bot.vars.BOT_NAME.capitalize())
+            )
             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
             return
 
@@ -75,8 +80,10 @@ class Trade(
 
         if self.offer is not None and self.search is None:
             success, pokemon_offer, pokemon_image_offer = await bot.utils.validate_pokemon(self.offer)
-            if not success:
-                response_message = await ctx.respond(language_helper.response_trade_offer_unknown_pokemon_offer.format(boss_name=pokemon_offer))
+            if not success or not pokemon_offer or not pokemon_image_offer:
+                response_message = await ctx.respond(
+                    language_helper.response_trade_offer_unknown_pokemon_offer.format(boss_name=pokemon_offer)
+                )
                 await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                 if guild_log_settings.log_errors:
                     log_response = language_helper.log_response_trade_offer_unknown_pokemon_offer.format(
@@ -91,24 +98,24 @@ class Trade(
                     components=[
                         hikari.impl.TextDisplayComponentBuilder(content=language_helper.trade_offer_embed_title),
                         hikari.impl.TextDisplayComponentBuilder(
-                            content=language_helper.trade_offer_embed_description.format(pokemon_offer=pokemon_offer.name.capitalize())
+                            content=language_helper.trade_offer_embed_description.format(
+                                pokemon_offer=pokemon_offer.name.capitalize()
+                            )
                         ),
                         hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
                         hikari.impl.TextDisplayComponentBuilder(
-                            content=language_helper.trade_proposal_embed_field_offering.format(pokemon_offer=pokemon_offer.name.capitalize())
+                            content=language_helper.trade_proposal_embed_field_offering.format(
+                                pokemon_offer=pokemon_offer.name.capitalize()
+                            )
                         ),
                         hikari.impl.MediaGalleryComponentBuilder(
-                            items=[
-                                hikari.impl.MediaGalleryItemBuilder(
-                                    media=pokemon_image_offer,
-                                ),
-                            ]
+                            items=[hikari.impl.MediaGalleryItemBuilder(media=pokemon_image_offer)]
                         ),
                         hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
                         hikari.impl.TextDisplayComponentBuilder(
-                            content=language_helper.trade_offered_embed_footer.format(member=ctx.member.display_name)
+                            content=language_helper.trade_offered_embed_footer.format(member=member_name)
                         ),
-                    ]
+                    ],
                 )
             ]
 
@@ -122,8 +129,10 @@ class Trade(
 
         if self.offer is None and self.search is not None:
             success, pokemon_search, pokemon_image_search = await bot.utils.validate_pokemon(self.search)
-            if not success:
-                response_message = await ctx.respond(language_helper.response_trade_offer_unknown_pokemon_search.format(boss_name=pokemon_search))
+            if not success or not pokemon_search or not pokemon_image_search:
+                response_message = await ctx.respond(
+                    language_helper.response_trade_offer_unknown_pokemon_search.format(boss_name=pokemon_search)
+                )
                 await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                 if guild_log_settings.log_errors:
                     log_response = language_helper.log_response_trade_offer_unknown_pokemon_search.format(
@@ -138,24 +147,24 @@ class Trade(
                     components=[
                         hikari.impl.TextDisplayComponentBuilder(content=language_helper.trade_search_embed_title),
                         hikari.impl.TextDisplayComponentBuilder(
-                            content=language_helper.trade_search_embed_description.format(pokemon_search=pokemon_search.name.capitalize())
+                            content=language_helper.trade_search_embed_description.format(
+                                pokemon_search=pokemon_search.name.capitalize()
+                            )
                         ),
                         hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
                         hikari.impl.TextDisplayComponentBuilder(
-                            content=language_helper.trade_proposal_embed_field_search.format(pokemon_search=pokemon_search.name.capitalize())
+                            content=language_helper.trade_proposal_embed_field_search.format(
+                                pokemon_search=pokemon_search.name.capitalize()
+                            )
                         ),
                         hikari.impl.MediaGalleryComponentBuilder(
-                            items=[
-                                hikari.impl.MediaGalleryItemBuilder(
-                                    media=pokemon_image_search,
-                                ),
-                            ]
+                            items=[hikari.impl.MediaGalleryItemBuilder(media=pokemon_image_search)]
                         ),
                         hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
                         hikari.impl.TextDisplayComponentBuilder(
-                            content=language_helper.trade_search_embed_footer.format(member=ctx.member.display_name)
+                            content=language_helper.trade_search_embed_footer.format(member=member_name)
                         ),
-                    ]
+                    ],
                 )
             ]
 
@@ -169,8 +178,10 @@ class Trade(
 
         if self.offer is not None and self.search is not None:
             success, pokemon_offer, pokemon_image_offer = await bot.utils.validate_pokemon(self.offer)
-            if not success:
-                response_message = await ctx.respond(language_helper.response_trade_offer_unknown_pokemon_offer.format(boss_name=pokemon_offer))
+            if not success or not pokemon_offer or not pokemon_image_offer:
+                response_message = await ctx.respond(
+                    language_helper.response_trade_offer_unknown_pokemon_offer.format(boss_name=pokemon_offer)
+                )
                 await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                 if guild_log_settings.log_errors:
                     log_response = language_helper.log_response_trade_offer_unknown_pokemon_offer.format(
@@ -180,8 +191,10 @@ class Trade(
                 return
 
             success, pokemon_search, pokemon_image_search = await bot.utils.validate_pokemon(self.search)
-            if not success:
-                response_message = await ctx.respond(language_helper.response_trade_offer_unknown_pokemon_search.format(boss_name=pokemon_search))
+            if not success or not pokemon_search or not pokemon_image_search:
+                response_message = await ctx.respond(
+                    language_helper.response_trade_offer_unknown_pokemon_search.format(boss_name=pokemon_search)
+                )
                 await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                 if guild_log_settings.log_errors:
                     log_response = language_helper.log_response_trade_offer_unknown_pokemon_search.format(
@@ -190,16 +203,16 @@ class Trade(
                     await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                 return
 
-            async with aiohttp.ClientSession() as session:
-                async with session.get(pokemon_image_offer) as response:
-                    pokemon_image_offer = await response.read()
-            async with aiohttp.ClientSession() as session:
-                async with session.get(pokemon_image_search) as response:
-                    pokemon_image_search = await response.read()
+            async with aiohttp.ClientSession() as session, session.get(pokemon_image_offer) as response:
+                pokemon_image_offer = await response.read()
+            async with aiohttp.ClientSession() as session, session.get(pokemon_image_search) as response:
+                pokemon_image_search = await response.read()
 
             pokemon_image_offer = Image.open(BytesIO(pokemon_image_offer))
             pokemon_image_search = Image.open(BytesIO(pokemon_image_search))
-            combined_image = Image.new("RGBA", (5 * pokemon_image_offer.size[0], pokemon_image_offer.size[1]), (0, 0, 0, 0))
+            combined_image = Image.new(
+                "RGBA", (5 * pokemon_image_offer.size[0], pokemon_image_offer.size[1]), (0, 0, 0, 0)
+            )
             combined_image.paste(pokemon_image_offer, (0, 0))
             combined_image.paste(pokemon_image_search, (pokemon_image_offer.size[0], 0))
 
@@ -213,27 +226,30 @@ class Trade(
                     components=[
                         hikari.impl.TextDisplayComponentBuilder(content=language_helper.trade_proposal_embed_title),
                         hikari.impl.TextDisplayComponentBuilder(
-                            content=language_helper.trade_proposal_embed_description.format(pokemon_search=pokemon_search.name.capitalize(), pokemon_offer=pokemon_offer.name.capitalize())
+                            content=language_helper.trade_proposal_embed_description.format(
+                                pokemon_search=pokemon_search.name.capitalize(),
+                                pokemon_offer=pokemon_offer.name.capitalize(),
+                            )
                         ),
                         hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
                         hikari.impl.TextDisplayComponentBuilder(
-                            content=language_helper.trade_proposal_embed_field_offering.format(pokemon_offer=pokemon_offer.name.capitalize())
+                            content=language_helper.trade_proposal_embed_field_offering.format(
+                                pokemon_offer=pokemon_offer.name.capitalize()
+                            )
                         ),
                         hikari.impl.TextDisplayComponentBuilder(
-                            content=language_helper.trade_proposal_embed_field_search.format(pokemon_search=pokemon_search.name.capitalize())
+                            content=language_helper.trade_proposal_embed_field_search.format(
+                                pokemon_search=pokemon_search.name.capitalize()
+                            )
                         ),
                         hikari.impl.MediaGalleryComponentBuilder(
-                            items=[
-                                hikari.impl.MediaGalleryItemBuilder(
-                                    media=combined_image_bytes,
-                                ),
-                            ]
+                            items=[hikari.impl.MediaGalleryItemBuilder(media=combined_image_bytes)]
                         ),
                         hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
                         hikari.impl.TextDisplayComponentBuilder(
-                            content=language_helper.trade_proposal_embed_footer.format(member=ctx.member.display_name)
+                            content=language_helper.trade_proposal_embed_footer.format(member=member_name)
                         ),
-                    ]
+                    ],
                 )
             ]
 

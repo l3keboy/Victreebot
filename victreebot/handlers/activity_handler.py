@@ -1,3 +1,5 @@
+# Copyright (c) 2022-present l3keboy
+
 # IMPORTS
 from __future__ import annotations
 
@@ -28,20 +30,10 @@ class ActivityHandler:
 
         # Create a list of all activities to display
         self._activities = [
-            hikari.Activity(
-                type=hikari.ActivityType.COMPETING,
-                name="Pokémon GO!",
-            ),
-            hikari.Activity(
-                type=hikari.ActivityType.PLAYING,
-                name=f"{self.bot.version}",
-            ),
-            hikari.Activity(
-                type=hikari.ActivityType.WATCHING,
-                name="Pokémon",
-            ),
+            hikari.Activity(type=hikari.ActivityType.COMPETING, name="Pokémon GO!"),
+            hikari.Activity(type=hikari.ActivityType.PLAYING, name=f"{self.bot.version}"),
+            hikari.Activity(type=hikari.ActivityType.WATCHING, name="Pokémon"),
         ]
-
 
         # Create iterable activities cycle
         self._activities_cycle = cycle(self._activities)

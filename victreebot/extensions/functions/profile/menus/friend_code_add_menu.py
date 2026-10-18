@@ -1,3 +1,5 @@
+# Copyright (c) 2022-present l3keboy
+
 from types import ModuleType
 
 import hikari
@@ -22,7 +24,7 @@ class FriendCodeAddModal(lightbulb.components.Modal):
         self.add_text_field_title_input = self.add_short_text_input(
             self._language_helper.profile_modal_add_friend_codes_text_input_title,
             custom_id="friend_codes",
-            placeholder=self._language_helper.profile_modal_add_friend_codes_text_input_placeholder
+            placeholder=self._language_helper.profile_modal_add_friend_codes_text_input_placeholder,
         )
 
     async def on_submit(self, ctx: lightbulb.components.ModalContext) -> None:

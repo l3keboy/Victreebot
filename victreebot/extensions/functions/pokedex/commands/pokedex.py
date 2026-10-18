@@ -1,12 +1,12 @@
-from pathlib import Path
+# Copyright (c) 2022-present l3keboy
 
 import hikari
 import lightbulb
 
 from victreebot.contants import SUPPORTED_LANGUAGES
 from victreebot.core.bot import Bot
-from victreebot.utils.shared_autocompletes import autocomplete_pokemon
 from victreebot.languages import en
+from victreebot.utils.shared_autocompletes import autocomplete_pokemon
 
 # Load command
 loader = lightbulb.Loader()
@@ -14,11 +14,7 @@ loader = lightbulb.Loader()
 
 # Command
 @loader.command
-class Pokedex(
-    lightbulb.SlashCommand, 
-    name="pokedex", 
-    description="Search details of a pokemon",
-):
+class Pokedex(lightbulb.SlashCommand, name="pokedex", description="Search details of a pokemon"):
     """Command to get info about a pokemon."""
 
     boss: str = lightbulb.string(
@@ -50,14 +46,16 @@ class Pokedex(
         auto_delete_helper = await bot.utils.determine_auto_delete(guild_settings.auto_delete)
 
         if not guild_settings.is_setup:
-            response_message = await ctx.respond(language_helper.response_not_yet_setup.format(bot_name=bot.vars.BOT_NAME.capitalize()))
+            response_message = await ctx.respond(
+                language_helper.response_not_yet_setup.format(bot_name=bot.vars.BOT_NAME.capitalize())
+            )
             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
             return
 
         try:
             int(self.boss)
             boss = int(self.boss)
-        except Exception:
+        except ValueError:
             boss = self.boss.replace(" ", "-")
             boss = self.boss.lower()
 
@@ -71,10 +69,13 @@ class Pokedex(
             height_unit = language_helper.height_usc_system
             weight_unit = language_helper.weight_usc_system
 
-        if boss != "egg1" and boss != "egg3" and boss != "egg5" and boss != "eggmega":
+        pokemon_image: str | None = None
+        if boss not in {"egg1", "egg3", "egg5", "eggmega"}:
             success, pokemon, pokemon_image = await bot.utils.validate_pokemon(self.boss)
-            if not success:
-                response_message = await ctx.respond(language_helper.response_pokedex_unknown_pokemon.format(boss_name=boss))
+            if not success or not pokemon or not pokemon_image:
+                response_message = await ctx.respond(
+                    language_helper.response_pokedex_unknown_pokemon.format(boss_name=boss)
+                )
                 await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                 if guild_log_settings.log_errors:
                     log_response = language_helper.log_response_pokedex_unknown_pokemon.format(
@@ -94,78 +95,64 @@ class Pokedex(
                 pokemon_height = round(pokemon_height_meters, 2)
                 pokemon_weight = round(pokemon_weight_gram / 1000, 2)
             elif guild_settings.unit_system == "Imperial System":
-                pokemon_height = round(pokemon_height_meters, *0.3048, 3)
+                pokemon_height = round(pokemon_height_meters / 0.3048, 3)
                 pokemon_weight = round(pokemon_weight_gram * 453.592, 2)
             else:
                 pokemon_height = round(pokemon_height_meters * 0.0254, 2)
                 pokemon_weight = round(pokemon_weight_gram * 453.592, 2)
 
-            pokemon_abilities = []
+            pokemon_abilities: list[str] = []
             pokemon_all_abilities = pokemon.abilities
-            for ability in pokemon_all_abilities:
-                pokemon_abilities.append(ability.ability)
+            pokemon_abilities = [str(ability.ability) for ability in pokemon_all_abilities]
 
         else:
-            path = Path().cwd()
-
             pokemon_name = self.boss.capitalize()
             pokemon_id = language_helper.unknown
             pokemon_height = language_helper.unknown
             pokemon_weight = language_helper.unknown
             pokemon_abilities = [language_helper.unknown]
             if boss == "egg1":
-                pokemon_image = f"{path}/assets/raidEggs/raid_eggOne.png"
+                pokemon_image = "assets/raidEggs/raid_eggOne.png"
             elif boss == "egg3":
-                pokemon_image = f"{path}/assets/raidEggs/raid_eggThree.png"
+                pokemon_image = "assets/raidEggs/raid_eggThree.png"
             elif boss == "egg5":
-                pokemon_image = f"{path}/assets/raidEggs/raid_eggFive.png"
+                pokemon_image = "assets/raidEggs/raid_eggFive.png"
             elif boss == "eggmega":
-                pokemon_image = f"{path}/assets/raidEggs/raid_eggMega.png"
+                pokemon_image = "assets/raidEggs/raid_eggMega.png"
+
+        if pokemon_image is None:
+            return
 
         components = [
             hikari.impl.ContainerComponentBuilder(
                 accent_color=hikari.Colour(0x8BC683),
                 components=[
-                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.pokedex_embed_title.format(pokemon=pokemon_name.capitalize())),
                     hikari.impl.TextDisplayComponentBuilder(
-                        content=language_helper.pokedex_embed_name_title
+                        content=language_helper.pokedex_embed_title.format(pokemon=pokemon_name.capitalize())
                     ),
-                    hikari.impl.TextDisplayComponentBuilder(
-                        content=pokemon_name.capitalize()
-                    ),
+                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.pokedex_embed_name_title),
+                    hikari.impl.TextDisplayComponentBuilder(content=pokemon_name.capitalize()),
                     hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
-                    hikari.impl.TextDisplayComponentBuilder(
-                        content=language_helper.pokedex_embed_id_title
-                    ),
-                    hikari.impl.TextDisplayComponentBuilder(
-                        content=pokemon_id
-                    ),
+                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.pokedex_embed_id_title),
+                    hikari.impl.TextDisplayComponentBuilder(content=str(pokemon_id)),
                     hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
-                    hikari.impl.TextDisplayComponentBuilder(
-                        content=language_helper.pokedex_embed_length_weight_title
-                    ),
+                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.pokedex_embed_length_weight_title),
                     hikari.impl.TextDisplayComponentBuilder(
                         content=f"{pokemon_height} {height_unit}  |  {pokemon_weight} {weight_unit}"
                     ),
                     hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
-                    hikari.impl.TextDisplayComponentBuilder(
-                        content=language_helper.pokedex_embed_abilities_title
-                    ),
+                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.pokedex_embed_abilities_title),
                     hikari.impl.TextDisplayComponentBuilder(
                         content="\n".join("- " + str(ability).capitalize() for ability in pokemon_abilities)
                     ),
                     hikari.impl.MediaGalleryComponentBuilder(
-                        items=[
-                            hikari.impl.MediaGalleryItemBuilder(
-                                media=pokemon_image,
-                            ),
-                        ]
+                        items=[hikari.impl.MediaGalleryItemBuilder(media=pokemon_image)]
                     ),
-                ]
+                ],
             )
         ]
 
-        auto_delete_helper = 20 if auto_delete_helper < 20 else auto_delete_helper
+        auto_delete_helper = max(auto_delete_helper, 20)
         response_message = await ctx.respond(components=components)
         await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
         if guild_log_settings.log_info:

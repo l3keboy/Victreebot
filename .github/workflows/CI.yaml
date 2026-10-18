@@ -1,80 +1,101 @@
 name: CI
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  check_flake8:
-    strategy:
-      # Allows for matrix sub-jobs to fail without cancelling the rest
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        python-version: ["3.10"]
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Setup python
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install requirements
-        run: |
-          pip install -r requirements.txt
-
-      - name: Run flake8
-        run: |
-          nox -s flake8
-
-  check_format:
-    strategy:
-      # Allows for matrix sub-jobs to fail without cancelling the rest
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        python-version: ["3.10"]
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Setup python
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install requirements
-        run: |
-          pip install -r requirements.txt
-
-      - name: Run format check
-        run: |
-          nox -s check_format
-
-  # Allows us to add this as a required check in Github branch rules, as all the
-  # other jobs are subject to change
-  ci-done:
-    needs: [check_flake8, check_format]
-    if: always()
-
+  # Run first
+  release_metadata:
     runs-on: ubuntu-latest
-
+    environment: QA
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.release_version.outputs.version }}
     steps:
-      - name: Mark status based on past job status
-        env:
-          # All new need jobs need to be added here with the prefix "RESULT_"
-          RESULT_FLAKE8: ${{ needs.check_flake8.result }}
-          RESULT_FORMAT: ${{ needs.check_format.result }}
+      # Checkout repository
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Extract version from pyproject.toml
+        id: release_version
         run: |
-          if [ "$(env | grep 'RESULT_')" = "$(env | grep "RESULT_" | grep '=success')" ]; then
-            exit 0
-          else
+          VERSION=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      - name: Ensure version is new
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          VERSION="${{ steps.release_version.outputs.version }}"
+          if git rev-parse -q --verify "refs/tags/$VERSION" >/dev/null; then
+            echo "::error ::Version in pyproject.toml ($VERSION) already has a Git tag."
             exit 1
           fi
+
+  # Run second
+  linting:
+    runs-on: ubuntu-latest
+    environment: QA
+    permissions:
+      contents: read
+    needs: [release_metadata]
+    steps:
+      # Checkout repository
+      - uses: actions/checkout@v5
+
+      # Setup python + uv
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      # Install project
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev
+
+      # Mypy
+      - name: Validate mypy typing
+        run: uv run mypy victreebot
+
+      # Pyright
+      - name: Validate pyright typing
+        run: uv run pyright
+
+      # Ruff
+      - name: Check formatting
+        run: uv run ruff format --check
+      - name: Check linting
+        run: uv run ruff check
+
+  # Run third (only on merge)
+  create_release_on_merge:
+    runs-on: ubuntu-latest
+    environment: QA
+    permissions:
+      contents: write
+    needs: [release_metadata, linting]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      # Create GitHub release
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.release_metadata.outputs.version }}
+          name: Release ${{ needs.release_metadata.outputs.version }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}

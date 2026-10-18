@@ -29,7 +29,7 @@ async def autocomplete_pokemon(ctx: lightbulb.AutocompleteContext[str], bot: Bot
                 result_map["Egg Legendary (Egg5)"] = "egg5"
                 result_map["Egg Mega (EggMega)"] = "eggmega"
                 result_map["Egg Shadow (EggShadow)"] = "eggshadow"
-            if pokemon.get("name").__contains__(ctx.focused.value):
+            if pokemon.get("name").__contains__(str(ctx.focused.value)):
                 result_map[f"{pokemon.get('name')}"] = f"{pokemon.get('name')}"
 
     # Return autocomplete options
@@ -41,7 +41,6 @@ async def autocomplete_locations(ctx: lightbulb.AutocompleteContext[str], bot: B
     # Validate that the callback is done from a guild
     if ctx.interaction.guild_id is None:
         return
-
 
     # Get locations
     locations = await bot.database.autocomplete_get_locations_like(ctx.interaction.guild_id, str(ctx.focused.value))

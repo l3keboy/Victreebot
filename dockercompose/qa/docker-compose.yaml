@@ -1,0 +1,13 @@
+services:
+  victreebot:
+    image: victreebot/victreebot:QA-victreebot-latest
+    container_name: Victreebot-QA
+    restart: unless-stopped
+    env_file:
+      - .env.qa
+    networks:
+      - qa_victreebot_network
+
+networks:
+  qa_victreebot_network:
+    driver: bridge

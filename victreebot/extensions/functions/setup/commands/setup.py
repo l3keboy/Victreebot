@@ -1,3 +1,6 @@
+# Copyright (c) 2022-present l3keboy
+
+import asyncio
 import logging
 from pathlib import Path
 
@@ -7,8 +10,8 @@ import lightbulb
 from victreebot.contants import SUPPORTED_LANGUAGES
 from victreebot.core.bot import Bot
 from victreebot.languages import en
-from victreebot.models.GuildSettings import Guild_SettingsUpdate
 from victreebot.models.GuildLogSettings import Guild_Log_SettingsUpdate
+from victreebot.models.GuildSettings import Guild_SettingsUpdate
 
 # Load command
 loader = lightbulb.Loader()
@@ -17,10 +20,10 @@ loader = lightbulb.Loader()
 # Command
 @loader.command
 class Setup(
-    lightbulb.SlashCommand, 
-    name="setup", 
+    lightbulb.SlashCommand,
+    name="setup",
     description="Setup basic settings to start using the bot",
-    hooks=[lightbulb.prefab.has_permissions(hikari.Permissions.MANAGE_GUILD)]
+    hooks=[lightbulb.prefab.has_permissions(hikari.Permissions.MANAGE_GUILD)],
 ):
     """Command to setup the bots settings."""
 
@@ -47,36 +50,37 @@ class Setup(
         auto_delete_helper = await bot.utils.determine_auto_delete(guild_settings.auto_delete)
 
         if guild_settings.is_setup:
-            response_message = await ctx.respond(language_helper.response_already_setup.format(bot_name=bot.vars.BOT_NAME.capitalize()))
+            response_message = await ctx.respond(
+                language_helper.response_already_setup.format(bot_name=bot.vars.BOT_NAME.capitalize())
+            )
             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
             return
 
         my_user = bot.cache.get_me() or await bot.discord_service.get_my_user()
         if my_user is None:
-            response_message = await ctx.respond(language_helper.response_setup_failed.format(bot_name=bot.vars.BOT_NAME.capitalize()))
+            response_message = await ctx.respond(
+                language_helper.response_setup_failed.format(bot_name=bot.vars.BOT_NAME.capitalize())
+            )
             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
             return
 
-        starter_path = Path().cwd()
-        gif = Path(f"{starter_path}/assets/gifs/loading.gif")
+        gif = Path("assets/gifs/loading.gif")
         components = [
             hikari.impl.ContainerComponentBuilder(
                 accent_color=hikari.Colour(0x8BC683),
                 components=[
                     hikari.impl.TextDisplayComponentBuilder(
-                        content=language_helper.setup_started_embed_title.format(bot_name=bot.vars.BOT_NAME.capitalize())
+                        content=language_helper.setup_started_embed_title.format(
+                            bot_name=bot.vars.BOT_NAME.capitalize()
+                        )
                     ),
                     hikari.impl.TextDisplayComponentBuilder(
-                        content=language_helper.setup_started_embed_description.format(bot_name=bot.vars.BOT_NAME.capitalize())
+                        content=language_helper.setup_started_embed_description.format(
+                            bot_name=bot.vars.BOT_NAME.capitalize()
+                        )
                     ),
-                    hikari.impl.MediaGalleryComponentBuilder(
-                        items=[
-                            hikari.impl.MediaGalleryItemBuilder(
-                                media=gif,
-                            )
-                        ]
-                    ),
-                ]
+                    hikari.impl.MediaGalleryComponentBuilder(items=[hikari.impl.MediaGalleryItemBuilder(media=gif)]),
+                ],
             )
         ]
 
@@ -90,48 +94,55 @@ class Setup(
                 or emoji.name == f"{bot.vars.BOT_NAME.lower()}_mystic"
                 or emoji.name == f"{bot.vars.BOT_NAME.lower()}_valor"
             ):
-                await bot.discord_service.delete_emoji(ctx.guild_id, emoji.id, reason=f"{bot.vars.BOT_NAME.capitalize()} setup Handler -- Setup!")
+                await bot.discord_service.delete_emoji(
+                    ctx.guild_id, emoji.id, reason=f"{bot.vars.BOT_NAME.capitalize()} setup Handler -- Setup!"
+                )
                 logging.getLogger(__name__).info(
-                    "Deleted emoji with same name "
-                    f"('{bot.vars.BOT_NAME.lower()}-instinct', '{bot.vars.BOT_NAME.lower()}-mystic' or '{bot.vars.BOT_NAME.lower()}-valor') "
-                    f"for guild_id: {ctx.guild_id}!"
+                    "Deleted emoji with same name ('%s-instinct', '%s-mystic' or '%s-valor') for guild_id: %s!",
+                    bot.vars.BOT_NAME.lower(),
+                    bot.vars.BOT_NAME.lower(),
+                    bot.vars.BOT_NAME.lower(),
+                    ctx.guild_id,
                 )
 
         instinct_emoji, mystic_emoji, valor_emoji = None, None, None
         try:
-            with open(Path(f"{starter_path}/assets/emojis/instinct.png"), "rb") as image:
-                instinct_image_bytes = image.read()
-                instinct_emoji = await bot.discord_service.create_emoji(
-                    ctx.guild_id,
-                    f"{bot.vars.BOT_NAME.lower()}_instinct",
-                    instinct_image_bytes,
-                    reason=f"{bot.vars.BOT_NAME.capitalize()} setup Handler -- Setup!",
-                )
-            with open(Path(f"{starter_path}/assets/emojis/mystic.png"), "rb") as image:
-                mystic_image_bytes = image.read()
-                mystic_emoji = await bot.discord_service.create_emoji(
-                    ctx.guild_id,
-                    f"{bot.vars.BOT_NAME.lower()}_mystic",
-                    mystic_image_bytes,
-                    reason=f"{bot.vars.BOT_NAME.capitalize()} setup Handler -- Setup!",
-                )
-            with open(Path(f"{starter_path}/assets/emojis/valor.png"), "rb") as image:
-                valor_image_bytes = image.read()
-                valor_emoji = await bot.discord_service.create_emoji(
-                    ctx.guild_id,
-                    f"{bot.vars.BOT_NAME.lower()}_valor",
-                    valor_image_bytes,
-                    reason=f"{bot.vars.BOT_NAME.capitalize()} setup Handler -- Setup!",
-                )
-            logging.getLogger(__name__).info(
-                f"Added emoji's ('{bot.vars.BOT_NAME.lower()}-instinct', '{bot.vars.BOT_NAME.lower()}-mystic' "
-                f" or '{bot.vars.BOT_NAME.lower()}-valor') to guild_id: {ctx.guild_id}!"
+            instinct_image_bytes = await asyncio.to_thread(Path("assets/emojis/instinct.png").read_bytes)
+            mystic_image_bytes = await asyncio.to_thread(Path("assets/emojis/mystic.png").read_bytes)
+            valor_image_bytes = await asyncio.to_thread(Path("assets/emojis/valor.png").read_bytes)
+            instinct_emoji = await bot.discord_service.create_emoji(
+                ctx.guild_id,
+                f"{bot.vars.BOT_NAME.lower()}_instinct",
+                instinct_image_bytes,
+                reason=f"{bot.vars.BOT_NAME.capitalize()} setup Handler -- Setup!",
             )
-        except Exception as e:
-            logging.getLogger(__name__).error(
+            mystic_emoji = await bot.discord_service.create_emoji(
+                ctx.guild_id,
+                f"{bot.vars.BOT_NAME.lower()}_mystic",
+                mystic_image_bytes,
+                reason=f"{bot.vars.BOT_NAME.capitalize()} setup Handler -- Setup!",
+            )
+            valor_emoji = await bot.discord_service.create_emoji(
+                ctx.guild_id,
+                f"{bot.vars.BOT_NAME.lower()}_valor",
+                valor_image_bytes,
+                reason=f"{bot.vars.BOT_NAME.capitalize()} setup Handler -- Setup!",
+            )
+            logging.getLogger(__name__).info(
+                "Added emoji's ('%s-instinct', '%s-mystic' or '%s-valor') to guild_id: %s!",
+                bot.vars.BOT_NAME.lower(),
+                bot.vars.BOT_NAME.lower(),
+                bot.vars.BOT_NAME.lower(),
+                ctx.guild_id,
+            )
+        except Exception:
+            logging.getLogger(__name__).exception(
                 "Unexpected error while trying to add one or more emoji's "
-                f"('{bot.vars.BOT_NAME.lower()}_instinct', '{bot.vars.BOT_NAME.lower()}_mystic' or '{bot.vars.BOT_NAME.lower()}_valor') "
-                f"for guild_id: {ctx.guild_id}! Got error: {e}"
+                "('%s_instinct', '%s_mystic' or '%s_valor') for guild_id: %s!",
+                bot.vars.BOT_NAME.lower(),
+                bot.vars.BOT_NAME.lower(),
+                bot.vars.BOT_NAME.lower(),
+                ctx.guild_id,
             )
 
         # CREATE DEFAULT ROLES
@@ -141,61 +152,77 @@ class Setup(
         for role in all_server_roles:
             if role.name == f"{bot.vars.BOT_NAME.capitalize()} instinct":
                 logging.getLogger(__name__).info(
-                    f"Role with name ('{bot.vars.BOT_NAME.lower()} instinct' exists in guild_id: {ctx.guild_id}! Continuing with existing role!"
+                    "Role with name ('%s instinct') exists in guild_id: %s! Continuing with existing role!",
+                    bot.vars.BOT_NAME.lower(),
+                    ctx.guild_id,
                 )
                 role_instinct_exists, role_instinct = True, role
             if role.name == f"{bot.vars.BOT_NAME.capitalize()} mystic":
                 logging.getLogger(__name__).info(
-                    f"Role with name ('{bot.vars.BOT_NAME.lower()} mystic' exists in guild_id: {ctx.guild_id}! Continuing with existing role!"
+                    "Role with name ('%s mystic') exists in guild_id: %s! Continuing with existing role!",
+                    bot.vars.BOT_NAME.lower(),
+                    ctx.guild_id,
                 )
                 role_mystic_exists, role_mystic = True, role
             if role.name == f"{bot.vars.BOT_NAME.capitalize()} valor":
                 logging.getLogger(__name__).info(
-                    f"Role with name ('{bot.vars.BOT_NAME.lower()} valor' exists in guild_id: {ctx.guild_id}! Continuing with existing role!"
+                    "Role with name ('%s valor') exists in guild_id: %s! Continuing with existing role!",
+                    bot.vars.BOT_NAME.lower(),
+                    ctx.guild_id,
                 )
                 role_valor_exists, role_valor = True, role
             if role.name == f"{bot.vars.BOT_NAME.capitalize()} moderator":
                 logging.getLogger(__name__).info(
-                    f"Role with name ('{bot.vars.BOT_NAME.lower()} moderator' exists in guild_id: {ctx.guild_id}! Continuing with existing role!"
+                    "Role with name ('%s moderator') exists in guild_id: %s! Continuing with existing role!",
+                    bot.vars.BOT_NAME.lower(),
+                    ctx.guild_id,
                 )
                 role_moderator_exists, role_moderator = True, role
 
         if not role_instinct_exists:
             logging.getLogger(__name__).info(
-                f"Role with name ('{bot.vars.BOT_NAME.lower()} instinct' doest not exist in guild_id: {ctx.guild_id}! Creating new role!"
+                "Role with name ('%s instinct') does not exist in guild_id: %s! Creating new role!",
+                bot.vars.BOT_NAME.lower(),
+                ctx.guild_id,
             )
             role_instinct = await bot.discord_service.create_role(
-                ctx.guild_id, 
+                ctx.guild_id,
                 name=f"{bot.vars.BOT_NAME.capitalize()} instinct",
                 colour=hikari.Colour(0xFDFF00),
                 reason=f"{bot.vars.BOT_NAME.capitalize()} setup Handler -- Setup!",
             )
         if not role_mystic_exists:
             logging.getLogger(__name__).info(
-                f"Role with name ('{bot.vars.BOT_NAME.lower()} mystic' doest not exist in guild_id: {ctx.guild_id}! Creating new role!"
+                "Role with name ('%s mystic') does not exist in guild_id: %s! Creating new role!",
+                bot.vars.BOT_NAME.lower(),
+                ctx.guild_id,
             )
             role_mystic = await bot.discord_service.create_role(
-                ctx.guild_id, 
+                ctx.guild_id,
                 name=f"{bot.vars.BOT_NAME.capitalize()} mystic",
                 colour=hikari.Colour(0x2A6CEB),
                 reason=f"{bot.vars.BOT_NAME.capitalize()} setup Handler -- Setup!",
             )
         if not role_valor_exists:
             logging.getLogger(__name__).info(
-                f"Role with name ('{bot.vars.BOT_NAME.lower()} valor' doest not exist in guild_id: {ctx.guild_id}! Creating new role!"
+                "Role with name ('%s valor') does not exist in guild_id: %s! Creating new role!",
+                bot.vars.BOT_NAME.lower(),
+                ctx.guild_id,
             )
             role_valor = await bot.discord_service.create_role(
-                ctx.guild_id, 
+                ctx.guild_id,
                 name=f"{bot.vars.BOT_NAME.capitalize()} valor",
                 colour=hikari.Colour(0xFF0000),
                 reason=f"{bot.vars.BOT_NAME.capitalize()} setup Handler -- Setup!",
             )
         if not role_moderator_exists:
             logging.getLogger(__name__).info(
-                f"Role with name ('{bot.vars.BOT_NAME.lower()} moderator' doest not exist in guild_id: {ctx.guild_id}! Creating new role!"
+                "Role with name ('%s moderator') does not exist in guild_id: %s! Creating new role!",
+                bot.vars.BOT_NAME.lower(),
+                ctx.guild_id,
             )
             role_moderator = await bot.discord_service.create_role(
-                ctx.guild_id, 
+                ctx.guild_id,
                 name=f"{bot.vars.BOT_NAME.capitalize()} moderator",
                 colour=hikari.Colour(0xFFA500),
                 reason=f"{bot.vars.BOT_NAME.capitalize()} setup Handler -- Setup!",
@@ -208,12 +235,16 @@ class Setup(
         for channel in all_server_channels:
             if channel.name == f"{bot.vars.BOT_NAME.lower()}-raids":
                 logging.getLogger(__name__).info(
-                    f"Channel with name ('{bot.vars.BOT_NAME.lower()}-raids' exists in guild_id: {ctx.guild_id}! Continuing with existing channel!"
+                    "Channel with name ('%s-raids') exists in guild_id: %s! Continuing with existing channel!",
+                    bot.vars.BOT_NAME.lower(),
+                    ctx.guild_id,
                 )
                 channel_raids_exists, channel_raids = True, channel
             if channel.name == f"{bot.vars.BOT_NAME.lower()}-logs":
                 logging.getLogger(__name__).info(
-                    f"Channel with name ('{bot.vars.BOT_NAME.lower()}-logs' exists in guild_id: {ctx.guild_id}! Continuing with existing channel!"
+                    "Channel with name ('%s-logs') exists in guild_id: %s! Continuing with existing channel!",
+                    bot.vars.BOT_NAME.lower(),
+                    ctx.guild_id,
                 )
                 channel_logs_exists, channel_logs = True, channel
 
@@ -226,7 +257,9 @@ class Setup(
         ]
         if not channel_raids_exists:
             logging.getLogger(__name__).info(
-                f"Channel with name ('{bot.vars.BOT_NAME.lower()}-raids' doest not exist in guild_id: {ctx.guild_id}! Creating new channel!"
+                "Channel with name ('%s-raids') does not exist in guild_id: %s! Creating new channel!",
+                bot.vars.BOT_NAME.lower(),
+                ctx.guild_id,
             )
             channel_raids = await bot.discord_service.create_guild_text_channel(
                 ctx.guild_id,
@@ -236,7 +269,9 @@ class Setup(
             )
         if not channel_logs_exists:
             logging.getLogger(__name__).info(
-                f"Channel with name ('{bot.vars.BOT_NAME.lower()}-logs' doest not exist in guild_id: {ctx.guild_id}! Creating new channel!"
+                "Channel with name ('%s-logs') does not exist in guild_id: %s! Creating new channel!",
+                bot.vars.BOT_NAME.lower(),
+                ctx.guild_id,
             )
             channel_logs = await bot.discord_service.create_guild_text_channel(
                 ctx.guild_id,
@@ -245,23 +280,34 @@ class Setup(
                 reason=f"{bot.vars.BOT_NAME.capitalize()} setup Handler -- Setup!",
             )
 
-        if (channel_raids is None 
-            or channel_logs is None 
-            or role_moderator is None 
-            or role_instinct is None 
-            or role_mystic is None 
-            or role_valor is None 
-            or instinct_emoji is None 
-            or mystic_emoji is None 
-            or valor_emoji is None 
+        if (
+            channel_raids is None
+            or channel_logs is None
+            or role_moderator is None
+            or role_instinct is None
+            or role_mystic is None
+            or role_valor is None
+            or instinct_emoji is None
+            or mystic_emoji is None
+            or valor_emoji is None
         ):
             logging.getLogger(__name__).info(
-                f"Got None type for required variable. channel_raids: {channel_raids}, channel_logs: "
-                f"{channel_logs}, role_moderator: {role_moderator}, role_instinct: {role_instinct}, "
-                f"role_mystic: {role_mystic}, role_valor: {role_valor}, instinct_emoji: {instinct_emoji} "
-                f"mystic_emoji: {mystic_emoji}, valor_emoji: {valor_emoji}"
+                "Got None type for required variable. channel_raids: %s, channel_logs: %s, "
+                "role_moderator: %s, role_instinct: %s, role_mystic: %s, role_valor: %s, "
+                "instinct_emoji: %s, mystic_emoji: %s, valor_emoji: %s",
+                channel_raids,
+                channel_logs,
+                role_moderator,
+                role_instinct,
+                role_mystic,
+                role_valor,
+                instinct_emoji,
+                mystic_emoji,
+                valor_emoji,
             )
-            await ctx.edit_response(language_helper.response_setup_failed.format(bot_name=bot.vars.BOT_NAME.capitalize()))
+            await ctx.edit_response(
+                language_helper.response_setup_failed.format(bot_name=bot.vars.BOT_NAME.capitalize())
+            )
             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
             return
 
@@ -275,12 +321,9 @@ class Setup(
             valor_role_id=role_valor.id,
             instinct_emoji_id=instinct_emoji,
             mystic_emoji_id=mystic_emoji,
-            valor_emoji_id=valor_emoji
+            valor_emoji_id=valor_emoji,
         )
-        new_guild_log_settings = Guild_Log_SettingsUpdate(
-            guild_id=ctx.guild_id,
-            logs_channel_id=channel_logs.id
-        )
+        new_guild_log_settings = Guild_Log_SettingsUpdate(guild_id=ctx.guild_id, logs_channel_id=channel_logs.id)
         await bot.database.change_guild_settings(guild_settings, new_guild_settings)
         await bot.database.change_guild_log_settings(guild_log_settings, new_guild_log_settings)
 
@@ -302,13 +345,11 @@ class Setup(
                             role_valor=role_valor.mention,
                             role_moderator=role_moderator.mention,
                             channel_raids=channel_raids.mention,
-                            channel_logs=channel_logs.mention
+                            channel_logs=channel_logs.mention,
                         )
                     ),
                     hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
-                    hikari.impl.TextDisplayComponentBuilder(
-                        content=language_helper.setup_overview_field_1_title
-                    ),
+                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.setup_overview_field_1_title),
                     hikari.impl.TextDisplayComponentBuilder(
                         content=language_helper.setup_overview_field_1_description.format(
                             bot_name=bot.vars.BOT_NAME.capitalize(),
@@ -322,7 +363,9 @@ class Setup(
                     ),
                     hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
                     hikari.impl.TextDisplayComponentBuilder(
-                        content=language_helper.setup_overview_field_2_title.format(bot_name=bot.vars.BOT_NAME.capitalize())
+                        content=language_helper.setup_overview_field_2_title.format(
+                            bot_name=bot.vars.BOT_NAME.capitalize()
+                        )
                     ),
                     hikari.impl.TextDisplayComponentBuilder(
                         content=language_helper.setup_overview_field_2_description.format(
@@ -335,7 +378,7 @@ class Setup(
                     hikari.impl.TextDisplayComponentBuilder(
                         content=language_helper.setup_overview_footer.format(bot_name=bot.vars.BOT_NAME.capitalize())
                     ),
-                ]
+                ],
             )
         ]
 
@@ -344,15 +387,21 @@ class Setup(
                 accent_color=hikari.Colour(0x8BC683),
                 components=[
                     hikari.impl.TextDisplayComponentBuilder(
-                        content=language_helper.setup_finished_embed_title.format(bot_name=bot.vars.BOT_NAME.capitalize())
+                        content=language_helper.setup_finished_embed_title.format(
+                            bot_name=bot.vars.BOT_NAME.capitalize()
+                        )
                     ),
                     hikari.impl.TextDisplayComponentBuilder(
-                        content=language_helper.setup_finished_embed_description.format(bot_name=bot.vars.BOT_NAME.capitalize(), logs_channel_mention=channel_logs.mention)
-                    )
-                ]
+                        content=language_helper.setup_finished_embed_description.format(
+                            bot_name=bot.vars.BOT_NAME.capitalize(), logs_channel_mention=channel_logs.mention
+                        )
+                    ),
+                ],
             )
         ]
 
         await ctx.edit_response(response_message, components=components_finished_message, embeds=[])
-        await bot.discord_service.create_message(channel_logs.id, None, components=components_finished_overview, embeds=[])
+        await bot.discord_service.create_message(
+            channel_logs.id, None, components=components_finished_overview, embeds=[]
+        )
         await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)

@@ -1,10 +1,13 @@
+# Copyright (c) 2022-present l3keboy
+
 from sqlalchemy import Column
-from sqlmodel import BigInteger, Field  # pyright: ignore[reportUnknownVariableType]
+from sqlmodel import BigInteger  # pyright: ignore[reportUnknownVariableType]
+from sqlmodel import Field  # pyright: ignore[reportUnknownVariableType]
 from sqlmodel import SQLModel
 
 
 class Guild_Log_Settings(SQLModel, table=True):
-    __tablename__ = "Guild_Log_Settings" # type: ignore
+    __tablename__ = "Guild_Log_Settings"  # pyright: ignore[reportAssignmentType]
 
     guild_id: int = Field(sa_column=Column(name="guild_id", nullable=False, primary_key=True, type_=BigInteger))
     logs_channel_id: int | None = Field(nullable=True, default=None, sa_type=BigInteger)
@@ -24,6 +27,7 @@ class Guild_Log_Settings(SQLModel, table=True):
     log_trade_offer: bool = Field(nullable=False, default=False)
     log_trade_proposal: bool = Field(nullable=False, default=False)
     log_trade_search: bool = Field(nullable=False, default=False)
+
 
 class Guild_Log_SettingsUpdate(SQLModel):
     guild_id: int

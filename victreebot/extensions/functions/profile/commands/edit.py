@@ -1,3 +1,5 @@
+# Copyright (c) 2022-present l3keboy
+
 import contextlib
 import logging
 
@@ -6,12 +8,12 @@ import lightbulb
 
 from victreebot.contants import SUPPORTED_LANGUAGES
 from victreebot.core.bot import Bot
-from victreebot.extensions.functions.profile.menus.friend_code_add_menu import FriendCodeAddModal
-from victreebot.extensions.functions.profile.menus.friend_code_delete_menu import FriendCodeDeleteModal
+from victreebot.extensions.functions.profile.commands import group
 from victreebot.extensions.functions.profile.menus.active_location_add_menu import ActiveLocationAddModal
 from victreebot.extensions.functions.profile.menus.active_location_delete_menu import ActiveLocationDeleteModal
+from victreebot.extensions.functions.profile.menus.friend_code_add_menu import FriendCodeAddModal
+from victreebot.extensions.functions.profile.menus.friend_code_delete_menu import FriendCodeDeleteModal
 from victreebot.languages import en
-from victreebot.extensions.functions.profile.commands import group
 from victreebot.models.Users import UsersUpdate
 
 # Load command
@@ -21,11 +23,7 @@ loader.command(group)
 
 # Command
 @group.register
-class ProfileEdit(
-    lightbulb.SlashCommand, 
-    name="edit", 
-    description="Edit your profile",
-):
+class ProfileEdit(lightbulb.SlashCommand, name="edit", description="Edit your profile"):
     """Command to edit your profile info."""
 
     @lightbulb.invoke
@@ -51,7 +49,9 @@ class ProfileEdit(
         auto_delete_helper = await bot.utils.determine_auto_delete(guild_settings.auto_delete)
 
         if not guild_settings.is_setup:
-            response_message = await ctx.respond(language_helper.response_not_yet_setup.format(bot_name=bot.vars.BOT_NAME.capitalize()))
+            response_message = await ctx.respond(
+                language_helper.response_not_yet_setup.format(bot_name=bot.vars.BOT_NAME.capitalize())
+            )
             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
             return
 
@@ -61,13 +61,12 @@ class ProfileEdit(
             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
             if guild_log_settings.log_errors:
                 log_response = language_helper.log_response_profile_edit_no_member.format(
-                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
-                    member=ctx.member,
+                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member
                 )
                 await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
             return
 
-        auto_delete_helper = 120 if auto_delete_helper < 120 else auto_delete_helper
+        auto_delete_helper = max(auto_delete_helper, 120)
         components = [
             hikari.impl.ContainerComponentBuilder(
                 accent_color=hikari.Colour(0x8BC683),
@@ -103,10 +102,9 @@ class ProfileEdit(
                             ),
                         ]
                     ),
-                ]
+                ],
             )
         ]
-
 
         response_message = await ctx.respond(components=components)
 
@@ -132,7 +130,9 @@ class ProfileEdit(
                     )
 
                     try:
-                        await friend_code_add_modal.attach(bot.client, "friend_codes_add_modal", timeout=auto_delete_helper)
+                        await friend_code_add_modal.attach(
+                            bot.client, "friend_codes_add_modal", timeout=auto_delete_helper
+                        )
                     except TimeoutError:
                         await ctx.delete_response(response_message)
                         listening = False
@@ -146,25 +146,33 @@ class ProfileEdit(
 
                             given_friend_codes_list = friend_code_add_modal.given_friend_code.split(",")
 
-                            for friend_code in given_friend_codes_list:
-                                friend_code = friend_code.replace("-", " ").lstrip().rstrip()
+                            for raw_friend_code in given_friend_codes_list:
+                                friend_code = raw_friend_code.replace("-", " ").strip()
                                 is_valid_friend_code = await bot.utils.validate_friend_code(friend_code)
                                 if not is_valid_friend_code:
                                     components_error = [
                                         hikari.impl.ContainerComponentBuilder(
                                             accent_color=hikari.Colour(0x8BC683),
                                             components=[
-                                                hikari.impl.TextDisplayComponentBuilder(content=language_helper.profile_edit_embed_title),
-                                                hikari.impl.TextDisplayComponentBuilder(content=language_helper.response_profile_edit_invalid_friend_code_format),
-                                            ]
+                                                hikari.impl.TextDisplayComponentBuilder(
+                                                    content=language_helper.profile_edit_embed_title
+                                                ),
+                                                hikari.impl.TextDisplayComponentBuilder(
+                                                    content=language_helper.response_profile_edit_invalid_friend_code_format
+                                                ),
+                                            ],
                                         )
                                     ]
                                     await ctx.edit_response(response_message, components=components_error, embeds=[])
-                                    await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
+                                    await bot.utils.handle_auto_delete(
+                                        ctx.channel_id, response_message, auto_delete_helper
+                                    )
                                     if guild_log_settings.log_errors:
-                                        log_response = language_helper.log_response_profile_edit_invalid_friend_code_format.format(
-                                            datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
-                                            member=ctx.member,
+                                        log_response = (
+                                            language_helper.log_response_profile_edit_invalid_friend_code_format.format(
+                                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                                member=ctx.member,
+                                            )
                                         )
                                         await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                                     return
@@ -173,9 +181,9 @@ class ProfileEdit(
                                     current_friend_codes_list.append(friend_code)
 
                             new_user_details = UsersUpdate(
-                                guild_id=ctx.guild_id, 
+                                guild_id=ctx.guild_id,
                                 user_id=ctx.user.id,
-                                friend_codes=",".join(friend_code for friend_code in current_friend_codes_list)
+                                friend_codes=",".join(friend_code for friend_code in current_friend_codes_list),
                             )
 
                             await bot.database.change_user(current_user_details, new_user_details)
@@ -184,17 +192,20 @@ class ProfileEdit(
                                 hikari.impl.ContainerComponentBuilder(
                                     accent_color=hikari.Colour(0x8BC683),
                                     components=[
-                                        hikari.impl.TextDisplayComponentBuilder(content=language_helper.profile_edit_embed_title),
-                                        hikari.impl.TextDisplayComponentBuilder(content=language_helper.response_profile_edit_success),
-                                    ]
+                                        hikari.impl.TextDisplayComponentBuilder(
+                                            content=language_helper.profile_edit_embed_title
+                                        ),
+                                        hikari.impl.TextDisplayComponentBuilder(
+                                            content=language_helper.response_profile_edit_success
+                                        ),
+                                    ],
                                 )
                             ]
                             await ctx.edit_response(response_message, components=components_success, embeds=[])
                             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                             if guild_log_settings.log_profile_edit:
                                 log_response = language_helper.log_response_profile_edit.format(
-                                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
-                                    member=ctx.member,
+                                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member
                                 )
                                 await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
 
@@ -207,7 +218,9 @@ class ProfileEdit(
                     )
 
                     try:
-                        await friend_code_delete_modal.attach(bot.client, "friend_codes_delete_modal", timeout=auto_delete_helper)
+                        await friend_code_delete_modal.attach(
+                            bot.client, "friend_codes_delete_modal", timeout=auto_delete_helper
+                        )
                     except TimeoutError:
                         await ctx.delete_response(response_message)
                         listening = False
@@ -221,25 +234,33 @@ class ProfileEdit(
 
                             given_friend_codes_list = friend_code_delete_modal.given_friend_code.split(",")
 
-                            for friend_code in given_friend_codes_list:
-                                friend_code = friend_code.replace("-", " ").lstrip().rstrip()
+                            for raw_friend_code in given_friend_codes_list:
+                                friend_code = raw_friend_code.replace("-", " ").strip()
                                 is_valid_friend_code = await bot.utils.validate_friend_code(friend_code)
                                 if not is_valid_friend_code:
                                     components_error = [
                                         hikari.impl.ContainerComponentBuilder(
                                             accent_color=hikari.Colour(0x8BC683),
                                             components=[
-                                                hikari.impl.TextDisplayComponentBuilder(content=language_helper.profile_edit_embed_title),
-                                                hikari.impl.TextDisplayComponentBuilder(content=language_helper.response_profile_edit_invalid_friend_code_format),
-                                            ]
+                                                hikari.impl.TextDisplayComponentBuilder(
+                                                    content=language_helper.profile_edit_embed_title
+                                                ),
+                                                hikari.impl.TextDisplayComponentBuilder(
+                                                    content=language_helper.response_profile_edit_invalid_friend_code_format
+                                                ),
+                                            ],
                                         )
                                     ]
                                     await ctx.edit_response(response_message, components=components_error, embeds=[])
-                                    await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
+                                    await bot.utils.handle_auto_delete(
+                                        ctx.channel_id, response_message, auto_delete_helper
+                                    )
                                     if guild_log_settings.log_errors:
-                                        log_response = language_helper.log_response_profile_edit_invalid_friend_code_format.format(
-                                            datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
-                                            member=ctx.member,
+                                        log_response = (
+                                            language_helper.log_response_profile_edit_invalid_friend_code_format.format(
+                                                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                                                member=ctx.member,
+                                            )
                                         )
                                         await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                                     return
@@ -248,9 +269,11 @@ class ProfileEdit(
                                     current_friend_codes_list.remove(friend_code)
 
                             new_user_details = UsersUpdate(
-                                guild_id=ctx.guild_id, 
+                                guild_id=ctx.guild_id,
                                 user_id=ctx.user.id,
-                                friend_codes=None if len(current_friend_codes_list) <= 0 else ",".join(friend_code for friend_code in current_friend_codes_list)
+                                friend_codes=None
+                                if len(current_friend_codes_list) <= 0
+                                else ",".join(friend_code for friend_code in current_friend_codes_list),
                             )
 
                             await bot.database.change_user(current_user_details, new_user_details)
@@ -259,17 +282,20 @@ class ProfileEdit(
                                 hikari.impl.ContainerComponentBuilder(
                                     accent_color=hikari.Colour(0x8BC683),
                                     components=[
-                                        hikari.impl.TextDisplayComponentBuilder(content=language_helper.profile_edit_embed_title),
-                                        hikari.impl.TextDisplayComponentBuilder(content=language_helper.response_profile_edit_success),
-                                    ]
+                                        hikari.impl.TextDisplayComponentBuilder(
+                                            content=language_helper.profile_edit_embed_title
+                                        ),
+                                        hikari.impl.TextDisplayComponentBuilder(
+                                            content=language_helper.response_profile_edit_success
+                                        ),
+                                    ],
                                 )
                             ]
                             await ctx.edit_response(response_message, components=components_success, embeds=[])
                             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                             if guild_log_settings.log_profile_edit:
                                 log_response = language_helper.log_response_profile_edit.format(
-                                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
-                                    member=ctx.member,
+                                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member
                                 )
                                 await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
 
@@ -282,7 +308,9 @@ class ProfileEdit(
                     )
 
                     try:
-                        await active_location_add_modal.attach(bot.client, "active_locations_add_modal", timeout=auto_delete_helper)
+                        await active_location_add_modal.attach(
+                            bot.client, "active_locations_add_modal", timeout=auto_delete_helper
+                        )
                     except TimeoutError:
                         await ctx.delete_response(response_message)
                         listening = False
@@ -292,19 +320,21 @@ class ProfileEdit(
                         ):
                             current_active_locations_list = []
                             if current_user_details.active_locations is not None:
-                                current_active_locations_list = current_user_details.active_locations.strip("'").split(",")
+                                current_active_locations_list = current_user_details.active_locations.strip("'").split(
+                                    ","
+                                )
 
                             given_active_locations_list = active_location_add_modal.given_active_location.split(",")
 
-                            for active_location in given_active_locations_list:
-                                active_location = active_location.replace("-", " ").lstrip().rstrip()
+                            for raw_active_location in given_active_locations_list:
+                                active_location = raw_active_location.replace("-", " ").strip()
                                 if active_location not in current_active_locations_list:
                                     current_active_locations_list.append(active_location)
 
                             new_user_details = UsersUpdate(
-                                guild_id=ctx.guild_id, 
+                                guild_id=ctx.guild_id,
                                 user_id=ctx.user.id,
-                                active_locations=",".join(location for location in current_active_locations_list)
+                                active_locations=",".join(location for location in current_active_locations_list),
                             )
 
                             await bot.database.change_user(current_user_details, new_user_details)
@@ -313,17 +343,20 @@ class ProfileEdit(
                                 hikari.impl.ContainerComponentBuilder(
                                     accent_color=hikari.Colour(0x8BC683),
                                     components=[
-                                        hikari.impl.TextDisplayComponentBuilder(content=language_helper.profile_edit_embed_title),
-                                        hikari.impl.TextDisplayComponentBuilder(content=language_helper.response_profile_edit_success),
-                                    ]
+                                        hikari.impl.TextDisplayComponentBuilder(
+                                            content=language_helper.profile_edit_embed_title
+                                        ),
+                                        hikari.impl.TextDisplayComponentBuilder(
+                                            content=language_helper.response_profile_edit_success
+                                        ),
+                                    ],
                                 )
                             ]
                             await ctx.edit_response(response_message, components=components_success, embeds=[])
                             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                             if guild_log_settings.log_profile_edit:
                                 log_response = language_helper.log_response_profile_edit.format(
-                                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
-                                    member=ctx.member,
+                                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member
                                 )
                                 await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
 
@@ -336,7 +369,9 @@ class ProfileEdit(
                     )
 
                     try:
-                        await active_location_delete_modal.attach(bot.client, "active_locations_delete_modal", timeout=auto_delete_helper)
+                        await active_location_delete_modal.attach(
+                            bot.client, "active_locations_delete_modal", timeout=auto_delete_helper
+                        )
                     except TimeoutError:
                         await ctx.delete_response(response_message)
                         listening = False
@@ -346,19 +381,23 @@ class ProfileEdit(
                         ):
                             current_active_locations_list = []
                             if current_user_details.active_locations is not None:
-                                current_active_locations_list = current_user_details.active_locations.strip("'").split(",")
+                                current_active_locations_list = current_user_details.active_locations.strip("'").split(
+                                    ","
+                                )
 
                             given_active_locations_list = active_location_delete_modal.given_active_location.split(",")
-                            
-                            for active_location in given_active_locations_list:
-                                active_location = active_location.replace("-", " ").lstrip().rstrip()
+
+                            for raw_active_location in given_active_locations_list:
+                                active_location = raw_active_location.replace("-", " ").strip()
                                 if active_location in current_active_locations_list:
                                     current_active_locations_list.remove(active_location)
 
                             new_user_details = UsersUpdate(
-                                guild_id=ctx.guild_id, 
+                                guild_id=ctx.guild_id,
                                 user_id=ctx.user.id,
-                                active_locations=None if len(current_active_locations_list) <= 0 else ",".join(location for location in current_active_locations_list)
+                                active_locations=None
+                                if len(current_active_locations_list) <= 0
+                                else ",".join(location for location in current_active_locations_list),
                             )
 
                             await bot.database.change_user(current_user_details, new_user_details)
@@ -367,17 +406,20 @@ class ProfileEdit(
                                 hikari.impl.ContainerComponentBuilder(
                                     accent_color=hikari.Colour(0x8BC683),
                                     components=[
-                                        hikari.impl.TextDisplayComponentBuilder(content=language_helper.profile_edit_embed_title),
-                                        hikari.impl.TextDisplayComponentBuilder(content=language_helper.response_profile_edit_success),
-                                    ]
+                                        hikari.impl.TextDisplayComponentBuilder(
+                                            content=language_helper.profile_edit_embed_title
+                                        ),
+                                        hikari.impl.TextDisplayComponentBuilder(
+                                            content=language_helper.response_profile_edit_success
+                                        ),
+                                    ],
                                 )
                             ]
                             await ctx.edit_response(response_message, components=components_success, embeds=[])
                             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                             if guild_log_settings.log_profile_edit:
                                 log_response = language_helper.log_response_profile_edit.format(
-                                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
-                                    member=ctx.member,
+                                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member
                                 )
                                 await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
 
@@ -386,9 +428,7 @@ class ProfileEdit(
                 await ctx.delete_response(response_message)
                 listening = False
             except Exception:
-                logging.getLogger(__name__).exception(
-                    "An error occurred while listening for the profile edit command!"
-                )
+                logging.getLogger(__name__).exception("An error occurred while listening for the profile edit command!")
                 await ctx.delete_response(response_message)
                 listening = False
 

@@ -1,3 +1,6 @@
+# Copyright (c) 2022-present l3keboy
+
+
 class DatabaseError(Exception):
     """Exception raised when an interaction with the database failed."""
 

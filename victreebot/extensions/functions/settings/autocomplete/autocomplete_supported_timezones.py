@@ -1,16 +1,16 @@
-import lightbulb
-
-from victreebot.contants import MAX_AUTOCOMPLETE_LENGTH
+# Copyright (c) 2022-present l3keboy
 
 import zoneinfo
 
-from victreebot.core.bot import Bot
+import lightbulb
+
+from victreebot.contants import MAX_AUTOCOMPLETE_LENGTH
 
 
 # ------------------------------------------------------------------------- #
 # AUTOCOMPLETE CALLBACKS #
 # ------------------------------------------------------------------------- #
-async def autocomplete_supported_timezones(ctx: lightbulb.AutocompleteContext[str], bot: Bot) -> None:
+async def autocomplete_supported_timezones(ctx: lightbulb.AutocompleteContext[str]) -> None:
     """Autocomplete callback to return pokemon related to the query."""
     # Validate that the callback is done from a guild
     if ctx.interaction.guild_id is None:
@@ -24,9 +24,8 @@ async def autocomplete_supported_timezones(ctx: lightbulb.AutocompleteContext[st
     for timezone in supported_timezones:
         if len(result_map) == MAX_AUTOCOMPLETE_LENGTH:
             break
-        else:
-            if timezone.__contains__(str(ctx.focused.value)):
-                result_map[f"{timezone}"] = f"{timezone}"
+        if timezone.__contains__(str(ctx.focused.value)):
+            result_map[f"{timezone}"] = f"{timezone}"
 
     # Return autocomplete options
     await ctx.respond(result_map)

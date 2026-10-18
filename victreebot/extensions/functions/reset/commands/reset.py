@@ -1,3 +1,5 @@
+# Copyright (c) 2022-present l3keboy
+
 import contextlib
 import logging
 from pathlib import Path
@@ -8,8 +10,8 @@ import lightbulb
 from victreebot.contants import SUPPORTED_LANGUAGES
 from victreebot.core.bot import Bot
 from victreebot.languages import en
-from victreebot.models.GuildSettings import Guild_SettingsUpdate
 from victreebot.models.GuildLogSettings import Guild_Log_SettingsUpdate
+from victreebot.models.GuildSettings import Guild_SettingsUpdate
 
 # Load command
 loader = lightbulb.Loader()
@@ -18,10 +20,10 @@ loader = lightbulb.Loader()
 # Command
 @loader.command
 class Reset(
-    lightbulb.SlashCommand, 
-    name="reset", 
+    lightbulb.SlashCommand,
+    name="reset",
     description="Reset the settings to start a new setup",
-    hooks=[lightbulb.prefab.has_permissions(hikari.Permissions.MANAGE_GUILD)]
+    hooks=[lightbulb.prefab.has_permissions(hikari.Permissions.MANAGE_GUILD)],
 ):
     """Command to reset the bots settings."""
 
@@ -48,11 +50,13 @@ class Reset(
         auto_delete_helper = await bot.utils.determine_auto_delete(guild_settings.auto_delete)
 
         if not guild_settings.is_setup:
-            response_message = await ctx.respond(language_helper.response_not_yet_setup.format(bot_name=bot.vars.BOT_NAME.capitalize()))
+            response_message = await ctx.respond(
+                language_helper.response_not_yet_setup.format(bot_name=bot.vars.BOT_NAME.capitalize())
+            )
             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
             return
 
-        if ctx.channel_id == guild_settings.raids_channel_id or ctx.channel_id == guild_log_settings.logs_channel_id:
+        if ctx.channel_id in (guild_settings.raids_channel_id, guild_log_settings.logs_channel_id):
             response_message = await ctx.respond(language_helper.response_reset_from_channel_not_possible)
             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
             return
@@ -62,27 +66,27 @@ class Reset(
                 accent_color=hikari.Colour(0x8BC683),
                 components=[
                     hikari.impl.TextDisplayComponentBuilder(
-                        content=language_helper.reset_validation_embed_title.format(bot_name=bot.vars.BOT_NAME.capitalize())
+                        content=language_helper.reset_validation_embed_title.format(
+                            bot_name=bot.vars.BOT_NAME.capitalize()
+                        )
                     ),
                     hikari.impl.TextDisplayComponentBuilder(
-                        content=language_helper.reset_validation_embed_description.format(bot_name=bot.vars.BOT_NAME.capitalize())
+                        content=language_helper.reset_validation_embed_description.format(
+                            bot_name=bot.vars.BOT_NAME.capitalize()
+                        )
                     ),
                     hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
                     hikari.impl.MessageActionRowBuilder(
                         components=[
                             hikari.impl.InteractiveButtonBuilder(
-                                style=hikari.ButtonStyle.SUCCESS,
-                                label=language_helper.yes,
-                                custom_id="reset,yes",
+                                style=hikari.ButtonStyle.SUCCESS, label=language_helper.yes, custom_id="reset,yes"
                             ),
                             hikari.impl.InteractiveButtonBuilder(
-                                style=hikari.ButtonStyle.DANGER,
-                                label=language_helper.no,
-                                custom_id="reset,no",
+                                style=hikari.ButtonStyle.DANGER, label=language_helper.no, custom_id="reset,no"
                             ),
                         ]
                     ),
-                ]
+                ],
             )
         ]
 
@@ -103,26 +107,25 @@ class Reset(
 
                 await event.interaction.create_initial_response(6)
                 if action == "yes":
-                    starter_path = Path().cwd()
-                    gif = Path(f"{starter_path}/assets/gifs/loading.gif")
+                    gif = Path("assets/gifs/loading.gif")
                     components = [
                         hikari.impl.ContainerComponentBuilder(
                             accent_color=hikari.Colour(0x8BC683),
                             components=[
                                 hikari.impl.TextDisplayComponentBuilder(
-                                    content=language_helper.reset_started_embed_title.format(bot_name=bot.vars.BOT_NAME.capitalize())
+                                    content=language_helper.reset_started_embed_title.format(
+                                        bot_name=bot.vars.BOT_NAME.capitalize()
+                                    )
                                 ),
                                 hikari.impl.TextDisplayComponentBuilder(
-                                    content=language_helper.reset_started_embed_description.format(bot_name=bot.vars.BOT_NAME.capitalize())
+                                    content=language_helper.reset_started_embed_description.format(
+                                        bot_name=bot.vars.BOT_NAME.capitalize()
+                                    )
                                 ),
                                 hikari.impl.MediaGalleryComponentBuilder(
-                                    items=[
-                                        hikari.impl.MediaGalleryItemBuilder(
-                                            media=gif,
-                                        )
-                                    ]
+                                    items=[hikari.impl.MediaGalleryItemBuilder(media=gif)]
                                 ),
-                            ]
+                            ],
                         )
                     ]
                     await ctx.edit_response(response_message, components=components, embeds=[])
@@ -130,43 +133,59 @@ class Reset(
                     # DELETE CUSTOM EMOJI'S
                     if guild_settings.instinct_emoji_id:
                         await bot.discord_service.delete_emoji(
-                            ctx.guild_id, int(guild_settings.instinct_emoji_id), reason=f"{bot.vars.BOT_NAME.capitalize()} reset Handler -- Reset!"
+                            ctx.guild_id,
+                            int(guild_settings.instinct_emoji_id),
+                            reason=f"{bot.vars.BOT_NAME.capitalize()} reset Handler -- Reset!",
                         )
                     if guild_settings.mystic_emoji_id:
                         await bot.discord_service.delete_emoji(
-                            ctx.guild_id, int(guild_settings.mystic_emoji_id), reason=f"{bot.vars.BOT_NAME.capitalize()} reset Handler -- Reset!"
+                            ctx.guild_id,
+                            int(guild_settings.mystic_emoji_id),
+                            reason=f"{bot.vars.BOT_NAME.capitalize()} reset Handler -- Reset!",
                         )
                     if guild_settings.valor_emoji_id:
                         await bot.discord_service.delete_emoji(
-                            ctx.guild_id, int(guild_settings.valor_emoji_id), reason=f"{bot.vars.BOT_NAME.capitalize()} reset Handler -- Reset!"
+                            ctx.guild_id,
+                            int(guild_settings.valor_emoji_id),
+                            reason=f"{bot.vars.BOT_NAME.capitalize()} reset Handler -- Reset!",
                         )
 
                     # DELETE ROLES
                     if guild_settings.instinct_role_id:
                         await bot.discord_service.delete_role(
-                            ctx.guild_id, int(guild_settings.instinct_role_id), reason=f"{bot.vars.BOT_NAME.capitalize()} reset Handler -- Reset!"
+                            ctx.guild_id,
+                            int(guild_settings.instinct_role_id),
+                            reason=f"{bot.vars.BOT_NAME.capitalize()} reset Handler -- Reset!",
                         )
                     if guild_settings.mystic_role_id:
                         await bot.discord_service.delete_role(
-                            ctx.guild_id, int(guild_settings.mystic_role_id), reason=f"{bot.vars.BOT_NAME.capitalize()} reset Handler -- Reset!"
+                            ctx.guild_id,
+                            int(guild_settings.mystic_role_id),
+                            reason=f"{bot.vars.BOT_NAME.capitalize()} reset Handler -- Reset!",
                         )
                     if guild_settings.valor_role_id:
                         await bot.discord_service.delete_role(
-                            ctx.guild_id, int(guild_settings.valor_role_id), reason=f"{bot.vars.BOT_NAME.capitalize()} reset Handler -- Reset!"
+                            ctx.guild_id,
+                            int(guild_settings.valor_role_id),
+                            reason=f"{bot.vars.BOT_NAME.capitalize()} reset Handler -- Reset!",
                         )
                     if guild_settings.moderator_role_id:
                         await bot.discord_service.delete_role(
-                            ctx.guild_id, int(guild_settings.moderator_role_id), reason=f"{bot.vars.BOT_NAME.capitalize()} reset Handler -- Reset!"
+                            ctx.guild_id,
+                            int(guild_settings.moderator_role_id),
+                            reason=f"{bot.vars.BOT_NAME.capitalize()} reset Handler -- Reset!",
                         )
 
                     # DELETE CHANNELS
                     if guild_settings.raids_channel_id:
                         await bot.discord_service.delete_channel(
-                            int(guild_settings.raids_channel_id), reason=f"{bot.vars.BOT_NAME.capitalize()} reset Handler -- Reset!"
+                            int(guild_settings.raids_channel_id),
+                            reason=f"{bot.vars.BOT_NAME.capitalize()} reset Handler -- Reset!",
                         )
                     if guild_log_settings.logs_channel_id:
                         await bot.discord_service.delete_channel(
-                            int(guild_log_settings.logs_channel_id), reason=f"{bot.vars.BOT_NAME.capitalize()} reset Handler -- Reset!"
+                            int(guild_log_settings.logs_channel_id),
+                            reason=f"{bot.vars.BOT_NAME.capitalize()} reset Handler -- Reset!",
                         )
 
                     new_guild_settings = Guild_SettingsUpdate(
@@ -181,10 +200,7 @@ class Reset(
                         mystic_emoji_id=None,
                         valor_emoji_id=None,
                     )
-                    new_guild_log_settings = Guild_Log_SettingsUpdate(
-                        guild_id=ctx.guild_id,
-                        logs_channel_id=None,
-                    )
+                    new_guild_log_settings = Guild_Log_SettingsUpdate(guild_id=ctx.guild_id, logs_channel_id=None)
 
                     await bot.database.change_guild_settings(guild_settings, new_guild_settings)
                     await bot.database.change_guild_log_settings(guild_log_settings, new_guild_log_settings)
@@ -194,19 +210,28 @@ class Reset(
                             accent_color=hikari.Colour(0x8BC683),
                             components=[
                                 hikari.impl.TextDisplayComponentBuilder(
-                                    content=language_helper.reset_finished_embed_title.format(bot_name=bot.vars.BOT_NAME.capitalize())
+                                    content=language_helper.reset_finished_embed_title.format(
+                                        bot_name=bot.vars.BOT_NAME.capitalize()
+                                    )
                                 ),
                                 hikari.impl.TextDisplayComponentBuilder(
-                                    content=language_helper.reset_finished_embed_description.format(bot_name=bot.vars.BOT_NAME.capitalize())
-                                )
-                            ]
+                                    content=language_helper.reset_finished_embed_description.format(
+                                        bot_name=bot.vars.BOT_NAME.capitalize()
+                                    )
+                                ),
+                            ],
                         )
                     ]
                     await ctx.edit_response(response_message, components=components, embeds=[])
                     await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
 
                 if action == "no":
-                    await ctx.edit_response(response_message, language_helper.response_not_yet_setup.format(bot_name=bot.vars.BOT_NAME.capitalize()), components=[], embeds=[])
+                    await ctx.edit_response(
+                        response_message,
+                        language_helper.response_not_yet_setup.format(bot_name=bot.vars.BOT_NAME.capitalize()),
+                        components=[],
+                        embeds=[],
+                    )
                     await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                     if guild_log_settings.log_errors:
                         log_response = language_helper.log_response_reset_cancelled.format(
@@ -221,9 +246,7 @@ class Reset(
                 await ctx.delete_response(response_message)
                 listening = False
             except Exception:
-                logging.getLogger(__name__).exception(
-                    "An error occurred while listening for the info command!"
-                )
+                logging.getLogger(__name__).exception("An error occurred while listening for the info command!")
                 await ctx.delete_response(response_message)
                 listening = False
 

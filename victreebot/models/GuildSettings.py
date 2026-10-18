@@ -1,10 +1,13 @@
+# Copyright (c) 2022-present l3keboy
+
 from sqlalchemy import Column
-from sqlmodel import BigInteger, Field  # pyright: ignore[reportUnknownVariableType]
+from sqlmodel import BigInteger  # pyright: ignore[reportUnknownVariableType]
+from sqlmodel import Field  # pyright: ignore[reportUnknownVariableType]
 from sqlmodel import SQLModel
 
 
 class Guild_Settings(SQLModel, table=True):
-    __tablename__ = "Guild_Settings" # type: ignore
+    __tablename__ = "Guild_Settings"  # pyright: ignore[reportAssignmentType]
 
     guild_id: int = Field(sa_column=Column(name="guild_id", nullable=False, primary_key=True, type_=BigInteger))
     language: str = Field(nullable=False)
@@ -22,6 +25,7 @@ class Guild_Settings(SQLModel, table=True):
     valor_emoji_id: int | None = Field(nullable=True, default=None, sa_type=BigInteger)
     raid_timeout: int = Field(nullable=False, default=900)
     extended_time_format: bool = Field(nullable=False, default=False)
+
 
 class Guild_SettingsUpdate(SQLModel):
     guild_id: int

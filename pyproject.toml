@@ -49,6 +49,7 @@ dev = [
     "ty>=0.0.1a27",
     "types-colorama>=0.4.15.20250801",
     "types-hvac>=2.4.0.20251115",
+    "types-python-dateutil>=2.9.0.20260807",
 ]
 
 
@@ -63,6 +64,7 @@ force_single_line = true
 [tool.mypy]
 # general settings
 strict = true
+mypy_path = "typings"
 check_untyped_defs = true
 incremental = true
 namespace_packages = true

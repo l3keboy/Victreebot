@@ -13,9 +13,17 @@ select = ["ALL"]
 ignore = [
     "S101",     # Use of assert detected (used for testing purposes)
     "D100",     # Missing docstring in public module
+    "D101",     # Public command and model classes are documented outside the code
+    "D102",     # Public handler methods are documented by their callers
+    "D103",     # Public functions are documented by their callers
     "D104",     # Missing docstring in public package
     "COM812",   # Missing trailing comma (interferes with the formatter)
     "N801",     # Class name `Database_Table` should use CapWords convention
+    "N999",     # Preserve established module names matching public class names
+    "C901",     # Command/event handlers are intentionally branch-oriented
+    "PLR0911",  # Command/event handlers use early returns for interaction exits
+    "PLR0912",  # Command/event handlers branch on user-selected actions
+    "PLR0915",  # Command/event handlers coordinate several ordered async steps
 ]
 exclude = ["**/utils/**"]
 
@@ -31,3 +39,6 @@ max-args = 20
 
 [lint.mccabe]
 max-complexity = 20
+
+[lint.per-file-ignores]
+"victreebot/languages/en.py" = ["E501"]

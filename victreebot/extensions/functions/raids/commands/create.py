@@ -1,23 +1,26 @@
+# Copyright (c) 2022-present l3keboy
+
 import datetime
 import logging
-from pathlib import Path
 import time
 import uuid
+import zoneinfo
 
 import hikari
 import lightbulb
 
-from victreebot.contants import SUPPORTED_LANGUAGES, SUPPORTED_LOCATION_TYPES, SUPPORTED_RAID_TYPES
+from victreebot.contants import SUPPORTED_LANGUAGES
+from victreebot.contants import SUPPORTED_LOCATION_TYPES
+from victreebot.contants import SUPPORTED_RAID_TYPES
 from victreebot.core.bot import Bot
+from victreebot.extensions.functions.raids.commands import group
 from victreebot.extensions.functions.raids.menus.time_menu import TimeModal
+from victreebot.languages import en
+from victreebot.models.GuildStats import Guild_StatsUpdate
 from victreebot.models.Users import UsersUpdate
 from victreebot.utils.classes.RaidClass import RaidClass
-from victreebot.utils.shared_autocompletes import autocomplete_pokemon, autocomplete_locations
-from victreebot.languages import en
-from victreebot.extensions.functions.raids.commands import group
-from victreebot.models.GuildStats import Guild_StatsUpdate
-import zoneinfo
-from dateutil.rrule import rrule, DAILY
+from victreebot.utils.shared_autocompletes import autocomplete_locations
+from victreebot.utils.shared_autocompletes import autocomplete_pokemon
 
 # Load command
 loader = lightbulb.Loader()
@@ -43,11 +46,7 @@ async def generate_check_raid_id(bot: Bot) -> str:
 
 # Command
 @group.register
-class RaidsCreate(
-    lightbulb.SlashCommand, 
-    name="create", 
-    description="Create a raid",
-):
+class RaidsCreate(lightbulb.SlashCommand, name="create", description="Create a raid"):
     """Command to create a raid."""
 
     boss: str = lightbulb.string(
@@ -89,72 +88,90 @@ class RaidsCreate(
         auto_delete_helper = await bot.utils.determine_auto_delete(guild_settings.auto_delete)
 
         if not guild_settings.is_setup:
-            response_message = await ctx.respond(language_helper.response_not_yet_setup.format(bot_name=bot.vars.BOT_NAME.capitalize()))
+            response_message = await ctx.respond(
+                language_helper.response_not_yet_setup.format(bot_name=bot.vars.BOT_NAME.capitalize())
+            )
             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
             return
 
         # Validate existing raids channel ID
         if guild_settings.raids_channel_id is None:
-            response_message = await ctx.respond(language_helper.response_raid_create_no_raids_channel.format(boss_name=self.boss), components=[], embeds=[])
+            response_message = await ctx.respond(
+                language_helper.response_raid_create_no_raids_channel.format(boss_name=self.boss),
+                components=[],
+                embeds=[],
+            )
             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
             if guild_log_settings.log_errors:
                 log_response = language_helper.log_response_raid_create_no_raids_channel.format(
-                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
-                    member=ctx.member,
+                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member
                 )
                 await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
             return
 
         # Validate emojis
-        if guild_settings.instinct_emoji_id is None or guild_settings.mystic_emoji_id is None or guild_settings.valor_emoji_id is None:
-            response_message = await ctx.respond(language_helper.response_raid_create_missing_emojis, components=[], embeds=[])
+        if (
+            guild_settings.instinct_emoji_id is None
+            or guild_settings.mystic_emoji_id is None
+            or guild_settings.valor_emoji_id is None
+        ):
+            response_message = await ctx.respond(
+                language_helper.response_raid_create_missing_emojis, components=[], embeds=[]
+            )
             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
             if guild_log_settings.log_errors:
                 log_response = language_helper.log_response_raid_create_missing_emojis.format(
-                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
-                    member=ctx.member,
+                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member
                 )
                 await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
             return
 
         # Validate boss
-        if self.boss != "egg1" and self.boss != "egg3" and self.boss != "egg5" and self.boss != "eggmega" and self.boss != "eggshadow":
+        pokemon_image: str | None = None
+        if self.boss not in {"egg1", "egg3", "egg5", "eggmega", "eggshadow"}:
             success, pokemon, pokemon_image = await bot.utils.validate_pokemon(self.boss)
-            pokemon_name = pokemon.name
-            if not success:
-                response_message = await ctx.respond(language_helper.response_raid_create_unknown_boss.format(boss_name=self.boss), components=[], embeds=[])
+            if not success or not pokemon or not pokemon_image:
+                response_message = await ctx.respond(
+                    language_helper.response_raid_create_unknown_boss.format(boss_name=self.boss),
+                    components=[],
+                    embeds=[],
+                )
                 await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                 if guild_log_settings.log_errors:
                     log_response = language_helper.log_response_raid_create_unknown_boss.format(
-                        datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
-                        member=ctx.member,
+                        datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member
                     )
                     await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                 return
+            pokemon_name = pokemon.name
         else:
-            path = Path().cwd()
             pokemon = self.boss
             pokemon_name = self.boss
             if self.boss == "egg1":
-                pokemon_image = f"{path}/assets/raidEggs/raid_eggOne.png"
+                pokemon_image = "assets/raidEggs/raid_eggOne.png"
             elif self.boss == "egg3":
-                pokemon_image = f"{path}/assets/raidEggs/raid_eggThree.png"
+                pokemon_image = "assets/raidEggs/raid_eggThree.png"
             elif self.boss == "egg5":
-                pokemon_image = f"{path}/assets/raidEggs/raid_eggFive.png"
+                pokemon_image = "assets/raidEggs/raid_eggFive.png"
             elif self.boss == "eggmega":
-                pokemon_image = f"{path}/assets/raidEggs/raid_eggMega.png"
+                pokemon_image = "assets/raidEggs/raid_eggMega.png"
             elif self.boss == "eggshadow":
-                pokemon_image = f"{path}/assets/raidEggs/raid_eggShadow.png"
-        
+                pokemon_image = "assets/raidEggs/raid_eggShadow.png"
+
+        if pokemon_image is None:
+            return
+
         # Get raid type
-        auto_delete_helper = 120 if auto_delete_helper < 120 else auto_delete_helper
+        auto_delete_helper = max(auto_delete_helper, 120)
 
         components = [
             hikari.impl.ContainerComponentBuilder(
                 accent_color=hikari.Colour(0x8BC683),
                 components=[
                     hikari.impl.TextDisplayComponentBuilder(content=language_helper.raid_create_embed_title_raid_type),
-                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.raid_create_embed_description_raid_type),
+                    hikari.impl.TextDisplayComponentBuilder(
+                        content=language_helper.raid_create_embed_description_raid_type
+                    ),
                     hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
                     hikari.impl.MessageActionRowBuilder(
                         components=[
@@ -162,10 +179,11 @@ class RaidsCreate(
                                 style=hikari.ButtonStyle.PRIMARY,
                                 label=raid_type,
                                 custom_id=f"raids,{raid_type.lower()}",
-                            ) for raid_type in SUPPORTED_RAID_TYPES
+                            )
+                            for raid_type in SUPPORTED_RAID_TYPES
                         ]
                     ),
-                ]
+                ],
             )
         ]
 
@@ -193,9 +211,7 @@ class RaidsCreate(
                 await ctx.delete_response(response_message)
                 listening = False
             except Exception:
-                logging.getLogger(__name__).exception(
-                    "An error occurred while listening for the raids command!"
-                )
+                logging.getLogger(__name__).exception("An error occurred while listening for the raids command!")
                 await ctx.delete_response(response_message)
                 listening = False
 
@@ -211,8 +227,12 @@ class RaidsCreate(
                 hikari.impl.ContainerComponentBuilder(
                     accent_color=hikari.Colour(0x8BC683),
                     components=[
-                        hikari.impl.TextDisplayComponentBuilder(content=language_helper.raid_create_embed_title_location_type),
-                        hikari.impl.TextDisplayComponentBuilder(content=language_helper.raid_create_embed_description_location_type),
+                        hikari.impl.TextDisplayComponentBuilder(
+                            content=language_helper.raid_create_embed_title_location_type
+                        ),
+                        hikari.impl.TextDisplayComponentBuilder(
+                            content=language_helper.raid_create_embed_description_location_type
+                        ),
                         hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
                         hikari.impl.MessageActionRowBuilder(
                             components=[
@@ -220,10 +240,11 @@ class RaidsCreate(
                                     style=hikari.ButtonStyle.PRIMARY,
                                     label=location_type,
                                     custom_id=f"raids,{location_type.lower()}",
-                                ) for location_type in SUPPORTED_LOCATION_TYPES
+                                )
+                                for location_type in SUPPORTED_LOCATION_TYPES
                             ]
                         ),
-                    ]
+                    ],
                 )
             ]
             await ctx.edit_response(response_message, components=components)
@@ -249,9 +270,7 @@ class RaidsCreate(
                     await ctx.delete_response(response_message)
                     listening = False
                 except Exception:
-                    logging.getLogger(__name__).exception(
-                        "An error occurred while listening for the raids command!"
-                    )
+                    logging.getLogger(__name__).exception("An error occurred while listening for the raids command!")
                     await ctx.delete_response(response_message)
                     listening = False
         else:
@@ -269,7 +288,7 @@ class RaidsCreate(
         timezone = zoneinfo.ZoneInfo(guild_settings.gmt)
 
         timezone_aware_current_date = datetime.datetime.today().astimezone(timezone).date()
-        days = rrule(DAILY, dtstart=timezone_aware_current_date)  # noqa F405
+        days = [timezone_aware_current_date + datetime.timedelta(days=offset) for offset in range(24)]
 
         components = [
             hikari.impl.ContainerComponentBuilder(
@@ -286,14 +305,18 @@ class RaidsCreate(
                                 max_values=1,
                                 options=[
                                     hikari.impl.SelectOptionBuilder(
-                                        label=f"{language_helper.weekdays[day.weekday()]} {day.day} {language_helper.months[day.month - 1]}",
-                                        value=day
-                                    ) for day in days[:24]
-                                ]
-                            ) 
+                                        label=(
+                                            f"{language_helper.weekdays[day.weekday()]} {day.day} "
+                                            f"{language_helper.months[day.month - 1]}"
+                                        ),
+                                        value=day.isoformat(),
+                                    )
+                                    for day in days[:24]
+                                ],
+                            )
                         ]
                     ),
-                ]
+                ],
             )
         ]
 
@@ -313,15 +336,13 @@ class RaidsCreate(
                 command, action = event.interaction.custom_id.split(",")
                 if command != "raids":
                     return
-                
+
                 raid_date = event.interaction.values[0]
 
                 # Time modal popup
                 time_modal = TimeModal(guild_settings.language)
                 await event.interaction.create_modal_response(
-                    language_helper.raid_create_modal_time,
-                    "_get_raid_time",
-                    components=time_modal,
+                    language_helper.raid_create_modal_time, "_get_raid_time", components=time_modal
                 )
 
                 try:
@@ -330,9 +351,7 @@ class RaidsCreate(
                     await ctx.delete_response(response_message)
                     listening = False
                 else:
-                    if time_modal.selected_btn == "_get_raid_time" and (
-                        time_modal.given_time is not None
-                    ):
+                    if time_modal.selected_btn == "_get_raid_time" and (time_modal.given_time is not None):
                         raid_time = time_modal.given_time
                         valid_time = await bot.utils.validate_timestamp_format(raid_time, "%H:%M")
                         if not valid_time:
@@ -340,16 +359,17 @@ class RaidsCreate(
                                 hikari.impl.ContainerComponentBuilder(
                                     accent_color=hikari.Colour(0x8BC683),
                                     components=[
-                                        hikari.impl.TextDisplayComponentBuilder(content=language_helper.response_raid_create_invalid_time),
-                                    ]
+                                        hikari.impl.TextDisplayComponentBuilder(
+                                            content=language_helper.response_raid_create_invalid_time
+                                        )
+                                    ],
                                 )
                             ]
                             await ctx.edit_response(response_message, embeds=[], components=components_invalid_time)
                             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
                             if guild_log_settings.log_errors:
                                 log_response = language_helper.log_response_raid_create_invalid_time.format(
-                                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
-                                    member=ctx.member,
+                                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member
                                 )
                                 await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                             return
@@ -359,13 +379,11 @@ class RaidsCreate(
                 await ctx.delete_response(response_message)
                 listening = False
             except Exception:
-                logging.getLogger(__name__).exception(
-                    "An error occurred while listening for the raids command!"
-                )
+                logging.getLogger(__name__).exception("An error occurred while listening for the raids command!")
                 await ctx.delete_response(response_message)
                 listening = False
 
-        raid_date = await bot.utils.change_timestamp_format(raid_date, "%Y-%m-%dT%H:%M:%S", "%d/%m/%Y")
+        raid_date = await bot.utils.change_timestamp_format(raid_date, "%Y-%m-%d", "%d/%m/%Y")
         raid_takes_place_at = f"{raid_date} {raid_time}"
 
         if guild_settings.extended_time_format:
@@ -377,23 +395,26 @@ class RaidsCreate(
             str(raid_takes_place_at), "%d/%m/%Y %H:%M"
         ).replace(tzinfo=timezone)
         datetime_obj_now_utc = datetime.datetime.now().astimezone(tz=zoneinfo.ZoneInfo("utc"))
-        datetime_obj_raid_takes_place_at_utc = raid_takes_place_at_server_timezone_aware.astimezone(tz=zoneinfo.ZoneInfo("utc"))
+        datetime_obj_raid_takes_place_at_utc = raid_takes_place_at_server_timezone_aware.astimezone(
+            tz=zoneinfo.ZoneInfo("utc")
+        )
 
         if datetime_obj_raid_takes_place_at_utc < datetime_obj_now_utc:
             components_date_passed = [
                 hikari.impl.ContainerComponentBuilder(
                     accent_color=hikari.Colour(0x8BC683),
                     components=[
-                        hikari.impl.TextDisplayComponentBuilder(content=language_helper.response_raid_create_date_time_already_past),
-                    ]
+                        hikari.impl.TextDisplayComponentBuilder(
+                            content=language_helper.response_raid_create_date_time_already_past
+                        )
+                    ],
                 )
             ]
             await ctx.edit_response(response_message, embeds=[], components=components_date_passed)
             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
             if guild_log_settings.log_errors:
                 log_response = language_helper.log_response_raid_create_date_time_already_past.format(
-                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
-                    member=ctx.member,
+                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member
                 )
                 await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
             return
@@ -402,23 +423,24 @@ class RaidsCreate(
 
         difference = datetime_obj_raid_takes_place_at_utc - datetime_obj_now_utc
         end_time = time.time() + difference.total_seconds() + int(guild_settings.raid_timeout)
-        
+
         # Create message component
         components_raid_messsage = [
             hikari.impl.ContainerComponentBuilder(
                 accent_color=hikari.Colour(0x8BC683),
                 components=[
                     hikari.impl.SectionComponentBuilder(
-                        accessory=hikari.impl.ThumbnailComponentBuilder(
-                            media=pokemon_image,
-                        ),
+                        accessory=hikari.impl.ThumbnailComponentBuilder(media=pokemon_image),
                         components=[
-                            hikari.impl.TextDisplayComponentBuilder(content=
-                                language_helper.raid_embed_description_with_location_link.format(
+                            hikari.impl.TextDisplayComponentBuilder(
+                                content=language_helper.raid_embed_description_with_location_link.format(
                                     raid_id=raid_id.strip("'"),
                                     raid_type=raid_type.capitalize(),
                                     time_date=f"""{raid_takes_place_at_to_show.strip("'")}""",
-                                    location=location_name.capitalize().replace("''", "'").removeprefix("'").removesuffix("'"),
+                                    location=location_name.capitalize()
+                                    .replace("''", "'")
+                                    .removeprefix("'")
+                                    .removesuffix("'"),
                                     latitude=latitude,
                                     longitude=longitude,
                                 )
@@ -427,54 +449,74 @@ class RaidsCreate(
                                     raid_id=raid_id.strip("'"),
                                     raid_type=raid_type.capitalize(),
                                     time_date=f"""{raid_takes_place_at_to_show.strip("'")}""",
-                                    location=location_name.capitalize().replace("''", "'").removeprefix("'").removesuffix("'"),
+                                    location=location_name.capitalize()
+                                    .replace("''", "'")
+                                    .removeprefix("'")
+                                    .removesuffix("'"),
                                 )
-                            ),
-                        ]
+                            )
+                        ],
                     ),
                     hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
-                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.raid_embed_subdescription.format(instinct="\u200b", mystic="\u200b", valor="\u200b", remote="\u200b")),
+                    hikari.impl.TextDisplayComponentBuilder(
+                        content=language_helper.raid_embed_subdescription.format(
+                            instinct="\u200b", mystic="\u200b", valor="\u200b", remote="\u200b"
+                        )
+                    ),
                     hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
-                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.raid_embed_footer.format(
-                        member=ctx.user.display_name, attendees="0"
-                    )),
-                ]
+                    hikari.impl.TextDisplayComponentBuilder(
+                        content=language_helper.raid_embed_footer.format(member=ctx.user.display_name, attendees="0")
+                    ),
+                ],
             )
         ]
 
         # Send message
-        raid_message = await bot.discord_service.create_message(guild_settings.raids_channel_id, None, components=components_raid_messsage)
+        raid_message = await bot.discord_service.create_message(
+            guild_settings.raids_channel_id, None, components=components_raid_messsage
+        )
         if raid_message is None:
             components_failed = [
                 hikari.impl.ContainerComponentBuilder(
                     accent_color=hikari.Colour(0x8BC683),
                     components=[
-                        hikari.impl.TextDisplayComponentBuilder(content=language_helper.response_raid_create_failed),
-                    ]
+                        hikari.impl.TextDisplayComponentBuilder(content=language_helper.response_raid_create_failed)
+                    ],
                 )
             ]
             await ctx.edit_response(response_message, embeds=[], components=components_failed)
             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
             if guild_log_settings.log_errors:
                 log_response = language_helper.log_response_raid_create_failed.format(
-                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
-                    member=ctx.member,
+                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member
                 )
                 await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
             return
 
         # Add reactions
-        emoji_instinct = bot.cache.get_emoji(guild_settings.instinct_emoji_id) or await bot.discord_service.get_emoji(ctx.guild_id, guild_settings.instinct_emoji_id)
+        emoji_instinct = bot.cache.get_emoji(guild_settings.instinct_emoji_id) or await bot.discord_service.get_emoji(
+            ctx.guild_id, guild_settings.instinct_emoji_id
+        )
         if emoji_instinct:
-            await bot.discord_service.add_reaction(guild_settings.raids_channel_id, raid_message, emoji_instinct.name, emoji_instinct.id)
+            await bot.discord_service.add_reaction(
+                guild_settings.raids_channel_id, raid_message, emoji_instinct.name, emoji_instinct.id
+            )
 
-        emoji_mystic = bot.cache.get_emoji(guild_settings.mystic_emoji_id) or await bot.discord_service.get_emoji(ctx.guild_id, guild_settings.mystic_emoji_id)
+        emoji_mystic = bot.cache.get_emoji(guild_settings.mystic_emoji_id) or await bot.discord_service.get_emoji(
+            ctx.guild_id, guild_settings.mystic_emoji_id
+        )
         if emoji_mystic:
-            await bot.discord_service.add_reaction(guild_settings.raids_channel_id, raid_message, emoji_mystic.name, emoji_mystic.id)
+            await bot.discord_service.add_reaction(
+                guild_settings.raids_channel_id, raid_message, emoji_mystic.name, emoji_mystic.id
+            )
 
-        emoji_valor = bot.cache.get_emoji(guild_settings.valor_emoji_id) or await bot.discord_service.get_emoji(ctx.guild_id, guild_settings.valor_emoji_id)
+        emoji_valor = bot.cache.get_emoji(guild_settings.valor_emoji_id) or await bot.discord_service.get_emoji(
+            ctx.guild_id, guild_settings.valor_emoji_id
+        )
         if emoji_valor:
-            await bot.discord_service.add_reaction(guild_settings.raids_channel_id, raid_message, emoji_valor.name, emoji_valor.id)
+            await bot.discord_service.add_reaction(
+                guild_settings.raids_channel_id, raid_message, emoji_valor.name, emoji_valor.id
+            )
 
         one_emoji = "1️⃣"
         two_emoji = "2️⃣"
@@ -504,7 +546,7 @@ class RaidsCreate(
             guild_settings.auto_delete,
             is_new_raid=True,
         )
-        
+
         # Update stats server
         new_server_stats = Guild_StatsUpdate(guild_id=ctx.guild_id, raids_created=guild_stats.raids_created + 1)
         await bot.database.change_guild_stats_settings(guild_stats, new_server_stats)
@@ -512,7 +554,11 @@ class RaidsCreate(
         # Update stats user
         current_user_details = await bot.database.get_user_for_guild(ctx.guild_id, ctx.user.id)
         if current_user_details:
-            new_user = UsersUpdate(guild_id=ctx.guild_id, user_id=ctx.user.id, stats_raids_created=current_user_details.stats_raids_created + 1)
+            new_user = UsersUpdate(
+                guild_id=ctx.guild_id,
+                user_id=ctx.user.id,
+                stats_raids_created=current_user_details.stats_raids_created + 1,
+            )
             await bot.database.change_user(current_user_details, new_user)
 
         # Respond finished
@@ -520,15 +566,14 @@ class RaidsCreate(
             hikari.impl.ContainerComponentBuilder(
                 accent_color=hikari.Colour(0x8BC683),
                 components=[
-                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.response_raid_create_success),
-                ]
+                    hikari.impl.TextDisplayComponentBuilder(content=language_helper.response_raid_create_success)
+                ],
             )
         ]
         await ctx.edit_response(response_message, embeds=[], components=components_finished)
         await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
         if guild_log_settings.log_raid_create:
             log_response = language_helper.log_response_raid_create_success.format(
-                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
-                member=ctx.member,
+                datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member
             )
             await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)

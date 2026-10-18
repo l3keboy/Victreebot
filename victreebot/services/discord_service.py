@@ -1,5 +1,6 @@
+# Copyright (c) 2022-present l3keboy
 
-from typing import Sequence
+from collections.abc import Sequence
 
 import hikari
 import hikari.errors
@@ -35,24 +36,36 @@ class DiscordService:
                 return await client.delete_message(channel_id, message_id)
         except hikari.errors.HikariError:
             return None
- 
-    async def delete_emoji(self, guild_id: hikari.Snowflake | int, emoji_id: hikari.Snowflake | int, reason: str | hikari.UndefinedType = hikari.UNDEFINED) -> None:
+
+    async def delete_emoji(
+        self,
+        guild_id: hikari.Snowflake | int,
+        emoji_id: hikari.Snowflake | int,
+        reason: str | hikari.UndefinedType = hikari.UNDEFINED,
+    ) -> None:
         """Try to delete an emoji from a guild in Discord."""
         try:
             async with self.bot.acquire(self.token, "bot") as client:
                 return await client.delete_emoji(guild_id, emoji_id, reason=reason)
         except hikari.errors.HikariError:
             return None
- 
-    async def delete_role(self, guild_id: hikari.Snowflake | int, role_id: hikari.Snowflake | int, reason: str | hikari.UndefinedType = hikari.UNDEFINED) -> None:
+
+    async def delete_role(
+        self,
+        guild_id: hikari.Snowflake | int,
+        role_id: hikari.Snowflake | int,
+        reason: str | hikari.UndefinedType = hikari.UNDEFINED,
+    ) -> None:
         """Try to delete an role from a guild in Discord."""
         try:
             async with self.bot.acquire(self.token, "bot") as client:
                 return await client.delete_role(guild_id, role_id, reason=reason)
         except hikari.errors.HikariError:
             return None
- 
-    async def delete_channel(self, channel_id: hikari.Snowflake | int, reason: str | hikari.UndefinedType = hikari.UNDEFINED) -> hikari.PartialChannel | None:
+
+    async def delete_channel(
+        self, channel_id: hikari.Snowflake | int, reason: str | hikari.UndefinedType = hikari.UNDEFINED
+    ) -> hikari.PartialChannel | None:
         """Try to delete an channel from a guild in Discord."""
         try:
             async with self.bot.acquire(self.token, "bot") as client:
@@ -100,7 +113,9 @@ class DiscordService:
         except hikari.errors.HikariError:
             return None
 
-    async def get_emoji(self, guild_id: hikari.Snowflake | int, emoji_id: hikari.Snowflake | int) -> hikari.KnownCustomEmoji | None:
+    async def get_emoji(
+        self, guild_id: hikari.Snowflake | int, emoji_id: hikari.Snowflake | int
+    ) -> hikari.KnownCustomEmoji | None:
         """Try to fetch all guild roles from Discord."""
         try:
             async with self.bot.acquire(self.token, "bot") as client:
@@ -108,7 +123,9 @@ class DiscordService:
         except hikari.errors.HikariError:
             return None
 
-    async def get_message(self, channel_id: hikari.Snowflake | int, message_id: hikari.Snowflake | int) -> hikari.Message | None:
+    async def get_message(
+        self, channel_id: hikari.Snowflake | int, message_id: hikari.Snowflake | int
+    ) -> hikari.Message | None:
         """Try to fetch all guild roles from Discord."""
         try:
             async with self.bot.acquire(self.token, "bot") as client:
@@ -116,7 +133,9 @@ class DiscordService:
         except hikari.errors.HikariError:
             return None
 
-    async def get_member(self, guild_id: hikari.Snowflake | int, member_id: hikari.Snowflake | int) -> hikari.Member | None:
+    async def get_member(
+        self, guild_id: hikari.Snowflake | int, member_id: hikari.Snowflake | int
+    ) -> hikari.Member | None:
         """Try to fetch all guild roles from Discord."""
         try:
             async with self.bot.acquire(self.token, "bot") as client:
@@ -132,7 +151,9 @@ class DiscordService:
         except hikari.errors.HikariError:
             return None
 
-    async def get_guild_role(self, guild_id: hikari.Snowflake | int, role_id: hikari.Snowflake | int) -> hikari.Role | None:
+    async def get_guild_role(
+        self, guild_id: hikari.Snowflake | int, role_id: hikari.Snowflake | int
+    ) -> hikari.Role | None:
         """Try to fetch a guilds channel from Discord."""
         try:
             async with self.bot.acquire(self.token, "bot") as client:
@@ -159,7 +180,7 @@ class DiscordService:
         guild_id: hikari.Snowflake | int,
         name: str,
         image: hikari.Resourceish,
-        reason: str | hikari.UndefinedType = hikari.UNDEFINED
+        reason: str | hikari.UndefinedType = hikari.UNDEFINED,
     ) -> hikari.Snowflake | None:
         """Create an emoji in a guild."""
         try:
@@ -173,7 +194,7 @@ class DiscordService:
         guild_id: hikari.Snowflake | int,
         name: str,
         colour: hikari.Color,
-        reason: str | hikari.UndefinedType = hikari.UNDEFINED
+        reason: str | hikari.UndefinedType = hikari.UNDEFINED,
     ) -> hikari.Role | None:
         """Create an emoji in a guild."""
         try:
@@ -187,12 +208,14 @@ class DiscordService:
         guild_id: hikari.Snowflake | int,
         name: str,
         permission_overwrites: Sequence[hikari.PermissionOverwrite] | hikari.UndefinedType = hikari.UNDEFINED,
-        reason: str | hikari.UndefinedType = hikari.UNDEFINED
+        reason: str | hikari.UndefinedType = hikari.UNDEFINED,
     ) -> hikari.GuildTextChannel | None:
         """Create an emoji in a guild."""
         try:
             async with self.bot.acquire(self.token, "bot") as client:
-                return await client.create_guild_text_channel(guild_id, name=name, permission_overwrites=permission_overwrites, reason=reason)
+                return await client.create_guild_text_channel(
+                    guild_id, name=name, permission_overwrites=permission_overwrites, reason=reason
+                )
         except hikari.errors.HikariError:
             return None
 
@@ -201,13 +224,11 @@ class DiscordService:
         channel_id: hikari.Snowflake | int,
         message_id: hikari.Snowflake | int,
         emoji: str,
-        emoji_id: hikari.UndefinedOr[hikari.SnowflakeishOr[hikari.CustomEmoji]] = hikari.UNDEFINED
-    ) -> hikari.GuildTextChannel | None:
+        emoji_id: hikari.UndefinedOr[hikari.SnowflakeishOr[hikari.CustomEmoji]] = hikari.UNDEFINED,
+    ) -> None:
         """Create an emoji in a guild."""
         try:
             async with self.bot.acquire(self.token, "bot") as client:
-                return await client.add_reaction(channel_id, message_id, emoji, emoji_id)
+                await client.add_reaction(channel_id, message_id, emoji, emoji_id)
         except hikari.errors.HikariError:
-            return None
-
-    
+            return

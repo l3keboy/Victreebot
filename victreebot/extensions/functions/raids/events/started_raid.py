@@ -1,3 +1,5 @@
+# Copyright (c) 2022-present l3keboy
+
 import hikari
 import lightbulb
 
@@ -8,7 +10,7 @@ loader = lightbulb.Loader()
 
 
 @loader.listener(hikari.StartedEvent)
-async def started_raid(event: hikari.StartedEvent, bot: Bot) -> None:
+async def started_raid(_event: hikari.StartedEvent, bot: Bot) -> None:
     """Event to readd existing raid to bot raids in memory."""
     all_raids = await bot.database.get_all_raids()
     for raid in all_raids:
@@ -17,8 +19,10 @@ async def started_raid(event: hikari.StartedEvent, bot: Bot) -> None:
             return
 
         boss = raid.boss
-        if boss != "egg1" and boss != "egg3" and boss != "egg5" and boss != "eggmega" and boss != "eggshadow":
-            success, pokemon, pokemon_image = await bot.utils.validate_pokemon(boss)
+        if boss not in {"egg1", "egg3", "egg5", "eggmega", "eggshadow"}:
+            success, pokemon, _ = await bot.utils.validate_pokemon(boss)
+            if not success or not pokemon:
+                return
             pokemon_name = pokemon.name
         else:
             pokemon_name = boss
@@ -34,32 +38,28 @@ async def started_raid(event: hikari.StartedEvent, bot: Bot) -> None:
                 instinct_present_list.append(int(instinct_present))
             else:
                 instinct_present = instinct_present.split(",")
-                for instinct in instinct_present:
-                    instinct_present_list.append(int(instinct))
+                instinct_present_list.extend(int(instinct) for instinct in instinct_present)
         mystic_present = raid.mystic_present
         if mystic_present is not None:
             if mystic_present.isdigit():
                 mystic_present_list.append(int(mystic_present))
             else:
                 mystic_present = mystic_present.split(",")
-                for mystic in mystic_present:
-                    mystic_present_list.append(int(mystic))
+                mystic_present_list.extend(int(mystic) for mystic in mystic_present)
         valor_present = raid.valor_present
         if valor_present is not None:
             if valor_present.isdigit():
                 valor_present_list.append(int(valor_present))
             else:
                 valor_present = valor_present.split(",")
-                for valor in valor_present:
-                    valor_present_list.append(int(valor))
+                valor_present_list.extend(int(valor) for valor in valor_present)
         remote_present = raid.remote_present
         if remote_present is not None:
             if remote_present.isdigit():
                 remote_present_list.append(int(remote_present))
             else:
                 remote_present = remote_present.split(",")
-                for remote in remote_present:
-                    remote_present_list.append(int(remote))
+                remote_present_list.extend(int(remote) for remote in remote_present)
 
         RaidClass(
             raid.raid_id,

@@ -1,7 +1,8 @@
+# Copyright (c) 2022-present l3keboy
+
 import lightbulb
 
 from victreebot.contants import MAX_AUTOCOMPLETE_LENGTH
-
 from victreebot.core.bot import Bot
 
 
@@ -22,8 +23,7 @@ async def autocomplete_raid_id(ctx: lightbulb.AutocompleteContext[str], bot: Bot
     for raid in raids:
         if len(result_map) == MAX_AUTOCOMPLETE_LENGTH:
             break
-        else:
-            result_map[f"{raid.raid_id}"] = f"{raid.raid_id}"
+        result_map[f"{raid.raid_id}"] = f"{raid.raid_id}"
 
     # Return autocomplete options
     await ctx.respond(result_map)

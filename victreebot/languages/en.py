@@ -1,3 +1,5 @@
+# Copyright (c) 2022-present l3keboy
+
 monday = "Monday"
 tuesday = "Tuesday"
 wednesday = "Wednesday"
@@ -90,7 +92,9 @@ setup_overview_field_1_title = "### Changeable server settings:"
 setup_overview_field_1_description = "Some default settings are changable, these include:\n- `Language`: {language}\n- `Timezone`: {timezone}\n- `Unit Systems`: {unit_system}\n- `Auto Delete`: {auto_delete} seconds\n- `Raids Channel ID`: {channel_raids}\n- `Logs Channel ID`: {channel_logs}\n\nMake sure to change these settings to your liking to make full use of {bot_name}!"
 setup_overview_field_2_title = "### {bot_name} resources:"
 setup_overview_field_2_description = "[Support server]({support_server_link}) | [Invite {bot_name}]({bot_invite_link})"
-setup_overview_footer = "Thanks for using {bot_name}! If you encounter any issues or you have feature ideas, join our support server!"
+setup_overview_footer = (
+    "Thanks for using {bot_name}! If you encounter any issues or you have feature ideas, join our support server!"
+)
 
 # ------------------------------------------------------------------------- #
 # reset.py #
@@ -192,8 +196,12 @@ profile_no_friend_codes_set = "No friend codes set!"
 profile_no_active_locations_set = "No active locations set!"
 # Response
 # Log response
-log_response_profile_no_member = "`[{datetime}]` -- **{member}** tried to view a members profile! But something went wrong!"
-log_response_profile_edit_no_member = "`[{datetime}]` -- **{member}** tried to edit their profile! But something went wrong!"
+log_response_profile_no_member = (
+    "`[{datetime}]` -- **{member}** tried to view a members profile! But something went wrong!"
+)
+log_response_profile_edit_no_member = (
+    "`[{datetime}]` -- **{member}** tried to edit their profile! But something went wrong!"
+)
 log_response_profile_view = "`[{datetime}]` -- **{member}** viewed {target_member} their profile!"
 # Embeds
 profile_view_embed_title = "## Profile"
@@ -304,8 +312,12 @@ response_raid_create_timeout_reached = "Stopping Raid creation, timeout was reac
 response_raid_create_location_not_found = (
     "The `{location_type}` with the name `{location_name}` does not exist! Please try to create the Raid again!"
 )
-response_raid_create_no_raids_channel = "No raids channel is configured! Please configure it first before creating the Raid again!"
-response_raid_create_missing_emojis = "One or more emojis are not configured! Please configure first before creating the Raid again!"
+response_raid_create_no_raids_channel = (
+    "No raids channel is configured! Please configure it first before creating the Raid again!"
+)
+response_raid_create_missing_emojis = (
+    "One or more emojis are not configured! Please configure first before creating the Raid again!"
+)
 response_raid_create_unknown_boss = "The given boss, `{boss_name}`, is not found! Please try to create the Raid again!"
 response_raid_create_invalid_time = "The given time is not in a valid timeformat!"
 response_raid_create_date_time_already_past = "The given date and time combination is in the past!"
@@ -333,9 +345,7 @@ log_response_raid_create_invalid_time = (
 log_response_raid_create_date_time_already_past = (
     "`[{datetime}]` -- **{member}** tried to create a raid, but the given date and time combination is in the past!"
 )
-log_response_raid_create_failed = (
-    "`[{datetime}]` -- **{member}** tried to create a raid, but something went wrong!"
-)
+log_response_raid_create_failed = "`[{datetime}]` -- **{member}** tried to create a raid, but something went wrong!"
 log_response_raid_create_success = "`[{datetime}]` -- **{member}** created a raid!"
 # Embed
 raid_create_embed_title_raid_type = "## Raid type"
@@ -424,9 +434,13 @@ info_bot_embed_footer = "Server stats -- Raids completed: {raids_completed} | Ra
 info_bot_embed_field_title_settings_general_title_settings = "### Settings"
 info_bot_embed_field_title_settings_general_description_settings = "Language: `{language}`\nAuto delete: `{auto_delete}`\nUnit system: `{unit_system}`\nTimezone: `{timezone}`\nRaid timeout: `{raid_timeout}`\nExtended time format: `{extended_time_format}`"
 info_bot_embed_field_title_settings_general_title_emojis = "### Emojis"
-info_bot_embed_field_title_settings_general_description_emojis = "Instinct emoji: {instinct}\nMystic emoji: {mystic}\nValor emoji: {valor}"
+info_bot_embed_field_title_settings_general_description_emojis = (
+    "Instinct emoji: {instinct}\nMystic emoji: {mystic}\nValor emoji: {valor}"
+)
 info_bot_embed_field_title_settings_general_title_roles = "### Roles"
-info_bot_embed_field_title_settings_general_description_roles = "Instinct role: {instinct}\nMystic role: {mystic}\nValor role: {valor}\nModerator role: {moderator}"
+info_bot_embed_field_title_settings_general_description_roles = (
+    "Instinct role: {instinct}\nMystic role: {mystic}\nValor role: {valor}\nModerator role: {moderator}"
+)
 info_bot_embed_field_title_settings_general_title_channels = "### Channels"
 info_bot_embed_field_title_settings_general_description_channels = "Raids channel: {raids}\nLogs channel: {logs}"
 info_bot_embed_field_title_settings_general_title_logged_events = "### Logged events"
