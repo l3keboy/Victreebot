@@ -1,6 +1,6 @@
 [project]
 name = "victreebot"
-version = "1.0.1"
+version = "1.0.2"
 description = "Pokémon Go! Raidbot"
 readme = "README.md"
 requires-python = ">=3.12"
