@@ -26,6 +26,8 @@ FROM ghcr.io/astral-sh/uv:python3.12-trixie-slim AS runtime
 
 ENV VENV_PATH=/app/.venv \
     PATH=/app/.venv/bin:$PATH \
+    HOME=/home/app \
+    XDG_CACHE_HOME=/home/app/.cache \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     UV_COMPILE_BYTE=1 \
@@ -39,8 +41,10 @@ COPY --from=builder /app/.venv ./.venv
 COPY --from=builder /app/ ./
 
 RUN addgroup --system app && adduser --system --ingroup app --no-create-home --shell /usr/sbin/nologin app \
-    && chown -R app:app /app \
+    && mkdir -p /home/app/.cache \
+    && chown -R app:app /app /home/app \
     && chmod -R 750 /app \
+    && chmod -R 750 /home/app \
     && find /app/.venv -name "__pycache__" -type d -exec rm -rf {} + \
     && find /app/.venv -name "*.pyc" -delete
 
