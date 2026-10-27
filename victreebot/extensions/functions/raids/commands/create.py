@@ -394,9 +394,9 @@ class RaidsCreate(lightbulb.SlashCommand, name="create", description="Create a r
         raid_takes_place_at_server_timezone_aware = datetime.datetime.strptime(
             str(raid_takes_place_at), "%d/%m/%Y %H:%M"
         ).replace(tzinfo=timezone)
-        datetime_obj_now_utc = datetime.datetime.now().astimezone(tz=zoneinfo.ZoneInfo("utc"))
+        datetime_obj_now_utc = datetime.datetime.now().astimezone(tz=zoneinfo.ZoneInfo("UTC"))
         datetime_obj_raid_takes_place_at_utc = raid_takes_place_at_server_timezone_aware.astimezone(
-            tz=zoneinfo.ZoneInfo("utc")
+            tz=zoneinfo.ZoneInfo("UTC")
         )
 
         if datetime_obj_raid_takes_place_at_utc < datetime_obj_now_utc:

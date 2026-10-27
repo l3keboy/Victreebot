@@ -7,13 +7,21 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased/Working on]
 
-## [0.9.2] - T.B.D.
+================================================================
+
+## [1.0.3] - 27-10-2026
 
 ### [Bugfixes]
 
-- Removed previously added temp try, except block
+- Fixed an issue with the wrong timezone key being used
 
-================================================================
+## [1.0.0 - 1.0.2] - 18-10-2026
+
+### [BREAKING]
+
+- Updates to backend implementation and Discord API calls
+- Migrated from embeds to components V2
+- General updates
 
 ## [0.9.1] - 31-10-2024
 

@@ -1,6 +1,6 @@
 [project]
 name = "victreebot"
-version = "1.0.2"
+version = "1.0.3"
 description = "Pokémon Go! Raidbot"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -36,6 +36,7 @@ dependencies = [
     "hikari-sake>=1.1.2",
     "pillow>=12.3.0",
     "python-dateutil>=2.9.0.post0",
+    "tzdata>=2026.5",
 ]
 
 [dependency-groups]
