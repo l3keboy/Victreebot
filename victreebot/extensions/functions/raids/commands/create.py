@@ -162,7 +162,7 @@ class RaidsCreate(lightbulb.SlashCommand, name="create", description="Create a r
             return
 
         # Get raid type
-        auto_delete_helper = max(auto_delete_helper, 120)
+        timeout = max(auto_delete_helper, 120)
 
         components = [
             hikari.impl.ContainerComponentBuilder(
@@ -195,7 +195,7 @@ class RaidsCreate(lightbulb.SlashCommand, name="create", description="Create a r
             try:
                 event = await bot.wait_for(
                     hikari.ComponentInteractionCreateEvent,
-                    timeout=max(auto_delete_helper, 30),
+                    timeout=timeout,
                     predicate=lambda event: event.interaction.user.id == ctx.user.id,
                 )
 
@@ -254,7 +254,7 @@ class RaidsCreate(lightbulb.SlashCommand, name="create", description="Create a r
                 try:
                     event = await bot.wait_for(
                         hikari.ComponentInteractionCreateEvent,
-                        timeout=max(auto_delete_helper, 30),
+                        timeout=timeout,
                         predicate=lambda event: event.interaction.user.id == ctx.user.id,
                     )
 
@@ -329,7 +329,7 @@ class RaidsCreate(lightbulb.SlashCommand, name="create", description="Create a r
             try:
                 event = await bot.wait_for(
                     hikari.ComponentInteractionCreateEvent,
-                    timeout=max(auto_delete_helper, 30),
+                    timeout=timeout,
                     predicate=lambda event: event.interaction.user.id == ctx.user.id,
                 )
 
@@ -436,6 +436,7 @@ class RaidsCreate(lightbulb.SlashCommand, name="create", description="Create a r
                                 content=language_helper.raid_embed_description_with_location_link.format(
                                     raid_id=raid_id.strip("'"),
                                     raid_type=raid_type.capitalize(),
+                                    boss=self.boss,
                                     time_date=f"""{raid_takes_place_at_to_show.strip("'")}""",
                                     location=location_name.capitalize()
                                     .replace("''", "'")

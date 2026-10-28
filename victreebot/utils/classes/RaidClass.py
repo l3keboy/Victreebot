@@ -49,7 +49,7 @@ class RaidClass:
     mystic_present: list[hikari.Snowflake | int] | None = None
     valor_present: list[hikari.Snowflake | int] | None = None
     remote_present: list[hikari.Snowflake | int] | None = None
-    total_attendess: int = 0
+    total_attendees: int = 0
     is_new_raid: bool = False
     task: asyncio.Future[None] = field(init=False)
 
@@ -118,11 +118,11 @@ class RaidClass:
             or reaction == "remote"
             or reaction == "one"
         ):
-            self.total_attendess = self.total_attendess + 1 if add else self.total_attendess - 1
+            self.total_attendees = self.total_attendees + 1 if add else self.total_attendees - 1
         elif reaction == "two":
-            self.total_attendess = self.total_attendess + 2 if add else self.total_attendess - 2
+            self.total_attendees = self.total_attendees + 2 if add else self.total_attendees - 2
         elif reaction == "three":
-            self.total_attendess = self.total_attendess + 3 if add else self.total_attendess - 3
+            self.total_attendees = self.total_attendees + 3 if add else self.total_attendees - 3
 
         raid_creator = self.bot.cache.get_member(
             self.guild_id, self.raid_creator_id
@@ -204,6 +204,7 @@ class RaidClass:
                                 content=language_helper.raid_embed_description_with_location_link.format(
                                     raid_id=self.raid_id.strip("'"),
                                     raid_type=self.raid_type.capitalize(),
+                                    boss=self.boss,
                                     time_date=f"""{self.takes_place_at_to_show.strip("'")}""",
                                     location=self.location_name.capitalize()
                                     .replace("''", "'")
@@ -216,6 +217,7 @@ class RaidClass:
                                 else language_helper.raid_embed_description_without_location_link.format(
                                     raid_id=self.raid_id.strip("'"),
                                     raid_type=self.raid_type.capitalize(),
+                                    boss=self.boss,
                                     time_date=f"""{self.takes_place_at_to_show.strip("'")}""",
                                     location=self.location_name.capitalize()
                                     .replace("''", "'")
@@ -237,7 +239,7 @@ class RaidClass:
                     hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
                     hikari.impl.TextDisplayComponentBuilder(
                         content=language_helper.raid_embed_footer.format(
-                            member=raid_creator.display_name, attendees="0"
+                            member=raid_creator.display_name, attendees=self.total_attendees
                         )
                     ),
                 ],
@@ -381,6 +383,7 @@ class RaidClass:
                                 content=language_helper.raid_embed_description_with_location_link.format(
                                     raid_id=self.raid_id.strip("'"),
                                     raid_type=self.raid_type.capitalize(),
+                                    boss=self.boss,
                                     time_date=f"""{self.takes_place_at_to_show.strip("'")}""",
                                     location=self.location_name.capitalize()
                                     .replace("''", "'")
@@ -393,6 +396,7 @@ class RaidClass:
                                 else language_helper.raid_embed_description_without_location_link.format(
                                     raid_id=self.raid_id.strip("'"),
                                     raid_type=self.raid_type.capitalize(),
+                                    boss=self.boss,
                                     time_date=f"""{self.takes_place_at_to_show.strip("'")}""",
                                     location=self.location_name.capitalize()
                                     .replace("''", "'")
@@ -414,7 +418,7 @@ class RaidClass:
                     hikari.impl.SeparatorComponentBuilder(divider=True, spacing=hikari.SpacingType.LARGE),
                     hikari.impl.TextDisplayComponentBuilder(
                         content=language_helper.raid_embed_footer.format(
-                            member=raid_creator.display_name, attendees="0"
+                            member=raid_creator.display_name, attendees=self.total_attendees
                         )
                     ),
                 ],
