@@ -449,6 +449,7 @@ class RaidsCreate(lightbulb.SlashCommand, name="create", description="Create a r
                                 else language_helper.raid_embed_description_without_location_link.format(
                                     raid_id=raid_id.strip("'"),
                                     raid_type=raid_type.capitalize(),
+                                    boss=self.boss,
                                     time_date=f"""{raid_takes_place_at_to_show.strip("'")}""",
                                     location=location_name.capitalize()
                                     .replace("''", "'")
