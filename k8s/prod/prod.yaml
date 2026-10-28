@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: victreebot
-          image: victreebot/victreebot:PROD-victreebot-1.0.3
+          image: victreebot/victreebot:PROD-victreebot-1.0.4
           envFrom:
             - configMapRef:
                 name: victreebot-config

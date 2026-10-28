@@ -81,5 +81,5 @@ async def started_raid(_event: hikari.StartedEvent, bot: Bot) -> None:
             mystic_present=mystic_present_list if mystic_present_list != [] else None,
             valor_present=valor_present_list if valor_present_list != [] else None,
             remote_present=remote_present_list if remote_present_list != [] else None,
-            total_attendess=raid.total_attendees,
+            total_attendees=raid.total_attendees,
         )

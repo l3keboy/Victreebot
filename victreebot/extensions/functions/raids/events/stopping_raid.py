@@ -47,7 +47,7 @@ async def stopping_raid(_event: hikari.StoppingEvent, bot: Bot) -> None:
             mystic_present=mystic_present,
             valor_present=valor_present,
             remote_present=remote_present,
-            total_attendees=raid_class.total_attendess,
+            total_attendees=raid_class.total_attendees,
         )
 
         await bot.database.change_raid(db_raid, new_raid)

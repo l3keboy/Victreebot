@@ -355,10 +355,8 @@ raid_create_embed_description_location_type = "Please select the type of the loc
 raid_create_embed_title_date = "## Raid date and time"
 raid_create_embed_description_date = "When does the raid take place? (Note: The format of the dates is: Month/Day!)"
 raid_embed_subdescription = "**Instinct:** {instinct}\n**Mystic:** {mystic}\n**Valor:** {valor}\n**Remote:** {remote}\n"
-raid_embed_description_with_location_link = "**Raid ID:** {raid_id}\n**Raid type:** {raid_type}\n**Time and date:** {time_date}\n**Location:** [{location}](https://www.google.com/maps/place/{latitude},{longitude})\n"
-raid_embed_description_without_location_link = (
-    "**Raid ID:** {raid_id}\n**Raid type:** {raid_type}\n**Time and date:** {time_date}\n**Location:** {location}\n"
-)
+raid_embed_description_with_location_link = "**Raid ID:** {raid_id}\n**Raid type:** {raid_type}\n**Boss:** {boss}\n**Time and date:** {time_date}\n**Location:** [{location}](https://www.google.com/maps/place/{latitude},{longitude})\n"
+raid_embed_description_without_location_link = "**Raid ID:** {raid_id}\n**Raid type:** {raid_type}\n**Boss:** {boss}\n**Time and date:** {time_date}\n**Location:** {location}\n"
 raid_embed_footer = "Raid created by: {member} | Total attendees: {attendees}"
 
 # ------------------------------------------------------------------------- #

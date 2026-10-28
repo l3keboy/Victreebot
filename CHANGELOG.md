@@ -9,6 +9,20 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [1.0.4] - 28-10-2026
+
+### [BREAKING]
+
+- Bump different dependencies
+
+### [NEW]
+
+- Added boss name in the raid components ui
+
+### [Bugfixes]
+
+- Fixed total attendees not updating
+
 ## [1.0.3] - 27-10-2026
 
 ### [Bugfixes]
