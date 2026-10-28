@@ -9,6 +9,12 @@ VictreeBot uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ================================================================
 
+## [1.0.5] - 28-10-2026
+
+### [Bugfixes]
+
+- Fix issues with creating raids
+
 ## [1.0.4] - 28-10-2026
 
 ### [BREAKING]
