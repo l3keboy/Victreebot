@@ -319,7 +319,7 @@ response_raid_create_missing_emojis = (
     "One or more emojis are not configured! Please configure first before creating the Raid again!"
 )
 response_raid_create_unknown_boss = "The given boss, `{boss_name}`, is not found! Please try to create the Raid again!"
-response_raid_create_invalid_time = "The given time is not in a valid timeformat!"
+response_raid_create_invalid_time = "The given time is not in a valid time format! Given format: `{format}`."
 response_raid_create_date_time_already_past = "The given date and time combination is in the past!"
 response_raid_create_success = "The raid is created!"
 response_raid_create_failed = "Something went wrong while creating the raid!"
@@ -339,9 +339,7 @@ log_response_raid_create_no_raids_channel = (
 log_response_raid_create_missing_emojis = (
     "`[{datetime}]` -- **{member}** tried to create a raid, but one or more emojis where not configured!"
 )
-log_response_raid_create_invalid_time = (
-    "`[{datetime}]` -- **{member}** tried to create a raid, but the given time is not in the valid format!"
-)
+log_response_raid_create_invalid_time = "`[{datetime}]` -- **{member}** tried to create a raid, but the given time is not in the valid format! Given format: `{format}`"
 log_response_raid_create_date_time_already_past = (
     "`[{datetime}]` -- **{member}** tried to create a raid, but the given date and time combination is in the past!"
 )

@@ -143,7 +143,7 @@ class RaidsCreate(lightbulb.SlashCommand, name="create", description="Create a r
                     )
                     await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                 return
-            pokemon_name = pokemon.name
+            pokemon_name = self.boss
         else:
             pokemon = self.boss
             pokemon_name = self.boss
@@ -162,7 +162,7 @@ class RaidsCreate(lightbulb.SlashCommand, name="create", description="Create a r
             return
 
         # Get raid type
-        timeout = max(auto_delete_helper, 120)
+        timeout = max(auto_delete_helper, 300)
 
         components = [
             hikari.impl.ContainerComponentBuilder(
@@ -208,10 +208,15 @@ class RaidsCreate(lightbulb.SlashCommand, name="create", description="Create a r
 
                 listening = False
             except TimeoutError:
+                logging.getLogger(__name__).exception(
+                    "Timeout error occurred while listening for the raid type in raids create command!"
+                )
                 await ctx.delete_response(response_message)
                 listening = False
             except Exception:
-                logging.getLogger(__name__).exception("An error occurred while listening for the raids command!")
+                logging.getLogger(__name__).exception(
+                    "An error occurred while listening for the raid type in raids create command!"
+                )
                 await ctx.delete_response(response_message)
                 listening = False
 
@@ -267,10 +272,15 @@ class RaidsCreate(lightbulb.SlashCommand, name="create", description="Create a r
 
                     listening = False
                 except TimeoutError:
+                    logging.getLogger(__name__).exception(
+                        "Timeout error occurred while listening for the location type in raids create command!"
+                    )
                     await ctx.delete_response(response_message)
                     listening = False
                 except Exception:
-                    logging.getLogger(__name__).exception("An error occurred while listening for the raids command!")
+                    logging.getLogger(__name__).exception(
+                        "An error occurred while listening for the location type in raids create command!"
+                    )
                     await ctx.delete_response(response_message)
                     listening = False
         else:
@@ -340,48 +350,66 @@ class RaidsCreate(lightbulb.SlashCommand, name="create", description="Create a r
                 raid_date = event.interaction.values[0]
 
                 # Time modal popup
+                custom_id = f"_get_raid_time,{time.time()}"
                 time_modal = TimeModal(guild_settings.language)
                 await event.interaction.create_modal_response(
-                    language_helper.raid_create_modal_time, "_get_raid_time", components=time_modal
+                    language_helper.raid_create_modal_time, custom_id, components=time_modal
                 )
 
                 try:
-                    await time_modal.attach(bot.client, "_get_raid_time", timeout=auto_delete_helper)
+                    await time_modal.attach(bot.client, custom_id, timeout=timeout)
                 except TimeoutError:
+                    logging.getLogger(__name__).exception(
+                        "Timeout error occurred while attached to time modal in raids create command!"
+                    )
+                    await ctx.delete_response(response_message)
+                    listening = False
+                except Exception:
+                    logging.getLogger(__name__).exception(
+                        "Unknown error occurred while listening to time modal in raids create command!"
+                    )
                     await ctx.delete_response(response_message)
                     listening = False
                 else:
-                    if time_modal.selected_btn == "_get_raid_time" and (time_modal.given_time is not None):
+                    if time_modal.selected_btn == custom_id and (time_modal.given_time is not None):
                         raid_time = time_modal.given_time
-                        valid_time = await bot.utils.validate_timestamp_format(raid_time, "%H:%M")
-                        if not valid_time:
-                            components_invalid_time = [
-                                hikari.impl.ContainerComponentBuilder(
-                                    accent_color=hikari.Colour(0x8BC683),
-                                    components=[
-                                        hikari.impl.TextDisplayComponentBuilder(
-                                            content=language_helper.response_raid_create_invalid_time
-                                        )
-                                    ],
-                                )
-                            ]
-                            await ctx.edit_response(response_message, embeds=[], components=components_invalid_time)
-                            await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
-                            if guild_log_settings.log_errors:
-                                log_response = language_helper.log_response_raid_create_invalid_time.format(
-                                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member
-                                )
-                                await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
-                            return
+                    listening = False
 
-                listening = False
             except TimeoutError:
+                logging.getLogger(__name__).exception(
+                    "Timeout error occurred while listening for date interaction in raids create command!"
+                )
                 await ctx.delete_response(response_message)
                 listening = False
             except Exception:
-                logging.getLogger(__name__).exception("An error occurred while listening for the raids command!")
+                logging.getLogger(__name__).exception(
+                    "Unknown error occurred while listening to date interaction in raids create command!"
+                )
                 await ctx.delete_response(response_message)
                 listening = False
+
+        valid_time = await bot.utils.validate_timestamp_format(raid_time, "%H:%M")
+        if not valid_time:
+            components_invalid_time = [
+                hikari.impl.ContainerComponentBuilder(
+                    accent_color=hikari.Colour(0x8BC683),
+                    components=[
+                        hikari.impl.TextDisplayComponentBuilder(
+                            content=language_helper.response_raid_create_invalid_time.format(format=raid_time)
+                        )
+                    ],
+                )
+            ]
+            await ctx.edit_response(response_message, embeds=[], components=components_invalid_time)
+            await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
+            if guild_log_settings.log_errors:
+                log_response = language_helper.log_response_raid_create_invalid_time.format(
+                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                    member=ctx.member,
+                    format=raid_time,
+                )
+                await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
+            return
 
         raid_date = await bot.utils.change_timestamp_format(raid_date, "%Y-%m-%d", "%d/%m/%Y")
         raid_takes_place_at = f"{raid_date} {raid_time}"
