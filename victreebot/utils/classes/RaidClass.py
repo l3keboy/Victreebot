@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 import os
 import time
@@ -95,13 +96,29 @@ class RaidClass:
 
     async def update_raid_from_reaction(self, reaction: str, add: bool, member: hikari.Member) -> None:
         if reaction == "instinct" and self.instinct_present is not None:
-            self.instinct_present.append(member.id) if add else self.instinct_present.remove(member.id)
+            if add:
+                self.instinct_present.append(member.id)
+            else:
+                with contextlib.suppress(Exception):
+                    self.instinct_present.remove(member.id)
         elif reaction == "mystic" and self.mystic_present is not None:
-            self.mystic_present.append(member.id) if add else self.mystic_present.remove(member.id)
+            if add:
+                self.mystic_present.append(member.id)
+            else:
+                with contextlib.suppress(Exception):
+                    self.mystic_present.remove(member.id)
         elif reaction == "valor" and self.valor_present is not None:
-            self.valor_present.append(member.id) if add else self.valor_present.remove(member.id)
+            if add:
+                self.valor_present.append(member.id)
+            else:
+                with contextlib.suppress(Exception):
+                    self.valor_present.remove(member.id)
         elif reaction == "remote" and self.remote_present is not None:
-            self.remote_present.append(member.id) if add else self.remote_present.remove(member.id)
+            if add:
+                self.remote_present.append(member.id)
+            else:
+                with contextlib.suppress(Exception):
+                    self.remote_present.remove(member.id)
 
         latitude = ""
         longitude = ""
@@ -134,6 +151,7 @@ class RaidClass:
             and self.boss.strip("'") != "egg3"
             and self.boss.strip("'") != "egg5"
             and self.boss.strip("'") != "eggmega"
+            and self.boss.strip("'") != "eggshadow"
         ):
             _, _, pokemon_image = await self.bot.utils.validate_pokemon(self.boss.strip("'"))
         else:
@@ -146,6 +164,8 @@ class RaidClass:
                 pokemon_image = f"{path}/assets/raidEggs/raid_eggFive.png"
             elif self.boss.strip("'") == "eggmega":
                 pokemon_image = f"{path}/assets/raidEggs/raid_eggMega.png"
+            elif self.boss.strip("'") == "eggshadow":
+                pokemon_image = f"{path}/assets/raidEggs/raid_eggShadow.png"
 
         if pokemon_image is None:
             return
@@ -315,6 +335,7 @@ class RaidClass:
             and self.boss.strip("'") != "egg3"
             and self.boss.strip("'") != "egg5"
             and self.boss.strip("'") != "eggmega"
+            and self.boss.strip("'") != "eggshadow"
         ):
             _, _, pokemon_image = await self.bot.utils.validate_pokemon(self.boss.strip("'"))
         else:
@@ -327,6 +348,8 @@ class RaidClass:
                 pokemon_image = f"{path}/assets/raidEggs/raid_eggFive.png"
             elif self.boss.strip("'") == "eggmega":
                 pokemon_image = f"{path}/assets/raidEggs/raid_eggMega.png"
+            elif self.boss.strip("'") == "eggshadow":
+                pokemon_image = f"{path}/assets/raidEggs/raid_eggShadow.png"
 
         if pokemon_image is None:
             return False

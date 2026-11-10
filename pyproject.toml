@@ -1,6 +1,6 @@
 [project]
 name = "victreebot"
-version = "1.0.5"
+version = "1.0.6"
 description = "Pokémon Go! Raidbot"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -10,22 +10,22 @@ dependencies = [
     "cryptography>=50.0.2",
     "greenlet>=3.5.6",
     "hvac[parser]>=2.4.0",
-    "opentelemetry-exporter-otlp>=1.45.1",
-    "opentelemetry-instrumentation>=0.66b1",
-    "opentelemetry-instrumentation-aiohttp-client>=0.66b1",
-    "opentelemetry-instrumentation-asgi>=0.66b1",
-    "opentelemetry-instrumentation-asyncio>=0.66b1",
-    "opentelemetry-instrumentation-asyncpg>=0.66b1",
-    "opentelemetry-instrumentation-logging>=0.66b1",
-    "opentelemetry-instrumentation-redis>=0.66b1",
-    "opentelemetry-instrumentation-requests>=0.66b1",
-    "opentelemetry-instrumentation-sqlalchemy>=0.66b1",
-    "opentelemetry-instrumentation-urllib3>=0.66b1",
+    "opentelemetry-exporter-otlp>=1.45.2",
+    "opentelemetry-instrumentation>=0.66b2",
+    "opentelemetry-instrumentation-aiohttp-client>=0.66b2",
+    "opentelemetry-instrumentation-asgi>=0.66b2",
+    "opentelemetry-instrumentation-asyncio>=0.66b2",
+    "opentelemetry-instrumentation-asyncpg>=0.66b2",
+    "opentelemetry-instrumentation-logging>=0.66b2",
+    "opentelemetry-instrumentation-redis>=0.66b2",
+    "opentelemetry-instrumentation-requests>=0.66b2",
+    "opentelemetry-instrumentation-sqlalchemy>=0.66b2",
+    "opentelemetry-instrumentation-urllib3>=0.66b2",
     "opentelemetry-sdk>=1.45.1",
-    "pydantic>=2.14.1",
+    "pydantic>=2.14.3",
     "pyfiglet>=1.0.4",
     "python-dotenv>=1.2.4",
-    "sqlalchemy>=2.1.6",
+    "sqlalchemy>=2.1.8",
     "sqlmodel>=0.0.48",
     "uvloop>=0.22.1 ; sys_platform != 'win32'",
     "colorama>=0.4.6",
@@ -35,8 +35,8 @@ dependencies = [
     "pokebase==1.4.1",
     "hikari-sake>=1.1.2",
     "pillow>=13.0.0",
-    "python-dateutil>=3.0.0",
-    "tzdata>=2026.5",
+    "python-dateutil>=4.0.0",
+    "tzdata>=2026.6",
 ]
 
 [dependency-groups]

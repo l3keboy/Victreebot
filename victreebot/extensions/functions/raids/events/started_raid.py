@@ -1,5 +1,7 @@
 # Copyright (c) 2022-present l3keboy
 
+import logging
+
 import hikari
 import lightbulb
 
@@ -16,14 +18,25 @@ async def started_raid(_event: hikari.StartedEvent, bot: Bot) -> None:
     for raid in all_raids:
         guild_settings = await bot.database.get_guild_settings(raid.guild_id)
         if guild_settings is None:
+            logging.getLogger(__name__).error(
+                "LOADING RAID FAILED: guild settings not found for guild %s!",
+                raid.guild_id,
+            )
             return
 
         boss = raid.boss
         if boss not in {"egg1", "egg3", "egg5", "eggmega", "eggshadow"}:
             success, pokemon, _ = await bot.utils.validate_pokemon(boss)
             if not success or not pokemon:
+                logging.getLogger(__name__).error(
+                    "LOADING RAID FAILED: Pokemon not found for raid with ID %s "
+                    "in guild %s when starting the bot. Unknown pokemon: %s!",
+                    raid.raid_id,
+                    raid.guild_id,
+                    boss,
+                )
                 return
-            pokemon_name = pokemon.name
+            pokemon_name = boss
         else:
             pokemon_name = boss
 

@@ -70,7 +70,7 @@ class Pokedex(lightbulb.SlashCommand, name="pokedex", description="Search detail
             weight_unit = language_helper.weight_usc_system
 
         pokemon_image: str | None = None
-        if boss not in {"egg1", "egg3", "egg5", "eggmega"}:
+        if boss not in {"egg1", "egg3", "egg5", "eggmega", "eggshadow"}:
             success, pokemon, pokemon_image = await bot.utils.validate_pokemon(self.boss)
             if not success or not pokemon or not pokemon_image:
                 response_message = await ctx.respond(
@@ -84,7 +84,7 @@ class Pokedex(lightbulb.SlashCommand, name="pokedex", description="Search detail
                     await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                 return
 
-            pokemon_name = pokemon.name
+            pokemon_name = self.boss
             pokemon_id = pokemon.id
 
             pokemon_height_decimeters = pokemon.height
@@ -119,6 +119,8 @@ class Pokedex(lightbulb.SlashCommand, name="pokedex", description="Search detail
                 pokemon_image = "assets/raidEggs/raid_eggFive.png"
             elif boss == "eggmega":
                 pokemon_image = "assets/raidEggs/raid_eggMega.png"
+            elif boss == "eggshadow":
+                pokemon_image = "assets/raidEggs/raid_eggShadow.png"
 
         if pokemon_image is None:
             return

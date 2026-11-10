@@ -1,5 +1,7 @@
 # Copyright (c) 2022-present l3keboy
 
+import logging
+
 import hikari
 import lightbulb
 
@@ -18,10 +20,18 @@ async def stopping_raid(_event: hikari.StoppingEvent, bot: Bot) -> None:
     for raid in bot.raids:
         raid_class = bot.raids.get(raid)
         if raid_class is None:
+            logging.getLogger(__name__).error(
+                "OFFLOADING RAID FAILED: Raid class not found for raid with ID %s!",
+                raid,
+            )
             return
 
         db_raid = await bot.database.get_raid(raid_class.guild_id, raid)
         if db_raid is None:
+            logging.getLogger(__name__).error(
+                "OFFLOADING RAID FAILED: Raid not found in database for raid with ID %s!",
+                raid,
+            )
             return
 
         instinct_present = None
