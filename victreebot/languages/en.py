@@ -339,9 +339,7 @@ log_response_raid_create_no_raids_channel = (
 log_response_raid_create_missing_emojis = (
     "`[{datetime}]` -- **{member}** tried to create a raid, but one or more emojis where not configured!"
 )
-log_response_raid_create_invalid_time = (
-    "`[{datetime}]` -- **{member}** tried to create a raid, but the given time is not in the valid format! Given format: `{format}`"
-)
+log_response_raid_create_invalid_time = "`[{datetime}]` -- **{member}** tried to create a raid, but the given time is not in the valid format! Given format: `{format}`"
 log_response_raid_create_date_time_already_past = (
     "`[{datetime}]` -- **{member}** tried to create a raid, but the given date and time combination is in the past!"
 )

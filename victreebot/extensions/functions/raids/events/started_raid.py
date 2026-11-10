@@ -19,8 +19,7 @@ async def started_raid(_event: hikari.StartedEvent, bot: Bot) -> None:
         guild_settings = await bot.database.get_guild_settings(raid.guild_id)
         if guild_settings is None:
             logging.getLogger(__name__).error(
-                "LOADING RAID FAILED: guild settings not found for guild %s!",
-                raid.guild_id,
+                "LOADING RAID FAILED: guild settings not found for guild %s!", raid.guild_id
             )
             return
 

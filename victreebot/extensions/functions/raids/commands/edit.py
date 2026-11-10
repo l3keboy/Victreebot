@@ -353,7 +353,7 @@ class RaidsEdit(lightbulb.SlashCommand, name="edit", description="Edit an existi
                     log_response = language_helper.log_response_raid_create_invalid_time.format(
                         datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
                         member=ctx.member,
-                        format=raid_time
+                        format=raid_time,
                     )
                     await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
                 return

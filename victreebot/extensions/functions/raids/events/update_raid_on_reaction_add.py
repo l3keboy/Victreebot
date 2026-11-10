@@ -35,8 +35,7 @@ async def update_raid_on_reaction_add(event: hikari.GuildReactionAddEvent, bot: 
     raid_class = bot.raids.get(raid.raid_id)
     if raid_class is None:
         logging.getLogger(__name__).error(
-            "Raid class not found for raid with ID %s in guild %s "
-            "when reacting to message %s!",
+            "Raid class not found for raid with ID %s in guild %s when reacting to message %s!",
             raid.raid_id,
             event.guild_id,
             event.message_id,

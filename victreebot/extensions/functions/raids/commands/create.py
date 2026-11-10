@@ -404,8 +404,9 @@ class RaidsCreate(lightbulb.SlashCommand, name="create", description="Create a r
             await bot.utils.handle_auto_delete(ctx.channel_id, response_message, auto_delete_helper)
             if guild_log_settings.log_errors:
                 log_response = language_helper.log_response_raid_create_invalid_time.format(
-                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt), member=ctx.member,
-                    format=raid_time
+                    datetime=await bot.utils.get_timestamp_aware(guild_settings.gmt),
+                    member=ctx.member,
+                    format=raid_time,
                 )
                 await bot.utils.handle_log_message(bot, ctx.guild_id, log_response)
             return
